@@ -256,9 +256,40 @@ export const useStore = create<Store>((set, get) => ({
   },
 
   deleteCell: (id) => {
-    const nb = get().notebook;
-    const next: Notebook = { ...nb, cells: nb.cells.filter((c) => c.id !== id) };
-    set({ notebook: next });
+    const s = get();
+    const idx = s.notebook.cells.findIndex((c) => c.id === id);
+    if (idx < 0) return;
+    const cells = s.notebook.cells.filter((c) => c.id !== id);
+    const next: Notebook = { ...s.notebook, cells };
+
+    // Pick a neighbor to focus next (the cell that *was* right after
+    // the deleted one; or the new last cell; or null if empty).
+    const nextFocusId =
+      s.focusedCellId === id
+        ? (cells[idx]?.id ?? cells[idx - 1]?.id ?? null)
+        : s.focusedCellId;
+
+    // Drop per-cell side state so nothing dangles.
+    const { [id]: _s1, ...cellState } = s.cellState;
+    const { [id]: _s2, ...cellSize } = s.cellSize;
+    const { [id]: _s3, ...cellHeight } = s.cellHeight;
+    let cellPositionOverrides = s.cellPositionOverrides;
+    if (cellPositionOverrides && id in cellPositionOverrides) {
+      const { [id]: _s4, ...rest } = cellPositionOverrides;
+      cellPositionOverrides = rest;
+    }
+    // If the open editor was for this cell, close it.
+    const openEditor = s.openEditor?.cellId === id ? null : s.openEditor;
+
+    set({
+      notebook: next,
+      cellState,
+      cellSize,
+      cellHeight,
+      cellPositionOverrides,
+      openEditor,
+      focusedCellId: nextFocusId,
+    });
     scheduleAutosave(next);
   },
 

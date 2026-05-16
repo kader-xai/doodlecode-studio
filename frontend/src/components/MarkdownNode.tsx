@@ -84,6 +84,7 @@ export function MarkdownNode({
   const reportCellHeight = useStore((s) => s.reportCellHeight);
   const updateMeta = useStore((s) => s.updateCellMeta);
   const setOpenEditor = useStore((s) => s.setOpenEditor);
+  const deleteCell = useStore((s) => s.deleteCell);
   const size = useStore((s) => s.cellSize[cellId]);
 
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -166,6 +167,21 @@ export function MarkdownNode({
               title="Edit side callout"
             >
               ✎
+            </button>
+            <button
+              className="font-hand text-lg w-8 h-8 rounded-lg border-2 border-ink dark:border-white/70 bg-[#ffc9c9] dark:bg-[#a61e4d] text-ink dark:text-white hover:translate-x-[1px] hover:translate-y-[1px] transition"
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                const label = data.title || `Text ${cellId.slice(0, 6)}`;
+                if (window.confirm(`Delete "${label}"? The rest of the notebook reorders automatically.`)) {
+                  deleteCell(cellId);
+                }
+              }}
+              title="Delete this cell"
+            >
+              🗑
             </button>
           </div>
         </div>

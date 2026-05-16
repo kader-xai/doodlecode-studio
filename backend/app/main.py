@@ -3,9 +3,10 @@ from __future__ import annotations
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import APIRouter, FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import FileResponse, PlainTextResponse
+from fastapi.staticfiles import StaticFiles
 
 from . import __version__ as APP_VERSION
 from .explain import explain_code
@@ -44,30 +45,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# All HTTP endpoints live under /api so the React build can be served at
+# the root path without colliding with API routes.
+api = APIRouter()
 
-@app.get("/health")
+
+@api.get("/health")
 def health() -> dict:
     return {"ok": True}
 
 
-@app.get("/version", response_model=VersionInfo)
+@api.get("/version", response_model=VersionInfo)
 def version() -> VersionInfo:
     return VersionInfo(app=APP_VERSION, format_version=FILE_FORMAT_VERSION)
 
 
-@app.post("/execute", response_model=ExecuteResponse)
+@api.post("/execute", response_model=ExecuteResponse)
 def execute(req: ExecuteRequest) -> ExecuteResponse:
     session = pool.get(req.session_id)
     return session.execute(req.code)
 
 
-@app.post("/reset")
+@api.post("/reset")
 def reset(session_id: str = "default") -> dict:
     pool.reset(session_id)
     return {"ok": True, "session_id": session_id}
 
 
-@app.post("/install", response_model=InstallResponse)
+@api.post("/install", response_model=InstallResponse)
 def install(req: InstallRequest) -> InstallResponse:
     """Pip-install packages into the kernel's venv. Returns stdout/stderr.
     Newly installed packages are importable on the next `import` in any
@@ -89,19 +94,19 @@ def install(req: InstallRequest) -> InstallResponse:
     return result
 
 
-@app.post("/explain", response_model=ExplainResponse)
+@api.post("/explain", response_model=ExplainResponse)
 def explain(req: ExplainRequest) -> ExplainResponse:
     return explain_code(req.code, mode=req.mode, meta=req.meta)
 
 
-@app.post("/export", response_class=PlainTextResponse)
+@api.post("/export", response_class=PlainTextResponse)
 def export(nb: Notebook) -> str:
     """Serialize a notebook back to a .py file with `# %%` headers
     and `# @explain:` directives. Round-trips with /upload."""
     return serialize_notebook(nb)
 
 
-@app.post("/autosave")
+@api.post("/autosave")
 def autosave(nb: Notebook) -> dict:
     """Persist the current notebook to ~/.doodlecode/<name>.py so changes
     survive a reload. Called on every edit (debounced client-side)."""
@@ -113,7 +118,7 @@ def autosave(nb: Notebook) -> dict:
     return {"ok": True, "path": str(target)}
 
 
-@app.post("/upload", response_model=Notebook)
+@api.post("/upload", response_model=Notebook)
 async def upload(file: UploadFile = File(...)) -> Notebook:
     raw = await file.read()
     name = file.filename or "untitled"
@@ -129,3 +134,30 @@ async def upload(file: UploadFile = File(...)) -> Notebook:
         return from_py(name, raw)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not parse {name}: {e}") from e
+
+
+app.include_router(api, prefix="/api")
+# Backwards-compat: also expose the routes at the root path so older
+# clients (and the dev-server proxy) that hit "/execute" instead of
+# "/api/execute" don't get a 405 from the SPA catch-all below.
+app.include_router(api)
+
+# Serve the built React app at the root. `frontend/dist` is created by
+# `npm run build` and shipped with the release. If it isn't present
+# (e.g. during pytest), we just skip the mount — the API still works.
+_DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
+if _DIST.is_dir():
+    app.mount("/assets", StaticFiles(directory=_DIST / "assets"), name="assets")
+
+    @app.get("/")
+    def _root() -> FileResponse:
+        return FileResponse(_DIST / "index.html")
+
+    @app.get("/{path:path}")
+    def _spa(path: str) -> FileResponse:
+        # Serve any other file from dist if it exists (favicon, etc.),
+        # otherwise fall back to index.html so client-side routing works.
+        candidate = _DIST / path
+        if candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(_DIST / "index.html")

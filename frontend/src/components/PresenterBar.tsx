@@ -128,7 +128,7 @@ export function PresenterBar() {
       <button className="btn-sketch sky" onClick={() => goTo(idx - 1)} title="← / PageUp">
         ◀ Prev
       </button>
-      <div className="font-hand text-2xl px-2 select-none">
+      <div className="font-hand text-2xl px-2 select-none text-ink dark:text-white">
         Slide {idx + 1} / {cells.length}
       </div>
       <button className="btn-sketch mint" onClick={() => goTo(idx + 1)} title="→ / Space / PageDown">
