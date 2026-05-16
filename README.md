@@ -7,13 +7,14 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node 18+](https://img.shields.io/badge/node-18+-brightgreen.svg)](https://nodejs.org/)
-[![Status: alpha](https://img.shields.io/badge/status-alpha-orange.svg)](#status)
+[![Status: golden-stable](https://img.shields.io/badge/status-golden%20stable-gold.svg)](#status)
+[![Version](https://img.shields.io/badge/version-v1.2.0-blue.svg)](CHANGELOG.md)
 
 DoodleCode Studio turns a Python file into a colorful whiteboard of code
 cards and explanation bubbles you can run, edit, present, and export — all
 locally, with a real IPython kernel and zero cloud dependencies.
 
-**Developed by [Kader-xai](https://kader-xai.github.io)** ·
+**Co-AI Developed by [Kader Mohideen](https://kader-xai.github.io)** ·
 [LinkedIn](https://linkedin.com/in/kader-xai) ·
 [GitHub](https://github.com/kader-xai)
 
@@ -123,6 +124,8 @@ in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 - **[Usage guide](docs/USAGE.md)** — the 60-second workflow, presenter
   mode, keyboard shortcuts, troubleshooting.
+- **[Authoring guide](docs/AUTHORING.md)** — writing DoodleCode `.py`
+  files by hand in any editor, no app needed.
 - **[File format spec](docs/FILE_FORMAT.md)** — the `# %%` header,
   `# @explain:` directives, color palette, round-tripping rules.
 - **[Architecture](docs/ARCHITECTURE.md)** — components, endpoints,
@@ -160,9 +163,21 @@ See [SECURITY.md](SECURITY.md) for the threat model and reporting process.
 
 ## Status
 
-**Alpha.** The file format and `/upload` / `/export` endpoints are
-considered stable from `0.1.0` and will round-trip; everything else may
-change. Pin a commit if you depend on internals.
+**🥇 Golden Stable — v1.2.0.** This is the recommended version for
+real-world use. Highlights:
+
+- 92 backend pytest + 40 frontend vitest = **132 green tests** in CI.
+- Lint clean across `ruff` (Python) and `tsc --noEmit` (TypeScript strict).
+- File format **v2** is a committed contract — files written here
+  round-trip exactly in any future release.
+- All public endpoints (`/upload`, `/export`, `/explain`, `/execute`,
+  `/install`, `/autosave`, `/version`, `/reset`, `/health`) are stable.
+- Three-tool canvas (Cursor / Hand / Move), presentation mode with
+  ✒️ Pen + 🖍 Highlighter + ⛶ Fullscreen, in-app callout editor,
+  inline title rename, auto-grow cells, ResizeHandle drag, dark mode,
+  one-click pip install, matplotlib inline rendering — all polished.
+
+CI is green across Python 3.9 / 3.11 / 3.12 and Node 18 / 20.
 
 ## License
 

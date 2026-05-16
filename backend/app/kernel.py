@@ -9,6 +9,17 @@ from jupyter_client.manager import KernelManager
 
 from .models import ExecuteOutput, ExecuteResponse
 
+_STARTUP_CODE = """\
+# DoodleCode kernel startup: turn on inline matplotlib if available,
+# silently no-op if not. Image output is captured as `image/png` mime
+# bundles which the frontend renders inline in the output panel.
+try:
+    get_ipython().run_line_magic('matplotlib', 'inline')
+    get_ipython().run_line_magic('config', "InlineBackend.figure_format = 'png'")
+except Exception:
+    pass
+"""
+
 
 class KernelSession:
     def __init__(self) -> None:
@@ -18,6 +29,25 @@ class KernelSession:
         self.kc.start_channels()
         self.kc.wait_for_ready(timeout=30)
         self._lock = threading.Lock()
+        # Fire-and-forget startup so the first user `plt.show()` works
+        # immediately. Silent — never surfaces to the user.
+        try:
+            self.execute(_STARTUP_CODE, timeout=10)
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).debug("kernel startup magic failed: %s", e)
+
+    def invalidate_import_caches(self) -> None:
+        """Tell Python to rescan site-packages so packages installed
+        AFTER the kernel started become importable without a restart."""
+        try:
+            self.execute(
+                "import importlib; importlib.invalidate_caches()",
+                timeout=5,
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).debug("invalidate_caches failed: %s", e)
 
     def execute(self, code: str, timeout: float = 60.0) -> ExecuteResponse:
         with self._lock:

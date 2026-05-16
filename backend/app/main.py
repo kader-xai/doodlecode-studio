@@ -71,11 +71,22 @@ def reset(session_id: str = "default") -> dict:
 def install(req: InstallRequest) -> InstallResponse:
     """Pip-install packages into the kernel's venv. Returns stdout/stderr.
     Newly installed packages are importable on the next `import` in any
-    cell — no kernel restart needed."""
+    cell — no kernel restart needed.
+
+    After a successful install we also tell any running kernels to
+    invalidate their import caches so packages that were freshly added
+    to site-packages are picked up immediately.
+    """
     try:
-        return pip_install(req)
+        result = pip_install(req)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e)) from e
+    if result.ok:
+        # Best-effort cache invalidation on every active session. Tiny
+        # cost, removes the "I had to refresh the page" surprise.
+        for session in list(pool._sessions.values()):
+            session.invalidate_import_caches()
+    return result
 
 
 @app.post("/explain", response_model=ExplainResponse)

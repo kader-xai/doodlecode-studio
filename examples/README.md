@@ -10,6 +10,9 @@ end-to-end outside the app.
 | File | What it shows | Cells |
 |------|---------------|-------|
 | [`how_it_works.py`](how_it_works.py) | In-app tutorial: callout editor, save / export, presentation mode. | 9 |
+| [`video_demo_python_in_presentation.py`](video_demo_python_in_presentation.py) | A 3-minute Python primer designed as the on-screen content for the screencast recording script in [docs/VIDEO_SCRIPT.md](../docs/VIDEO_SCRIPT.md). | 13 |
+| [`live_demo.py`](live_demo.py) | **Open this when you present the app.** Nine colored slides walking through canvas + callouts + 📦 Install + matplotlib + pandas, with prompts for what to demonstrate at each step. Finish with ⓘ About to show the project URL. | 9 |
+| [`heavy_text_demo.py`](heavy_text_demo.py) | Stress-test for the auto-grow doodle border: every cell is loaded with a wall of text. On a fresh open, the wavy SVG should wrap snugly around every paragraph without any manual resize. | 5 |
 
 ## Python foundations
 

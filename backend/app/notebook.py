@@ -101,9 +101,16 @@ def _parse_kv(header: str) -> dict[str, str]:
     return out
 
 
+_MARKDOWN_FLAG_RE = re.compile(r"^\s*\[?markdown\]?\s*", re.IGNORECASE)
+
+
 def _parse_header(header: str) -> tuple[bool, dict[str, str]]:
     h = header.strip()
-    is_markdown = h.lower() in ("[markdown]", "markdown")
+    is_markdown = bool(_MARKDOWN_FLAG_RE.match(h))
+    if is_markdown:
+        # Strip the leading `[markdown]` (or `markdown`) marker so the
+        # rest of the header parses as plain key=value pairs.
+        h = _MARKDOWN_FLAG_RE.sub("", h)
     return is_markdown, _parse_kv(h)
 
 
@@ -151,9 +158,15 @@ def _drain_directives(lines: list[str], i: int) -> tuple[dict, int]:
     return out, i
 
 
-def _extract_callouts(body: str, header_meta: dict[str, str]) -> tuple[list[CalloutBlock], str]:
+def _extract_callouts(
+    body: str, header_meta: dict[str, str]
+) -> tuple[list[CalloutBlock], str, Optional[str]]:
     """Split leading `# @...` directives into one or more CalloutBlocks.
-    Returns (callouts, remaining source)."""
+    Returns (callouts, remaining source, box_image).
+
+    `box_image` is the cell-body image (`# @box_image:`) — it belongs to
+    the cell itself, NOT to any callout, so we yank it out before
+    building the primary callout dict."""
     lines = body.split("\n")
     callouts: list[CalloutBlock] = []
 
@@ -161,6 +174,7 @@ def _extract_callouts(body: str, header_meta: dict[str, str]) -> tuple[list[Call
     first_attrs, i = _drain_directives(lines, 0)
     primary = {**header_meta, **first_attrs}
     primary.pop("version", None)  # version is a file-level concept, not callout
+    box_image = primary.pop("box_image", None)
     if any(primary.get(k) for k in ("title", "explain", "color", "kind", "image", "tags")):
         callouts.append(_block_from_dict(primary))
 
@@ -181,23 +195,29 @@ def _extract_callouts(body: str, header_meta: dict[str, str]) -> tuple[list[Call
         break
 
     rest = "\n".join(lines[i:]).strip("\n")
-    return callouts, rest
+    return callouts, rest, box_image
 
 
-def _meta_from_callouts(callouts: list[CalloutBlock]) -> Optional[CellMeta]:
-    if not callouts:
+def _meta_from_callouts(
+    callouts: list[CalloutBlock], box_image: Optional[str] = None
+) -> Optional[CellMeta]:
+    if not callouts and not box_image:
         return None
-    primary = callouts[0]
-    extras = callouts[1:]
-    return CellMeta(
-        kind=primary.kind,
-        color=primary.color,
-        title=primary.title,
-        explain=primary.explain,
-        tags=list(primary.tags),
-        image=primary.image,
-        callouts=extras,
-    )
+    if callouts:
+        primary = callouts[0]
+        extras = callouts[1:]
+        return CellMeta(
+            kind=primary.kind,
+            color=primary.color,
+            title=primary.title,
+            explain=primary.explain,
+            tags=list(primary.tags),
+            image=primary.image,
+            callouts=extras,
+            box_image=box_image,
+        )
+    # No callouts but a box_image is set — still need a meta to carry it.
+    return CellMeta(box_image=box_image)
 
 
 def _markdown_strip(body: str) -> str:
@@ -205,6 +225,33 @@ def _markdown_strip(body: str) -> str:
     for line in body.split("\n"):
         out.append(re.sub(r"^[ \t]*#[ \t]?", "", line))
     return "\n".join(out).strip("\n")
+
+
+def _extract_markdown_directives(
+    body: str, header_meta: dict[str, str]
+) -> tuple[list[CalloutBlock], str, Optional[str]]:
+    """Markdown cells can carry the same `# @title:` / `# @image:` /
+    `# @callout` directives as code cells. Strip them first; the rest of
+    the body is markdown text (still with leading `# ` per line)."""
+    lines = body.split("\n")
+    callouts, _rest_drop, box_image = _extract_callouts("\n".join(lines), header_meta)
+
+    # Reconstruct the markdown body by skipping the directive lines that
+    # `_extract_callouts` would have consumed.
+    rest_lines: list[str] = []
+    consumed_directive_block = False
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        if not consumed_directive_block:
+            if _AT_RE.match(line) or line.strip() == "":
+                i += 1
+                continue
+            consumed_directive_block = True
+        rest_lines.append(line)
+        i += 1
+
+    return callouts, _markdown_strip("\n".join(rest_lines)), box_image
 
 
 def _split_with_markers(name: str, text: str) -> Notebook:
@@ -242,17 +289,21 @@ def _split_with_markers(name: str, text: str) -> Notebook:
             except ValueError:
                 pass
         if is_md:
+            callouts, md_source, box_image = _extract_markdown_directives(body, header_attrs)
             cells.append(Cell(
                 id=str(uuid.uuid4()),
                 kind="markdown",
-                source=_markdown_strip(body),
+                source=md_source,
+                meta=_meta_from_callouts(callouts, box_image=box_image)
+                    if (callouts or box_image)
+                    else None,
             ))
         else:
-            callouts, source = _extract_callouts(body, header_attrs)
+            callouts, source, box_image = _extract_callouts(body, header_attrs)
             cells.append(Cell(
                 id=str(uuid.uuid4()),
                 kind="code",
                 source=source,
-                meta=_meta_from_callouts(callouts),
+                meta=_meta_from_callouts(callouts, box_image=box_image),
             ))
     return Notebook(name=name, cells=cells, format_version=format_version)

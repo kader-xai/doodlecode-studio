@@ -78,7 +78,7 @@ export function Outputs({ result }: { result?: ExecuteResponse }) {
         )}
       </div>
 
-      <div className="nowheel max-h-[28rem] overflow-auto rounded-xl border-2 border-ink/70 dark:border-white/40 bg-white dark:bg-[#11141a] p-2 space-y-1.5">
+      <div className="rounded-xl border-2 border-ink/70 dark:border-white/40 bg-white dark:bg-[#11141a] p-2 space-y-1.5">
         {empty && (
           <div className="px-2 py-1 font-hand text-lg italic text-ink/50 dark:text-white/50">
             (no output)

@@ -27,16 +27,29 @@
 
 ## Canvas controls
 
+Three tools live in the top-left toggle (Figma convention):
+
+| Tool | Shortcut | What drag does | What click does |
+|------|----------|----------------|-----------------|
+| **➤ Cursor** (default) | **V** | nothing | select / focus |
+| **✋ Hand** | **H** | pans the canvas | select / focus |
+| **✥ Move** | **M** | moves the cell | select / focus |
+
+Across all three tools:
+
 | Action | How |
 |--------|-----|
-| Pan    | Scroll (mouse wheel or two-finger trackpad) |
-| Zoom   | **Cmd / Ctrl + scroll**, double-click, pinch, or the `+ −` buttons |
-| Drag a cell | Click and drag anywhere on the cell card (not on the Monaco editor) |
-| Focus a cell | Click its callout bubble — canvas pans (zoom preserved) |
-| Select a cell | Click anywhere on the cell — gets a dashed pink outline |
+| Two-finger trackpad scroll | pans the canvas |
+| Cmd / Ctrl + scroll | zoom |
+| Pinch (trackpad) | zoom |
+| Double-click a cell title | rename inline |
+| **Double-click anywhere on a code cell** | opens the callout editor |
+| **Double-click anywhere on a text cell** | opens the text editor |
+| **Double-click a callout bubble** | opens the callout editor for its source cell |
+| Click on a callout bubble | pans the view to its source cell |
 
-Monaco editor scrolling does **not** pan the canvas (the editor has its
-own scroll). Same goes for the output panel.
+Monaco editor scrolling and the output panel both keep their own scroll
+— they don't pan the canvas.
 
 ## The callout editor
 
@@ -68,9 +81,20 @@ The toolbar shows `saved Ns ago` when autosave succeeds.
 
 - Press **🎬 Present**.
 - A `◀ Prev · Slide M/N · Next ▶` strip appears at the bottom.
-- The canvas pans to each focused cell at your **current** zoom level —
-  it does not reset zoom. Set your zoom once before presenting.
-- Press **✕ Exit** (formerly "Present" button) to return to free editing.
+- The canvas pans/auto-fits to each focused cell. Set your starting
+  zoom once with Cmd+scroll; arrows then move you slide-by-slide.
+
+### Presenter tools (v0.7)
+
+Two extra buttons sit on the presenter bar:
+
+| Tool | Shortcut | What it does |
+|------|----------|--------------|
+| **✒️ Pen** (Excalidraw-style) | **P** | Drag to draw red ink. Strokes fade out in ~1.4 s. Perfect for circling something to draw the eye — your circle vanishes by the time the audience looks. |
+| **🖍 Highlighter** | **H** | Thick translucent yellow ink that fades in ~4 s. Use for stable annotations on a slide. |
+
+Both toggle off when pressed again, or auto-clear when you exit
+presentation mode (Esc).
 
 ## Troubleshooting
 

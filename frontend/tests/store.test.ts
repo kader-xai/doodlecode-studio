@@ -32,6 +32,12 @@ function reset() {
     savedAt: null,
     cellHeight: {},
     installing: null,
+    interactionMode: "cursor",
+    openEditor: null,
+    presenterTool: "none",
+    installOpen: false,
+    cellPositionOverrides: null,
+    cellSize: {},
   });
 }
 
@@ -107,10 +113,27 @@ describe("store: newNotebook", () => {
 });
 
 describe("store: addCell / deleteCell", () => {
-  it("addCell appends an empty code cell", () => {
+  it("addCell appends an empty code cell by default", () => {
     const before = useStore.getState().notebook.cells.length;
     useStore.getState().addCell();
-    expect(useStore.getState().notebook.cells.length).toBe(before + 1);
+    const cells = useStore.getState().notebook.cells;
+    expect(cells.length).toBe(before + 1);
+    expect(cells[cells.length - 1].kind).toBe("code");
+  });
+
+  it("addCell with kind=markdown adds a slide-style text cell", () => {
+    useStore.getState().addCell(undefined, "markdown");
+    const cells = useStore.getState().notebook.cells;
+    const added = cells[cells.length - 1];
+    expect(added.kind).toBe("markdown");
+    expect(added.source).toContain("New slide");
+    expect(added.meta?.title).toBe("New slide");
+  });
+
+  it("addCell focuses the newly added cell", () => {
+    useStore.getState().addCell(undefined, "markdown");
+    const cells = useStore.getState().notebook.cells;
+    expect(useStore.getState().focusedCellId).toBe(cells[cells.length - 1].id);
   });
 
   it("deleteCell removes by id", () => {
@@ -133,6 +156,113 @@ describe("store: reportCellHeight hysteresis", () => {
     useStore.getState().reportCellHeight("c1", 400);
     useStore.getState().reportCellHeight("c1", 410);
     expect(useStore.getState().cellHeight.c1).toBe(410);
+  });
+});
+
+describe("store: installOpen (v0.7.2)", () => {
+  it("defaults to false", () => {
+    expect(useStore.getState().installOpen).toBe(false);
+  });
+  it("setInstallOpen toggles", () => {
+    useStore.getState().setInstallOpen(true);
+    expect(useStore.getState().installOpen).toBe(true);
+    useStore.getState().setInstallOpen(false);
+    expect(useStore.getState().installOpen).toBe(false);
+  });
+});
+
+describe("store: presenterTool (v0.7)", () => {
+  it("defaults to 'none'", () => {
+    expect(useStore.getState().presenterTool).toBe("none");
+  });
+
+  it("setPresenterTool switches the active overlay tool", () => {
+    useStore.getState().setPresenterTool("pen");
+    expect(useStore.getState().presenterTool).toBe("pen");
+    useStore.getState().setPresenterTool("highlighter");
+    expect(useStore.getState().presenterTool).toBe("highlighter");
+  });
+
+  it("leaving presentation resets the tool to 'none'", () => {
+    useStore.getState().setPresenting(true);
+    useStore.getState().setPresenterTool("pen");
+    useStore.getState().setPresenting(false);
+    expect(useStore.getState().presenterTool).toBe("none");
+  });
+});
+
+describe("store: interactionMode + openEditor (v0.6)", () => {
+  it("defaults to the cursor tool", () => {
+    expect(useStore.getState().interactionMode).toBe("cursor");
+  });
+
+  it("setInteractionMode switches the active tool", () => {
+    useStore.getState().setInteractionMode("hand");
+    expect(useStore.getState().interactionMode).toBe("hand");
+    useStore.getState().setInteractionMode("move");
+    expect(useStore.getState().interactionMode).toBe("move");
+  });
+
+  it("openEditor is a singleton — second open replaces the first", () => {
+    useStore.getState().setOpenEditor({ kind: "callout", cellId: "c1" });
+    expect(useStore.getState().openEditor).toEqual({ kind: "callout", cellId: "c1" });
+    useStore.getState().setOpenEditor({ kind: "text", cellId: "c2" });
+    expect(useStore.getState().openEditor).toEqual({ kind: "text", cellId: "c2" });
+    useStore.getState().setOpenEditor(null);
+    expect(useStore.getState().openEditor).toBeNull();
+  });
+});
+
+describe("store: setCellSize", () => {
+  it("stores width and height", () => {
+    useStore.getState().setCellSize("c1", { width: 700, height: 500 });
+    expect(useStore.getState().cellSize.c1).toEqual({ width: 700, height: 500 });
+  });
+
+  it("merges partial updates", () => {
+    useStore.getState().setCellSize("c1", { width: 700 });
+    useStore.getState().setCellSize("c1", { height: 400 });
+    expect(useStore.getState().cellSize.c1).toEqual({ width: 700, height: 400 });
+  });
+
+  it("clears the entry when both dimensions are undefined", () => {
+    useStore.getState().setCellSize("c1", { width: 700, height: 500 });
+    useStore.getState().setCellSize("c1", { width: undefined, height: undefined });
+    expect(useStore.getState().cellSize.c1).toBeUndefined();
+  });
+});
+
+describe("store: autoSpaceForPresentation / rollbackLayout", () => {
+  it("sets one override entry per cell, spaced apart", () => {
+    useStore.getState().addCell();
+    useStore.getState().addCell();
+    const cells = useStore.getState().notebook.cells;
+    useStore.getState().autoSpaceForPresentation(800);
+    const overrides = useStore.getState().cellPositionOverrides!;
+    expect(Object.keys(overrides).length).toBe(cells.length);
+    const ys = cells.map((c) => overrides[c.id].y);
+    for (let i = 1; i < ys.length; i++) {
+      expect(ys[i]).toBeGreaterThan(ys[i - 1]); // strictly increasing
+      expect(ys[i] - ys[i - 1]).toBeGreaterThanOrEqual(800); // >= one slide
+    }
+  });
+
+  it("rollback clears the overrides", () => {
+    useStore.getState().autoSpaceForPresentation(800);
+    expect(useStore.getState().cellPositionOverrides).not.toBeNull();
+    useStore.getState().rollbackLayout();
+    expect(useStore.getState().cellPositionOverrides).toBeNull();
+  });
+
+  it("tall cells consume multiple slide slots", () => {
+    useStore.getState().reportCellHeight("c1", 1800); // ~2.25 × slide of 800
+    useStore.getState().addCell(); // adds a normal-sized cell
+    const cells = useStore.getState().notebook.cells;
+    useStore.getState().autoSpaceForPresentation(800);
+    const overrides = useStore.getState().cellPositionOverrides!;
+    const firstY = overrides[cells[0].id].y;
+    const secondY = overrides[cells[1].id].y;
+    expect(secondY - firstY).toBeGreaterThanOrEqual(800 * 3);
   });
 });
 

@@ -54,8 +54,53 @@ def _serialize_callout_directives(c: CalloutBlock, *, header_already: bool) -> l
 
 def _serialize_cell(cell: Cell) -> str:
     if cell.kind == "markdown":
-        body = "\n".join(("# " + line) if line.strip() else "#" for line in cell.source.split("\n"))
-        return f"# %% [markdown]\n{body}"
+        body = "\n".join(
+            ("# " + line) if line.strip() else "#" for line in cell.source.split("\n")
+        )
+        meta = cell.meta
+        if not meta:
+            return f"# %% [markdown]\n{body}"
+
+        # Build a `# %% [markdown] kind=... color=... title=...` header
+        # plus directive lines for image + extra callouts. Mirrors how
+        # code cells emit their meta.
+        primary = CalloutBlock(
+            title=meta.title,
+            explain=meta.explain,
+            color=meta.color,
+            kind=meta.kind,
+            image=meta.image,
+            tags=list(meta.tags),
+        )
+        extras = list(meta.callouts or [])
+        parts: list[str] = ["[markdown]"]
+        if primary.kind:
+            parts.append(_kv("kind", primary.kind))
+        if primary.color:
+            parts.append(_kv("color", primary.color))
+        if primary.title:
+            parts.append(_kv("title", primary.title))
+        header = "# %% " + " ".join(parts)
+
+        lines: list[str] = [header]
+        if meta.box_image:
+            lines.append(f"# @box_image: {meta.box_image}")
+        lines.extend(_serialize_callout_directives(primary, header_already=True))
+        for extra in extras:
+            inline_parts: list[str] = []
+            if extra.kind:
+                inline_parts.append(_kv("kind", extra.kind))
+            if extra.color:
+                inline_parts.append(_kv("color", extra.color))
+            if extra.title:
+                inline_parts.append(_kv("title", extra.title))
+            marker = "# @callout" + ((" " + " ".join(inline_parts)) if inline_parts else "")
+            lines.append(marker)
+            lines.extend(_serialize_callout_directives(extra, header_already=True))
+        if body.strip("#\n "):
+            lines.append("")
+            lines.append(body)
+        return "\n".join(lines)
 
     meta = cell.meta or CellMeta()
     primary = CalloutBlock(
@@ -80,6 +125,8 @@ def _serialize_cell(cell: Cell) -> str:
     header = "# %%" + (" " + " ".join(parts) if parts else "")
 
     lines: list[str] = [header]
+    if meta.box_image:
+        lines.append(f"# @box_image: {meta.box_image}")
     lines.extend(_serialize_callout_directives(primary, header_already=True))
     for extra in extras:
         # Inline kind/color/title on the `# @callout` line for compactness.

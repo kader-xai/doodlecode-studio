@@ -8,6 +8,35 @@ html, body, #root {
   color: #2a2a2a;
 }
 
+/* Pen-style cursor used ONLY when the highlighter tool is active in
+ * presentation mode. Everywhere else the OS default cursor wins. */
+:root {
+  --pen-cursor:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><path d='M3 25 L8 20 L20 8 L23 11 L11 23 Z' fill='%23fcc419' stroke='%232a2a2a' stroke-width='2' stroke-linejoin='round'/><path d='M3 25 L5.5 22.5 L8 20' fill='none' stroke='%232a2a2a' stroke-width='2' stroke-linecap='round'/></svg>") 3 25, crosshair;
+}
+
+.presenting.highlighter-active,
+.presenting.highlighter-active * {
+  cursor: var(--pen-cursor) !important;
+}
+.presenting.pen-active,
+.presenting.pen-active * {
+  cursor: crosshair !important;
+}
+
+/* Tailwind's preflight resets `button { cursor: inherit }`, which lets
+ * the canvas's hand-tool grab cursor leak onto buttons inside modals.
+ * Restore explicit cursors on interactive elements so they look right
+ * regardless of what tool is selected outside. */
+button, [role="button"], a, label {
+  cursor: pointer;
+}
+button:disabled, [role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+input, textarea, select { cursor: text; }
+input[type="file"], input[type="checkbox"], input[type="radio"] { cursor: pointer; }
+
 body {
   background: #fdf7e6;
   background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
@@ -44,6 +73,10 @@ body {
 /* Allow Monaco / Outputs scroll without panning canvas */
 .nowheel, .nowheel * { overscroll-behavior: contain; }
 
+/* Hide visible scrollbar but keep scroll capability (popovers). */
+.scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-none::-webkit-scrollbar { width: 0; height: 0; }
+
 /* Presentation lock: belt-and-braces against any leftover wheel-pan path. */
 .presenting .react-flow__pane,
 .presenting .react-flow__renderer { overscroll-behavior: none; touch-action: none; }
@@ -71,15 +104,24 @@ body {
 .dark .btn-sketch.peach  { background: #c2410c; }
 .dark .btn-sketch.violet { background: #862e9c; }
 
-/* Doodle card surface */
+/* Doodle card surface — clean CSS border + chunky offset shadow.
+ * Consistent across every cell type (code, text, callout). No SVG
+ * accent on top; the doodle feel comes from the color palette, the
+ * hand-drawn font, and the offset shadow. */
 .doodle-card {
   position: relative;
   background: white;
   border-radius: 18px;
   padding: 12px 14px 10px;
+  border: 2px solid #2a2a2a;
+  box-shadow: 4px 5px 0 0 rgba(0, 0, 0, 0.85);
 }
-.dark .doodle-card { background: #1f2228; color: #ececec; }
-.doodle-card > svg.doodle-border { position: absolute; inset: -4px; pointer-events: none; }
+.dark .doodle-card {
+  background: #1f2228;
+  color: #ececec;
+  border-color: #ececec;
+  box-shadow: 4px 5px 0 0 rgba(255, 255, 255, 0.5);
+}
 
 /* Body / text helpers in dark */
 .dark input, .dark textarea {

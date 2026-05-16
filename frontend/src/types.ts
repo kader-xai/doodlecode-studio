@@ -1,5 +1,5 @@
 /** Bumped manually on user-visible changes. Mirrors backend/app/__init__.py. */
-export const APP_VERSION = "0.3.0";
+export const APP_VERSION = "1.2.0";
 
 /** File-format level. Bump on schema changes. */
 export const FILE_FORMAT_VERSION = 2;
@@ -19,8 +19,11 @@ export type CellMeta = {
   title?: string;
   explain?: string;
   tags?: string[];
+  /** Primary callout's bubble image. */
   image?: string;
   callouts?: CalloutBlock[];
+  /** Image rendered INSIDE the text cell's body (📝 Edit owns this). */
+  box_image?: string;
 };
 
 export type Cell = {

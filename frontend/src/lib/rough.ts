@@ -1,5 +1,14 @@
 import rough from "roughjs";
 
+/**
+ * SVG dimensions MATCH the card's dimensions exactly (no over-paint).
+ * The hand-drawn rectangle is inset by `BORDER_INSET` so the wavy
+ * stroke (roughness + bowing + stroke-width) stays inside the SVG
+ * bounds — i.e. inside the card. Result: the border never visibly
+ * leaks past the box edge.
+ */
+const BORDER_INSET = 5;
+
 export function sketchyBorder(
   width: number,
   height: number,
@@ -10,15 +19,23 @@ export function sketchyBorder(
   svg.setAttribute("height", String(height));
   svg.classList.add("doodle-border");
   const rc = rough.svg(svg);
-  const node = rc.rectangle(4, 4, Math.max(8, width - 8), Math.max(8, height - 8), {
-    roughness: opts.roughness ?? 1.4,
-    bowing: 1.3,
-    stroke: opts.stroke ?? "#2a2a2a",
-    strokeWidth: 1.8,
-    fill: opts.fill,
-    fillStyle: "solid",
-    seed: opts.seed ?? 42,
-  });
+  const node = rc.rectangle(
+    BORDER_INSET,
+    BORDER_INSET,
+    Math.max(8, width - 2 * BORDER_INSET),
+    Math.max(8, height - 2 * BORDER_INSET),
+    {
+      roughness: opts.roughness ?? 1.4,
+      bowing: 1.0,
+      stroke: opts.stroke ?? "#2a2a2a",
+      strokeWidth: 1.6,
+      // No fill — the CSS .doodle-card paints the background. We use
+      // the SVG ONLY for the hand-drawn wavy stroke on top.
+      fill: opts.fill,
+      fillStyle: opts.fill ? "solid" : undefined,
+      seed: opts.seed ?? 42,
+    }
+  );
   svg.appendChild(node);
   return svg;
 }

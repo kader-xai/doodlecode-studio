@@ -51,13 +51,15 @@ function estimateCellHeight(
 function buildGraph(
   cells: Cell[],
   explainByCell: Record<string, ExplainResponse | undefined>,
-  cellHeights: Record<string, number>
+  cellHeights: Record<string, number>,
+  positionOverrides: Record<string, { x: number; y: number }> | null
 ): { nodes: Node[]; edges: Edge[] } {
   const nodes: Node[] = [];
   const edges: Edge[] = [];
   let y = 40;
   cells.forEach((cell, ci) => {
-    const baseY = y;
+    const override = positionOverrides?.[cell.id];
+    const baseY = override?.y ?? y;
     if (cell.kind === "markdown") {
       nodes.push({
         id: `cell-${cell.id}`,
@@ -69,9 +71,41 @@ function buildGraph(
           color: cell.meta?.color,
           kind: cell.meta?.kind,
           title: cell.meta?.title,
+          // The text-box body shows `box_image` (the 📝 Edit field).
+          // The right-side callout bubble keeps using `image`. Distinct
+          // fields = no double-showing.
+          image: cell.meta?.box_image,
         },
         draggable: true,
       });
+      // Markdown cells can also carry callouts (v0.4+).
+      const ex = explainByCell[cell.id];
+      if (ex) {
+        ex.explanations.forEach((e, ei) => {
+          const id = `ex-${cell.id}-${ei}`;
+          nodes.push({
+            id,
+            type: "explain",
+            position: { x: EXPLAIN_COL_X, y: baseY + ei * EXPLAIN_GAP_Y },
+            data: {
+              title: e.title,
+              body: e.body,
+              kind: e.tags?.[0] ?? "expr",
+              color: e.color,
+              image: e.image,
+            },
+            draggable: true,
+          });
+          edges.push({
+            id: `e-${id}`,
+            source: `cell-${cell.id}`,
+            target: id,
+            type: "default",
+            animated: true,
+            style: { stroke: "#444", strokeWidth: 2 },
+          });
+        });
+      }
     } else {
       nodes.push({
         id: `cell-${cell.id}`,
@@ -118,7 +152,11 @@ function buildGraph(
       });
     }
     const calloutCount = explainByCell[cell.id]?.explanations.length ?? 0;
-    y += estimateCellHeight(cell, calloutCount, cellHeights[cell.id]) + 60;
+    const h = estimateCellHeight(cell, calloutCount, cellHeights[cell.id]) + 60;
+    // When the layout is overridden (Auto-Space mode) keep y in sync
+    // for any cell that ISN'T in the override map — but normally every
+    // cell IS in the map and we just consume the override y above.
+    y = override ? override.y + h : y + h;
   });
   return { nodes, edges };
 }
@@ -130,7 +168,11 @@ function CanvasInner() {
   const presenting = useStore((s) => s.presenting);
   const focus = useStore((s) => s.focus);
   const theme = useStore((s) => s.theme);
+  const mode = useStore((s) => s.interactionMode);
+  const setOpenEditor = useStore((s) => s.setOpenEditor);
   const cellHeights = useStore((s) => s.cellHeight);
+  const positionOverrides = useStore((s) => s.cellPositionOverrides);
+  const fullscreen = useStore((s) => s.fullscreen);
   // Subscribe to the focused cell's measured height + output so the
   // present-mode fit-bounds effect re-runs when the user clicks Run
   // and the box grows downward to make room for stdout.
@@ -147,8 +189,8 @@ function CanvasInner() {
   }, [cells, cellState]);
 
   const initial = useMemo(
-    () => buildGraph(cells, explainByCell, cellHeights),
-    [cells, explainByCell, cellHeights]
+    () => buildGraph(cells, explainByCell, cellHeights, positionOverrides),
+    [cells, explainByCell, cellHeights, positionOverrides]
   );
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
@@ -178,12 +220,17 @@ function CanvasInner() {
         ? EXPLAIN_COL_X - CELL_COL_X + EXPLAIN_W
         : CARD_W) + 80;
     const height = h + 80;
-    rf.fitBounds({ x, y, width, height }, { padding: 0.12, duration: 550 });
+    // Tighter padding in fullscreen so the cell fills more of the screen.
+    rf.fitBounds(
+      { x, y, width, height },
+      { padding: fullscreen ? 0.06 : 0.12, duration: 550 }
+    );
   }, [
     focused,
     presenting,
     cells,
     nodes,
+    fullscreen,
     rf,
     explainByCell,
     cellHeights,
@@ -206,26 +253,41 @@ function CanvasInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [firstCellId]);
 
+  const resolveCellId = (node: Node): string | null => {
+    if (node.id.startsWith("ex-")) return node.id.slice(3).replace(/-\d+$/, "");
+    if (node.id.startsWith("cell-")) return node.id.slice(5);
+    return null;
+  };
+
   const onNodeClick = (_: any, node: Node) => {
-    let cellId: string | null = null;
-    if (node.id.startsWith("ex-")) {
-      const rest = node.id.slice(3);
-      cellId = rest.replace(/-\d+$/, "");
-    } else if (node.id.startsWith("cell-")) {
-      cellId = node.id.slice(5);
-    }
+    const cellId = resolveCellId(node);
     if (!cellId) return;
     focus(cellId);
-    if (presenting) return; // presentation effect handles the zoom
+    if (presenting) return;
 
-    const cell = cells.find((c) => c.id === cellId);
     const target = nodes.find((n) => n.id === `cell-${cellId}`);
-    if (!cell || !target) return;
-    // Outside presentation: pan only, preserve zoom — per CLAUDE.md rule 6.
+    if (!target) return;
     rf.setCenter(target.position.x + 280, target.position.y + 220, {
       zoom: rf.getZoom(),
       duration: 400,
     });
+  };
+
+  // Double-click opens the right editor — callout for code cells and
+  // explanation bubbles, text editor for markdown cells. Works in
+  // cursor / hand / move modes alike.
+  const onNodeDoubleClick = (_: any, node: Node) => {
+    const cellId = resolveCellId(node);
+    if (!cellId) return;
+    const cell = cells.find((c) => c.id === cellId);
+    if (!cell) return;
+    if (node.id.startsWith("ex-")) {
+      setOpenEditor({ kind: "callout", cellId });
+    } else if (cell.kind === "markdown") {
+      setOpenEditor({ kind: "text", cellId });
+    } else {
+      setOpenEditor({ kind: "callout", cellId });
+    }
   };
 
   return (
@@ -235,15 +297,18 @@ function CanvasInner() {
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onNodeClick={onNodeClick}
+      onNodeDoubleClick={onNodeDoubleClick}
       nodeTypes={nodeTypes}
       defaultViewport={{ x: 0, y: 0, zoom: 0.7 }}
       minZoom={0.15}
       maxZoom={1.5}
       // Two-finger trackpad scroll on Mac (and mouse wheel anywhere) pans
       // the canvas. Cmd/Ctrl + scroll zooms. Pinch zooms (trackpad).
-      // Everything off during presentation so a stray gesture can't
-      // drift the canvas mid-talk.
-      panOnScroll={!presenting}
+      // During presentation we KEEP panning (trackpad / hand-drag) so the
+      // presenter can browse, but we LOCK zoom so a stray pinch can't
+      // wreck a carefully-fit slide. Arrow keys still trigger auto-fit
+      // to the next/prev cell.
+      panOnScroll
       panOnScrollMode={PanOnScrollMode.Free}
       panOnScrollSpeed={0.9}
       zoomOnScroll={!presenting}
@@ -258,15 +323,23 @@ function CanvasInner() {
       selectionKeyCode={null}
       multiSelectionKeyCode={null}
       proOptions={{ hideAttribution: true }}
-      // Figma / Excalidraw-style automatic behavior:
-      //  - drag a cell  → moves the cell
-      //  - drag empty   → pans the canvas
-      // Both work simultaneously, no tool switching required.
-      // During presentation cells stay locked; canvas drag stays free.
-      nodesDraggable={!presenting}
-      panOnDrag
+      // Three explicit tools (V / H / M):
+      //   cursor → click selects, double-click edits, no drag.
+      //   hand   → drag pans the canvas (works in presentation too).
+      //   move   → drag moves cells.
+      // Presentation locks cell-drag (no accidental moves), but hand-tool
+      // dragging stays available — explicit user ask.
+      nodesDraggable={!presenting && mode === "move"}
+      panOnDrag={mode === "hand"}
       nodesConnectable={false}
       elementsSelectable={!presenting}
+      className={
+        !presenting && mode === "hand"
+          ? "cursor-grab active:cursor-grabbing"
+          : !presenting && mode === "move"
+          ? "cursor-move"
+          : ""
+      }
     >
       <Background variant={BackgroundVariant.Dots} gap={22} size={1.2} color={dotColor} />
       <Controls showInteractive={false} />

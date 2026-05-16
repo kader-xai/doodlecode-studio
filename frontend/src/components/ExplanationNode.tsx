@@ -1,5 +1,4 @@
 import { Handle, Position, NodeProps } from "reactflow";
-import { DoodleBorder } from "./DoodleBorder";
 import { colorFor } from "../lib/rough";
 import { useStore } from "../store";
 
@@ -16,25 +15,37 @@ export function ExplanationNode({
 }>) {
   const dark = useStore((s) => s.theme === "dark");
   const fill = colorFor({ color: data.color, kind: data.kind, dark });
-  const lines = Math.max(3, Math.ceil((data.body?.length ?? 0) / 32));
-  const imgH = data.image ? 140 : 0;
-  const h = 70 + lines * 20 + imgH;
   const textCls = dark ? "text-white" : "text-ink";
   const subCls = dark ? "text-white/90" : "text-ink/85";
+
+  // No need to manage SVG sizing here — DoodleBorder measures its own
+  // parent via ResizeObserver and rebuilds the wavy outline whenever
+  // the card resizes. The colored CSS background covers the card so
+  // text always sits on the section color even mid-resize.
+
   return (
     <div style={{ width: W, position: "relative" }}>
       <Handle type="target" position={Position.Left} />
-      <div className="doodle-card" style={{ minHeight: h, background: "transparent" }}>
-        <DoodleBorder
-          width={W + 8}
-          height={h + 8}
-          fill={fill}
-          stroke={dark ? "#ececec" : "#2a2a2a"}
-        />
+      <div
+        className="doodle-card relative"
+        style={{
+          minHeight: 80,
+          background: fill,
+          borderRadius: 18,
+        }}
+      >
         <div className="relative">
-          <div className={`font-hand text-xl leading-tight ${textCls}`}>{data.title}</div>
+          <div
+            className={`font-hand text-xl leading-tight ${textCls} break-words`}
+            style={{ overflowWrap: "anywhere" }}
+          >
+            {data.title}
+          </div>
           {data.body && (
-            <div className={`font-hand text-lg mt-1 leading-snug whitespace-pre-wrap ${subCls}`}>
+            <div
+              className={`font-hand text-lg mt-1 leading-snug whitespace-pre-wrap break-words ${subCls}`}
+              style={{ overflowWrap: "anywhere" }}
+            >
               {data.body}
             </div>
           )}
@@ -42,7 +53,7 @@ export function ExplanationNode({
             <img
               src={data.image}
               alt={data.title}
-              className="mt-2 rounded-lg border-2 border-ink/70 dark:border-white/60 max-h-32 w-full object-contain bg-white/40"
+              className="mt-2 rounded-lg border-2 border-ink/70 dark:border-white/60 max-w-full object-contain bg-white/40"
             />
           )}
         </div>

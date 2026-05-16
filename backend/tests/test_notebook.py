@@ -137,6 +137,36 @@ def test_invalid_python_still_splits():
     assert len(nb.cells) == 2
 
 
+# ---------- v0.4: markdown cells with title + image + callouts ----------
+
+def test_markdown_cell_can_carry_title_and_image():
+    img = "data:image/png;base64,AAAA"
+    src = (
+        f'# %% [markdown] color=mint title="Slide 1"\n'
+        f"# @image: {img}\n"
+        f"# @explain: a callout on the side\n"
+        f"# # Heading\n"
+        f"# body text\n"
+    ).encode()
+    nb = from_py("md.py", src)
+    assert len(nb.cells) == 1
+    cell = nb.cells[0]
+    assert cell.kind == "markdown"
+    assert cell.source == "# Heading\nbody text"
+    assert cell.meta is not None
+    assert cell.meta.title == "Slide 1"
+    assert cell.meta.color == "mint"
+    assert cell.meta.image == img
+    assert cell.meta.explain == "a callout on the side"
+
+
+def test_markdown_without_meta_unchanged():
+    src = b"# %% [markdown]\n# # Heading\n# body\n"
+    nb = from_py("md.py", src)
+    assert nb.cells[0].meta is None
+    assert nb.cells[0].source == "# Heading\nbody"
+
+
 # ---------- ipynb ----------
 
 def test_ipynb_basic():

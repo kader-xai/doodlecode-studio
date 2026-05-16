@@ -85,6 +85,60 @@ def test_internal_multispace_survives_round_trip():
     assert parsed.cells[0].meta.explain == explain.replace("\n", " ")
 
 
+def test_markdown_with_meta_round_trip():
+    """v0.4: markdown cells can carry title / image / color / callouts."""
+    img = "data:image/png;base64,AAAA"
+    nb = Notebook(name="x.py", cells=[
+        Cell(
+            id="1",
+            kind="markdown",
+            source="# Heading\n\nBody.",
+            meta=CellMeta(title="Slide 1", color="mint", image=img,
+                          explain="side body"),
+        ),
+    ])
+    text = serialize_notebook(nb)
+    assert "[markdown]" in text
+    assert 'title="Slide 1"' in text
+    assert "color=mint" in text
+    parsed = from_py("x.py", text.encode())
+    m = parsed.cells[0].meta
+    assert m.title == "Slide 1"
+    assert m.color == "mint"
+    assert m.image == img
+    assert m.explain == "side body"
+    assert parsed.cells[0].source == "# Heading\n\nBody."
+
+
+def test_box_image_and_callout_image_are_independent():
+    """The text-box image (📝 Edit) and the callout bubble image (✎)
+    must round-trip as separate fields. Editing one never affects the
+    other — that's the v1.0.3 contract."""
+    box_img = "data:image/png;base64,BOX"
+    callout_img = "data:image/png;base64,CALLOUT"
+    nb = Notebook(name="x.py", cells=[
+        Cell(
+            id="1",
+            kind="markdown",
+            source="# Slide",
+            meta=CellMeta(
+                title="Slide", color="mint",
+                image=callout_img,         # primary callout bubble image
+                box_image=box_img,         # cell-body image
+                explain="callout body",
+            ),
+        ),
+    ])
+    text = serialize_notebook(nb)
+    assert "# @box_image:" in text
+    assert "# @image:" in text
+    parsed = from_py("x.py", text.encode())
+    m = parsed.cells[0].meta
+    assert m.box_image == box_img
+    assert m.image == callout_img
+    assert m.box_image != m.image
+
+
 def test_unicode_title_round_trip():
     """Em-dash and superscript chars must not be mangled by quoting."""
     nb = Notebook(name="x.py", cells=[

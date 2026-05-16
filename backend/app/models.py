@@ -24,7 +24,12 @@ class CalloutBlock(BaseModel):
 class CellMeta(BaseModel):
     """Cell-level metadata. Backward compatible with v1:
     `kind/color/title/explain/tags` describe the FIRST callout.
-    Additional callouts live in `callouts` (without the first one)."""
+    Additional callouts live in `callouts` (without the first one).
+
+    `image` is the FIRST callout's bubble image. `box_image` is a
+    different thing — it's the image displayed INSIDE the cell body
+    (used by the 📝 Edit text box editor). Kept separate so editing
+    one never bleeds into the other."""
     # Legacy v1 fields — always populated for the primary callout.
     kind: Optional[str] = None
     color: Optional[str] = None
@@ -34,6 +39,9 @@ class CellMeta(BaseModel):
     # v2 fields:
     image: Optional[str] = None
     callouts: list[CalloutBlock] = Field(default_factory=list)
+    # v2.1: image rendered inside the cell body (markdown text box).
+    # Distinct from `image` (callout bubble image).
+    box_image: Optional[str] = None
 
 
 class Cell(BaseModel):
