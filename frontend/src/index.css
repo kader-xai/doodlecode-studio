@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  color: #2a2a2a;
+}
+
+body {
+  background: #fdf7e6;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.dark body {
+  background: #15171b;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  color: #ececec;
+}
+
+.dark { color-scheme: dark; }
+
+.font-hand { font-family: 'Caveat', 'Patrick Hand', cursive; }
+
+.react-flow__background { background-color: transparent; }
+.react-flow__edge-path { stroke-linecap: round; }
+
+/* Two-finger trackpad pan / pinch zoom on the canvas. */
+.react-flow__pane,
+.react-flow__viewport,
+.react-flow__renderer { touch-action: none; }
+.react-flow__handle {
+  width: 10px; height: 10px; border: 2px solid #2a2a2a; background: #ffec99;
+}
+.dark .react-flow__handle { border-color: #ececec; background: #f08c00; }
+
+.dark .react-flow__controls button {
+  background: #2a2a2a; color: #ececec; border-color: #444;
+}
+.dark .react-flow__minimap { background: #1a1a1a !important; }
+
+/* Allow Monaco / Outputs scroll without panning canvas */
+.nowheel, .nowheel * { overscroll-behavior: contain; }
+
+/* Presentation lock: belt-and-braces against any leftover wheel-pan path. */
+.presenting .react-flow__pane,
+.presenting .react-flow__renderer { overscroll-behavior: none; touch-action: none; }
+.presenting body { overflow: hidden; }
+
+/* Focused cell pulse (when its callout is clicked) */
+.react-flow__node.selected .doodle-card,
+.react-flow__node:focus-within .doodle-card { outline: 3px solid #e64980; outline-offset: 4px; border-radius: 22px; }
+
+/* Sketchy button */
+.btn-sketch {
+  @apply font-hand text-xl px-4 py-1 rounded-xl border-2 border-ink shadow-sketch hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition;
+  background: #ffec99;
+}
+.btn-sketch.pink  { background: #fcc2d7; }
+.btn-sketch.mint  { background: #b2f2bb; }
+.btn-sketch.sky   { background: #a5d8ff; }
+.btn-sketch.peach { background: #ffd8a8; }
+.btn-sketch.violet{ background: #eebefa; }
+
+.dark .btn-sketch        { background: #a37f08; color: #fff; border-color: #ececec; box-shadow: 3px 4px 0 0 rgba(255,255,255,0.6); }
+.dark .btn-sketch.pink   { background: #a61e4d; }
+.dark .btn-sketch.mint   { background: #2b8a3e; }
+.dark .btn-sketch.sky    { background: #1864ab; }
+.dark .btn-sketch.peach  { background: #c2410c; }
+.dark .btn-sketch.violet { background: #862e9c; }
+
+/* Doodle card surface */
+.doodle-card {
+  position: relative;
+  background: white;
+  border-radius: 18px;
+  padding: 12px 14px 10px;
+}
+.dark .doodle-card { background: #1f2228; color: #ececec; }
+.doodle-card > svg.doodle-border { position: absolute; inset: -4px; pointer-events: none; }
+
+/* Body / text helpers in dark */
+.dark input, .dark textarea {
+  background: #1f2228; color: #ececec; border-color: #444;
+}

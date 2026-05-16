@@ -1,0 +1,26 @@
+line-length = 100
+target-version = "py39"
+extend-exclude = [".venv", "build", "dist"]
+
+[lint]
+select = [
+  "E",   # pycodestyle
+  "F",   # pyflakes
+  "I",   # isort
+  "B",   # bugbear
+  "UP",  # pyupgrade
+  "S",   # bandit-lite
+  "RUF", # ruff-specific
+]
+ignore = [
+  "E501",   # line length (handled by formatter)
+  "S101",   # assert use (we use it in tests)
+  "S603",   # subprocess: we validate inputs in install.py
+  "S607",   # subprocess partial paths
+  "B008",   # FastAPI uses Depends(Foo()) as default
+  "UP045",  # X | None vs Optional[X] — we stay on py3.9 compat
+  "UP007",  # same
+]
+
+[lint.per-file-ignores]
+"tests/*" = ["S", "B011"]

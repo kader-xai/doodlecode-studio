@@ -1,0 +1,65 @@
+name: 🐞 Bug report
+description: Something is broken or behaves unexpectedly.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug. Please fill in as much as
+        you can — minimal reproductions are golden.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, and what did you see instead?
+      placeholder: |
+        1. I opened example/module_03_ai_doodle_demo.py
+        2. I hit ▶ Run on the "Training Loop" cell
+        3. Expected: numbers in the output panel
+        4. Got: the spinner stays forever
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: A small `.py` file or set of clicks that triggers the bug.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      placeholder: "v0.1.0 or commit hash"
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version (output of `python --version`)
+      placeholder: "Python 3.11.7"
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node version (output of `node --version`)
+      placeholder: "v20.10.0"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / console output
+      description: Backend log (`/tmp/doodle-backend.log` or terminal), and browser console.
+      render: shell
