@@ -6,7 +6,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.3.3] — 2026-05-16 — **Latest Stable** 🥇
+## [1.3.4] — 2026-05-16 — **Latest Stable** 🥇
+
+### Added
+- **Single-port deployment.** `./start.sh` builds the React UI once
+  and serves both the UI and the API from `http://localhost:8000`.
+  End users no longer need `npm run dev`. `./start.sh --dev` keeps
+  the old hot-reload flow for development.
+- **Per-cell Delete button** (🗑) in both code and text cell headers.
+  Confirms before deletion. The chain connector auto-reconnects the
+  remaining cells in order (delete cell 3 from 1→2→3→4→5 and the
+  chain becomes 1→2→4→5 immediately).
+
+### Fixed
+- **/execute returned 405** after the static-mount change. API
+  routes are now exposed at both `/api/*` (canonical) and `/*`
+  (legacy alias) so any cached client keeps working.
+- **Dark-mode slide counter** in the presenter bar was rendering in
+  black on a dark background. Now uses `text-ink dark:text-white`.
+
+### Removed
+- **Recording feature** (screen / camera / mic capture) — the
+  presenter bar 🔴 button, `RecorderController`, `RecorderSetup`,
+  and `CameraPiP` components are all gone, along with their store
+  state. Bundle size dropped ~4 KB gzip as a result.
+
+### Compatibility
+- File format unchanged. Old notebooks load and save identically.
+
+## [1.3.3] — 2026-05-16
 
 ### Added
 - **✏️ Edit Logo** button in the toolbar (right of 📦 Install) opens a

@@ -1,5 +1,5 @@
 /** Bumped manually on user-visible changes. Mirrors backend/app/__init__.py. */
-export const APP_VERSION = "1.3.3";
+export const APP_VERSION = "1.3.4";
 
 /** File-format level. Bump on schema changes. */
 export const FILE_FORMAT_VERSION = 2;
