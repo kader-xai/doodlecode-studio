@@ -7,6 +7,7 @@ import { About } from "./components/About";
 import { CalloutEditor } from "./components/CalloutEditor";
 import { TextEditor } from "./components/TextEditor";
 import { InstallModal } from "./components/InstallModal";
+import { BrandingEditor } from "./components/BrandingEditor";
 import { useStore } from "./store";
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
   const setOpenEditor = useStore((s) => s.setOpenEditor);
   const installOpen = useStore((s) => s.installOpen);
   const setInstallOpen = useStore((s) => s.setInstallOpen);
+  const brandingOpen = useStore((s) => s.brandingOpen);
   const setMode = useStore((s) => s.setInteractionMode);
   const cell = useStore((s) =>
     openEditor ? s.notebook.cells.find((c) => c.id === openEditor.cellId) : undefined
@@ -99,6 +101,7 @@ export default function App() {
       <PresenterOverlay />
       {aboutOpen && <About />}
       {installOpen && <InstallModal onClose={() => setInstallOpen(false)} />}
+      {brandingOpen && <BrandingEditor />}
 
       {/* Singleton popovers. Mounted once at the top so they can't be
           hidden by ReactFlow's transform and there's only ever one. */}

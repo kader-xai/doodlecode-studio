@@ -43,6 +43,11 @@ type Store = {
   /** Global font scale (1.0 = default). Applied to <html>'s font-size so
    *  every rem-based Tailwind utility scales together. Clamped 0.8–1.6. */
   fontScale: number;
+  /** User-customizable branding shown in the toolbar + About modal.
+   *  `logo` is any short string (emoji recommended). `byline` is the
+   *  full author credit line (e.g. "Co-AI Developed by Jane Doe"). */
+  branding: { logo: string; byline: string };
+  brandingOpen: boolean;
   /** Singleton state for the install modal. Lifted out of the Toolbar
    *  so it isn't trapped inside the `pointer-events: none` wrapper. */
   installOpen: boolean;
@@ -82,7 +87,11 @@ type Store = {
   setFullscreen: (v: boolean) => void;
   setDesign: (d: "doodle" | "professional" | "serif" | "mono") => void;
   setFontScale: (n: number) => void;
+  setBranding: (b: { logo: string; byline: string }) => void;
+  setBrandingOpen: (v: boolean) => void;
 };
+
+const BRANDING_DEFAULT = { logo: "🎨", byline: "Co-AI Developed by Kader Mohideen" };
 
 const LS_KEY = "doodlecode.notebook.v2";
 
@@ -164,6 +173,27 @@ export const useStore = create<Store>((set, get) => ({
     } catch {}
     return "doodle";
   })(),
+  branding: (() => {
+    try {
+      const raw = localStorage.getItem("doodlecode.branding");
+      if (raw) {
+        const v = JSON.parse(raw) as { logo?: unknown; byline?: unknown; name?: unknown };
+        // Forward-migrate older { name } payloads into a full byline.
+        const byline =
+          typeof v.byline === "string" && v.byline
+            ? v.byline
+            : typeof v.name === "string" && v.name
+              ? `Co-AI Developed by ${v.name}`
+              : BRANDING_DEFAULT.byline;
+        return {
+          logo: typeof v.logo === "string" && v.logo ? v.logo : BRANDING_DEFAULT.logo,
+          byline,
+        };
+      }
+    } catch {}
+    return { ...BRANDING_DEFAULT };
+  })(),
+  brandingOpen: false,
   fontScale: (() => {
     try {
       const v = parseFloat(localStorage.getItem("doodlecode.fontScale") ?? "1");
@@ -317,6 +347,15 @@ export const useStore = create<Store>((set, get) => ({
     try { localStorage.setItem("doodlecode.design", d); } catch {}
     set({ design: d });
   },
+  setBranding: (b) => {
+    const clean = {
+      logo: (b.logo || BRANDING_DEFAULT.logo).slice(0, 64),
+      byline: (b.byline || BRANDING_DEFAULT.byline).slice(0, 160),
+    };
+    try { localStorage.setItem("doodlecode.branding", JSON.stringify(clean)); } catch {}
+    set({ branding: clean });
+  },
+  setBrandingOpen: (v) => set({ brandingOpen: v }),
   setFontScale: (n) => {
     const clamped = Math.min(1.6, Math.max(0.8, Math.round(n * 100) / 100));
     try { localStorage.setItem("doodlecode.fontScale", String(clamped)); } catch {}

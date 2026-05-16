@@ -8,7 +8,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node 18+](https://img.shields.io/badge/node-18+-brightgreen.svg)](https://nodejs.org/)
 [![Status: golden-stable](https://img.shields.io/badge/status-golden%20stable-gold.svg)](#status)
-[![Version](https://img.shields.io/badge/version-v1.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.3.3-blue.svg)](CHANGELOG.md)
 
 DoodleCode Studio turns a Python file into a colorful whiteboard of code
 cards and explanation bubbles you can run, edit, present, and export — all
@@ -17,7 +17,7 @@ locally, with a real IPython kernel and zero cloud dependencies.
 **Co-AI Developed by [Kader Mohideen](https://kader-xai.github.io)** ·
 [LinkedIn](https://linkedin.com/in/kader-xai) ·
 [GitHub](https://github.com/kader-xai) ·
-[Meetup: Machine Learning Group Riyadh](https://www.meetup.com/g/machine-learning-group-riyadh)
+[Meetup: Machine Learning Group Riyadh](https://www.meetup.com/machine-learning-group-riyadh)
 
 ---
 
@@ -166,10 +166,10 @@ See [SECURITY.md](SECURITY.md) for the threat model and reporting process.
 
 ## Status
 
-**🥇 Golden Stable — v1.2.0.** This is the recommended version for
+**🥇 Latest Stable — v1.3.3.** This is the recommended version for
 real-world use. Highlights:
 
-- 92 backend pytest + 40 frontend vitest = **132 green tests** in CI.
+- 94 backend pytest + 40 frontend vitest = **134 green tests** in CI.
 - Lint clean across `ruff` (Python) and `tsc --noEmit` (TypeScript strict).
 - File format **v2** is a committed contract — files written here
   round-trip exactly in any future release.

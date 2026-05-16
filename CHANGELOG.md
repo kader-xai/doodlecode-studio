@@ -6,6 +6,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.3] — 2026-05-16 — **Latest Stable** 🥇
+
+### Added
+- **✏️ Edit Logo** button in the toolbar (right of 📦 Install) opens a
+  branding editor: customize the logo emoji and the full author byline
+  ("Co-AI Developed by …" or anything else). Live preview, ↺ Reset,
+  💾 Save. Values persist in `localStorage` and propagate to the
+  toolbar wordmark + About modal title + author card.
+- Meetup URL canonicalized to
+  <https://www.meetup.com/machine-learning-group-riyadh> (no `/g/`
+  prefix) everywhere it appears.
+
+### Compatibility
+- File format unchanged. UI / branding metadata only.
+- Older `{name}` branding payloads in localStorage auto-migrate to a
+  full byline on first load — no user action needed.
+
 ## [1.3.2] — 2026-05-16
 
 ### Added
@@ -29,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **🤝 Community Work** card in the About modal, linking to the Riyadh
   ML meetup the author runs:
-  <https://www.meetup.com/g/machine-learning-group-riyadh>.
+  <https://www.meetup.com/machine-learning-group-riyadh>.
 - **📜 License** card in the About modal — explicit "MIT © 2026 Kader
   Mohideen" so anyone presenting from the app can show the license
   attribution on screen.

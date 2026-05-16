@@ -4,7 +4,7 @@ import { APP_VERSION, FILE_FORMAT_VERSION } from "../types";
 const PROJECT_URL = "https://github.com/kader-xai/doodlecode-studio";
 const AI_BRIEF_PATH = "docs/AI_HANDOFF.md";
 const AI_BRIEF_URL = `${PROJECT_URL}/blob/main/${AI_BRIEF_PATH}`;
-const MEETUP_URL = "https://www.meetup.com/g/machine-learning-group-riyadh";
+const MEETUP_URL = "https://www.meetup.com/machine-learning-group-riyadh";
 
 const LINKS = [
   { label: "LinkedIn", href: "https://linkedin.com/in/kader-xai", icon: "in", color: "#a5d8ff" },
@@ -14,6 +14,7 @@ const LINKS = [
 
 export function About() {
   const close = useStore((s) => s.setAboutOpen);
+  const branding = useStore((s) => s.branding);
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60"
@@ -30,7 +31,9 @@ export function About() {
           ✕
         </button>
 
-        <div className="text-4xl mb-1 text-ink dark:text-white">🎨 DoodleCode Studio</div>
+        <div className="text-4xl mb-1 text-ink dark:text-white">
+          {branding.logo} DoodleCode Studio
+        </div>
         <div className="text-xl text-ink/80 dark:text-white/90">
           A doodle-powered Python notebook & presentation canvas.
         </div>
@@ -48,7 +51,7 @@ export function About() {
           </div>
           <div>
             <div className="text-3xl leading-tight text-ink dark:text-white">
-              Co-AI Developed by Kader Mohideen
+              {branding.byline}
             </div>
             <div className="text-lg text-ink/80 dark:text-white/85">
               Engineer · designer · doodler

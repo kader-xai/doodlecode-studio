@@ -236,11 +236,11 @@ them without explicit user approval.**
 
 ## Quality bars
 
-The project ships a stable v1.2.0 (the "Golden Stable" release). To
+The project ships a stable v1.3.2 (the latest stable release). To
 keep that label honest, every PR must:
 
 - `ruff check backend/app backend/tests` — clean
-- `(cd backend && pytest -q)` — 92 / 92 pass
+- `(cd backend && pytest -q)` — 94 / 94 pass
 - `(cd frontend && npx tsc -b --noEmit)` — strict typecheck clean
 - `(cd frontend && npm test)` — 40 / 40 vitest pass
 - `(cd frontend && npm run build)` — production bundle succeeds

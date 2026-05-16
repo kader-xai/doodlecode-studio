@@ -17,6 +17,8 @@ export function Toolbar() {
   const setAboutOpen = useStore((s) => s.setAboutOpen);
   const installing = useStore((s) => s.installing);
   const setInstallOpen = useStore((s) => s.setInstallOpen);
+  const setBrandingOpen = useStore((s) => s.setBrandingOpen);
+  const branding = useStore((s) => s.branding);
   const fullscreen = useStore((s) => s.fullscreen);
   const positionOverrides = useStore((s) => s.cellPositionOverrides);
   const autoSpace = useStore((s) => s.autoSpaceForPresentation);
@@ -66,7 +68,7 @@ export function Toolbar() {
       <div className="flex flex-col gap-1 pointer-events-auto">
         <div className="flex gap-2 items-center flex-wrap">
           <div className="font-hand text-3xl mr-1 select-none leading-none text-ink dark:text-white">
-            🎨 DoodleCode <span className="text-[#c2255c] dark:text-[#fcc2d7]">Studio</span>
+            {branding.logo} DoodleCode <span className="text-[#c2255c] dark:text-[#fcc2d7]">Studio</span>
           </div>
 
           {/* Three tools: cursor / hand / move (V / H / M). Like Figma. */}
@@ -124,6 +126,13 @@ export function Toolbar() {
           >
             📦 Install
           </button>
+          <button
+            className="btn-sketch peach"
+            onClick={() => setBrandingOpen(true)}
+            title="Customize the logo and author byline"
+          >
+            ✏️ Edit Logo
+          </button>
           <button className="btn-sketch peach" onClick={() => resetKernel()}>
             ↻ Kernel
           </button>
@@ -149,15 +158,12 @@ export function Toolbar() {
           </button>
         </div>
         <div className="font-hand text-lg ml-1 text-ink/70 dark:text-white/70 select-none flex items-center gap-3 flex-wrap">
-          <span>
-            Co-AI Developed by{" "}
-            <button
-              onClick={() => setAboutOpen(true)}
-              className="text-[#c2255c] dark:text-[#fcc2d7] underline decoration-wavy underline-offset-2 hover:opacity-80"
-            >
-              Kader Mohideen
-            </button>
-          </span>
+          <button
+            onClick={() => setAboutOpen(true)}
+            className="text-[#c2255c] dark:text-[#fcc2d7] underline decoration-wavy underline-offset-2 hover:opacity-80 text-left"
+          >
+            {branding.byline}
+          </button>
           <span className="text-ink/40 dark:text-white/40">·</span>
           <span>{notebook.name}</span>
           <span className="text-ink/40 dark:text-white/40">·</span>
