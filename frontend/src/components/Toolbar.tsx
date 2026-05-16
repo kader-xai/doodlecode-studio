@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { exportNotebook, resetKernel, uploadNotebook } from "../api";
 import { useStore } from "../store";
+import { DesignPicker } from "./DesignPicker";
 
 export function Toolbar() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -64,7 +65,7 @@ export function Toolbar() {
     <div className="absolute top-3 left-3 right-3 z-30 flex items-start justify-between pointer-events-none">
       <div className="flex flex-col gap-1 pointer-events-auto">
         <div className="flex gap-2 items-center flex-wrap">
-          <div className="font-hand text-3xl mr-1 select-none leading-none">
+          <div className="font-hand text-3xl mr-1 select-none leading-none text-ink dark:text-white">
             🎨 DoodleCode <span className="text-[#c2255c] dark:text-[#fcc2d7]">Studio</span>
           </div>
 
@@ -168,6 +169,7 @@ export function Toolbar() {
         </div>
       </div>
       <div className="flex gap-2 pointer-events-auto">
+        <DesignPicker />
         <button
           className="btn-sketch violet"
           onClick={toggleTheme}

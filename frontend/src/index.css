@@ -51,7 +51,54 @@ body {
 
 .dark { color-scheme: dark; }
 
-.font-hand { font-family: 'Caveat', 'Patrick Hand', cursive; }
+/* Dark-mode global text contrast floor.
+ * Any Tailwind class like text-ink/60 (which would render too dark on
+ * a dark background) is forced to a brighter shade. Authors only have
+ * to remember to set `text-ink dark:text-white` on the FEW high-contrast
+ * elements; the rest of the tree gets readable text by default. */
+.dark .text-ink,
+.dark .text-ink\/85,
+.dark .text-ink\/80,
+.dark .text-ink\/70,
+.dark .text-ink\/60,
+.dark .text-ink\/50,
+.dark .text-ink\/40 {
+  color: rgba(236, 236, 236, 0.95) !important;
+}
+.dark .text-ink\/40 { color: rgba(236, 236, 236, 0.75) !important; }
+.dark .text-ink\/30 { color: rgba(236, 236, 236, 0.55) !important; }
+.dark .text-ink\/20 { color: rgba(236, 236, 236, 0.4) !important; }
+
+/* Same for borders that use the ink palette so dividers / underlines
+ * don't disappear into the dark background. */
+.dark .border-ink\/80 { border-color: rgba(236, 236, 236, 0.7) !important; }
+.dark .border-ink\/70 { border-color: rgba(236, 236, 236, 0.6) !important; }
+.dark .border-ink\/60 { border-color: rgba(236, 236, 236, 0.5) !important; }
+.dark .border-ink\/50 { border-color: rgba(236, 236, 236, 0.4) !important; }
+.dark .border-ink\/40 { border-color: rgba(236, 236, 236, 0.35) !important; }
+.dark .border-ink\/30 { border-color: rgba(236, 236, 236, 0.3) !important; }
+
+/* Design theme — `--font-display` swaps the headings + handwriting,
+ * `--font-body` swaps body text. Toggled by the .design-* class on
+ * <html> via the Design picker in the toolbar. */
+:root {
+  --font-display: 'Caveat', 'Patrick Hand', cursive;
+  --font-body: 'Caveat', 'Patrick Hand', cursive;
+}
+html.design-professional {
+  --font-display: 'Inter', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+  --font-body: 'Inter', 'Helvetica Neue', system-ui, -apple-system, sans-serif;
+}
+html.design-serif {
+  --font-display: 'Lora', 'Georgia', 'Times New Roman', serif;
+  --font-body: 'Lora', 'Georgia', 'Times New Roman', serif;
+}
+html.design-mono {
+  --font-display: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  --font-body: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+}
+
+.font-hand { font-family: var(--font-display); }
 
 .react-flow__background { background-color: transparent; }
 .react-flow__edge-path { stroke-linecap: round; }

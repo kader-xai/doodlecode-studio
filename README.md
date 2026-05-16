@@ -16,7 +16,8 @@ locally, with a real IPython kernel and zero cloud dependencies.
 
 **Co-AI Developed by [Kader Mohideen](https://kader-xai.github.io)** ·
 [LinkedIn](https://linkedin.com/in/kader-xai) ·
-[GitHub](https://github.com/kader-xai)
+[GitHub](https://github.com/kader-xai) ·
+[Meetup: Machine Learning Group Riyadh](https://www.meetup.com/g/machine-learning-group-riyadh)
 
 ---
 
@@ -122,6 +123,8 @@ in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## 📚 Documentation
 
+- **[🤖 AI handoff brief](docs/AI_HANDOFF.md)** — point any AI assistant
+  here when they need the whole project on one page.
 - **[Usage guide](docs/USAGE.md)** — the 60-second workflow, presenter
   mode, keyboard shortcuts, troubleshooting.
 - **[Authoring guide](docs/AUTHORING.md)** — writing DoodleCode `.py`
@@ -181,7 +184,18 @@ CI is green across Python 3.9 / 3.11 / 3.12 and Node 18 / 20.
 
 ## License
 
-[MIT](LICENSE) © 2026 Kader-xai
+MIT © 2026 Kader Mohideen — see [LICENSE](LICENSE) for the full text.
+
+GitHub renders the repo sidebar as **MIT License** automatically once
+the `LICENSE` file is in the root.
+
+### Why MIT (and not AGPLv3)?
+
+MIT keeps the bar to adopt and contribute as low as possible — many
+companies' legal teams refuse anything copyleft. If, later, the project
+sees corporate forks running it as SaaS without giving back, switching
+to AGPLv3 (which forces hosted versions to remain open source) is on
+the table. For now, MIT is the smarter call.
 
 ## Credits
 

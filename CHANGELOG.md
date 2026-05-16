@@ -6,6 +6,74 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] — 2026-05-16
+
+### Added
+- **Font-size A− / A+ control** next to the 🎨 Design picker in the
+  toolbar. Scales the whole UI 80%–160% via the root `font-size`;
+  persists to `localStorage`.
+
+### Changed
+- About modal: License, Community, and "Point your AI" demoted to
+  compact one-line chips under a dashed divider so the four primary
+  cards (Star/clone, LinkedIn, GitHub, Website) stay visually dominant.
+- Toolbar "🎨 DoodleCode" wordmark now sets explicit
+  `text-ink dark:text-white` — previously inherited body color and
+  appeared near-black against the dark canvas on some setups.
+
+### Compatibility
+- File format unchanged. UI only.
+
+## [1.3.1] — 2026-05-16
+
+### Added
+- **🤝 Community Work** card in the About modal, linking to the Riyadh
+  ML meetup the author runs:
+  <https://www.meetup.com/g/machine-learning-group-riyadh>.
+- **📜 License** card in the About modal — explicit "MIT © 2026 Kader
+  Mohideen" so anyone presenting from the app can show the license
+  attribution on screen.
+- README now lists the Riyadh ML Meetup alongside LinkedIn / GitHub
+  in the author byline, and the **License section** explains why MIT
+  (vs. AGPLv3) was chosen.
+
+### Changed
+- LICENSE copyright holder updated to **Kader Mohideen** (canonical
+  full name, matching the About modal author credit).
+- `backend/pyproject.toml` `authors` and `frontend/package.json`
+  `author.name` aligned to the same canonical name.
+
+### Compatibility
+- File format unchanged. Metadata + UI text only.
+
+## [1.3.0] — 2026-05-16
+
+### Added
+- **[docs/AI_HANDOFF.md](docs/AI_HANDOFF.md)** — single-page briefing
+  for any AI assistant (or human) taking over the project. Covers
+  architecture, file format, conventions, quality bars, repo layout,
+  and where to start. Linked from the README.
+- **🤖 "Point your AI" section** at the bottom of the About modal,
+  showing the file path `docs/AI_HANDOFF.md` so users can paste it
+  straight into another assistant.
+- **🎨 Design picker** in the toolbar with **four font themes**:
+  - **Doodle** (golden default) — Caveat + Patrick Hand
+  - **Professional** — Inter sans-serif
+  - **Serif** — Lora editorial serif
+  - **Mono** — JetBrains Mono terminal feel
+  Choice persists to `localStorage` and is applied app-wide via a
+  CSS custom property (`--font-display`) on `<html>`.
+
+### Fixed
+- **Dark-mode text contrast floor.** Added a global CSS pass that
+  forces every Tailwind `text-ink/N` and `border-ink/N` utility to a
+  bright light-on-dark equivalent when `<html class="dark">` is set.
+  Stops author-level oversights from producing dark-on-dark text in
+  the About modal or anywhere else.
+
+### Compatibility
+- File format unchanged.
+
 ## [1.2.0] — 2026-05-16 · **🥇 GOLDEN STABLE**
 
 The recommended production version. All the polish and bug-fixes from

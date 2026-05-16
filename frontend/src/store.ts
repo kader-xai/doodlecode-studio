@@ -36,6 +36,13 @@ type Store = {
    *  When true + presenting, the toolbar hides and the presenter bar
    *  auto-fades after a few seconds of mouse-idle. */
   fullscreen: boolean;
+  /** Active design / font theme. `doodle` is the golden default
+   *  (handwriting). Other options swap the heading + body fonts
+   *  app-wide via the `--font-display` CSS custom property. */
+  design: "doodle" | "professional" | "serif" | "mono";
+  /** Global font scale (1.0 = default). Applied to <html>'s font-size so
+   *  every rem-based Tailwind utility scales together. Clamped 0.8–1.6. */
+  fontScale: number;
   /** Singleton state for the install modal. Lifted out of the Toolbar
    *  so it isn't trapped inside the `pointer-events: none` wrapper. */
   installOpen: boolean;
@@ -73,6 +80,8 @@ type Store = {
   setPresenterTool: (t: "none" | "pen" | "highlighter") => void;
   setInstallOpen: (v: boolean) => void;
   setFullscreen: (v: boolean) => void;
+  setDesign: (d: "doodle" | "professional" | "serif" | "mono") => void;
+  setFontScale: (n: number) => void;
 };
 
 const LS_KEY = "doodlecode.notebook.v2";
@@ -148,6 +157,20 @@ export const useStore = create<Store>((set, get) => ({
   presenterTool: "none",
   installOpen: false,
   fullscreen: false,
+  design: (() => {
+    try {
+      const v = localStorage.getItem("doodlecode.design");
+      if (v === "doodle" || v === "professional" || v === "serif" || v === "mono") return v;
+    } catch {}
+    return "doodle";
+  })(),
+  fontScale: (() => {
+    try {
+      const v = parseFloat(localStorage.getItem("doodlecode.fontScale") ?? "1");
+      if (!isNaN(v) && v >= 0.8 && v <= 1.6) return v;
+    } catch {}
+    return 1;
+  })(),
   cellHeight: {},
   cellPositionOverrides: null,
   cellSize: {},
@@ -290,6 +313,15 @@ export const useStore = create<Store>((set, get) => ({
   setPresenterTool: (t) => set({ presenterTool: t }),
   setInstallOpen: (v) => set({ installOpen: v }),
   setFullscreen: (v) => set({ fullscreen: v }),
+  setDesign: (d) => {
+    try { localStorage.setItem("doodlecode.design", d); } catch {}
+    set({ design: d });
+  },
+  setFontScale: (n) => {
+    const clamped = Math.min(1.6, Math.max(0.8, Math.round(n * 100) / 100));
+    try { localStorage.setItem("doodlecode.fontScale", String(clamped)); } catch {}
+    set({ fontScale: clamped });
+  },
   setCellSize: (id, size) =>
     set((s) => {
       const prev = s.cellSize[id] ?? {};

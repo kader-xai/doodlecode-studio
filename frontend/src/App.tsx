@@ -26,6 +26,27 @@ export default function App() {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
 
+  // Apply the active design as a class on <html> so the font CSS
+  // custom properties switch instantly.
+  const design = useStore((s) => s.design);
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove(
+      "design-doodle",
+      "design-professional",
+      "design-serif",
+      "design-mono"
+    );
+    root.classList.add(`design-${design}`);
+  }, [design]);
+
+  // Global font scaling — rem-based Tailwind utilities all rescale when
+  // we change the root font-size. Default browser is 16px → 100%.
+  const fontScale = useStore((s) => s.fontScale);
+  useEffect(() => {
+    document.documentElement.style.fontSize = `${fontScale * 100}%`;
+  }, [fontScale]);
+
   // Mirror the browser's fullscreen state into the store + a body class
   // so CSS / components can react. Auto-flips off if the user presses
   // Esc (which exits fullscreen but we shouldn't lose presentation).

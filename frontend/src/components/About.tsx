@@ -2,6 +2,9 @@ import { useStore } from "../store";
 import { APP_VERSION, FILE_FORMAT_VERSION } from "../types";
 
 const PROJECT_URL = "https://github.com/kader-xai/doodlecode-studio";
+const AI_BRIEF_PATH = "docs/AI_HANDOFF.md";
+const AI_BRIEF_URL = `${PROJECT_URL}/blob/main/${AI_BRIEF_PATH}`;
+const MEETUP_URL = "https://www.meetup.com/g/machine-learning-group-riyadh";
 
 const LINKS = [
   { label: "LinkedIn", href: "https://linkedin.com/in/kader-xai", icon: "in", color: "#a5d8ff" },
@@ -17,25 +20,25 @@ export function About() {
       onClick={() => close(false)}
     >
       <div
-        className="relative w-[500px] max-w-[92vw] bg-white dark:bg-[#1f2228] border-2 border-ink dark:border-white rounded-3xl shadow-sketch p-6 font-hand text-ink dark:text-white"
+        className="relative w-[520px] max-w-[92vw] max-h-[92vh] overflow-auto scrollbar-none bg-white dark:bg-[#1f2228] border-2 border-ink dark:border-white rounded-3xl shadow-sketch p-6 font-hand text-ink dark:text-white"
         onClick={(e) => e.stopPropagation()}
       >
         <button
-          className="absolute top-3 right-3 w-8 h-8 rounded-full border-2 border-ink dark:border-white bg-white dark:bg-[#0f1115] text-ink dark:text-white text-xl"
+          className="absolute top-3 right-3 w-9 h-9 rounded-full border-2 border-ink dark:border-white bg-white dark:bg-[#0f1115] text-ink dark:text-white text-xl"
           onClick={() => close(false)}
         >
           ✕
         </button>
 
-        <div className="text-4xl mb-1">🎨 DoodleCode Studio</div>
+        <div className="text-4xl mb-1 text-ink dark:text-white">🎨 DoodleCode Studio</div>
         <div className="text-xl text-ink/80 dark:text-white/90">
           A doodle-powered Python notebook & presentation canvas.
         </div>
-        <div className="text-base font-mono text-ink/60 dark:text-white/70 mt-1">
+        <div className="text-base font-mono text-ink/70 dark:text-white/80 mt-1">
           v{APP_VERSION} · file-format v{FILE_FORMAT_VERSION}
         </div>
 
-        {/* Author headline */}
+        {/* Author */}
         <div className="mt-5 flex items-center gap-3">
           <div
             className="w-14 h-14 rounded-2xl border-2 border-ink dark:border-white flex items-center justify-center text-3xl text-ink"
@@ -47,14 +50,13 @@ export function About() {
             <div className="text-3xl leading-tight text-ink dark:text-white">
               Co-AI Developed by Kader Mohideen
             </div>
-            <div className="text-lg text-ink/70 dark:text-white/80">
+            <div className="text-lg text-ink/80 dark:text-white/85">
               Engineer · designer · doodler
             </div>
           </div>
         </div>
 
-        {/* Project URL CTA with hand pointing at it — easy to point to
-            on a video, easy to click during a live demo. */}
+        {/* Project URL CTA */}
         <div className="mt-4 flex items-center gap-3">
           <span
             className="font-hand text-5xl select-none"
@@ -69,10 +71,10 @@ export function About() {
             rel="noopener noreferrer"
             className="flex-1 px-3 py-3 rounded-2xl border-2 border-ink dark:border-white bg-marker-yellow dark:bg-amber-700 text-ink dark:text-white hover:translate-x-[1px] hover:translate-y-[1px] transition"
           >
-            <div className="font-hand text-2xl flex items-center gap-2">
+            <div className="font-hand text-2xl flex items-center gap-2 text-ink dark:text-white">
               ⭐ Star &amp; clone the project
             </div>
-            <div className="font-mono text-base break-all underline decoration-dotted underline-offset-4">
+            <div className="font-mono text-base break-all underline decoration-dotted underline-offset-4 text-ink dark:text-white">
               {PROJECT_URL}
             </div>
           </a>
@@ -93,21 +95,58 @@ export function About() {
                 {l.icon}
               </span>
               <div className="flex-1">
-                <div className="text-2xl leading-none">{l.label}</div>
-                <div className="text-base font-mono text-ink/80 break-all">{l.href}</div>
+                <div className="text-2xl leading-none text-ink">{l.label}</div>
+                <div className="text-base font-mono text-ink/85 break-all">{l.href}</div>
               </div>
-              <span className="font-hand text-xl">↗</span>
+              <span className="font-hand text-xl text-ink">↗</span>
             </a>
           ))}
         </div>
 
-        <div className="mt-4 text-base text-ink/70 dark:text-white/80">
+        <div className="mt-4 text-sm text-ink/80 dark:text-white/85">
           Built with FastAPI, Jupyter kernels, React, Monaco, React Flow,
-          and roughjs. Open source under the MIT license.
+          and roughjs.
+        </div>
+
+        {/* Compact footer — the four cards above are the primary CTAs;
+            License, Community, and AI brief sit small below them. */}
+        <div className="mt-4 pt-3 border-t-2 border-dashed border-ink/30 dark:border-white/30 space-y-2 text-xs">
+          <div className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-ink/40 dark:border-white/40 bg-white dark:bg-[#0f1115] text-ink dark:text-white">
+            <span className="text-sm">📜</span>
+            <span className="font-hand text-sm">License</span>
+            <span className="font-mono text-[11px] text-ink/80 dark:text-white/80 ml-auto">
+              MIT © 2026 Kader Mohideen
+            </span>
+          </div>
+
+          <a
+            href={MEETUP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-ink/40 dark:border-white/40 bg-[#e6fcf5] dark:bg-[#1b4332] text-ink dark:text-white hover:translate-x-[1px] hover:translate-y-[1px] transition"
+          >
+            <span className="text-sm">🤝</span>
+            <span className="font-hand text-sm">Community</span>
+            <span className="font-mono text-[11px] truncate text-ink/80 dark:text-white/85 ml-auto">
+              ML Group · Riyadh ↗
+            </span>
+          </a>
+
+          <a
+            href={AI_BRIEF_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-2 py-1.5 rounded-lg border border-ink/40 dark:border-white/40 bg-[#f3f0ff] dark:bg-[#2a1e5c] text-ink dark:text-white hover:translate-x-[1px] hover:translate-y-[1px] transition"
+          >
+            <span className="text-sm">🤖</span>
+            <span className="font-hand text-sm">Point your AI</span>
+            <span className="font-mono text-[11px] truncate text-ink/80 dark:text-white/85 ml-auto">
+              {AI_BRIEF_PATH} ↗
+            </span>
+          </a>
         </div>
       </div>
 
-      {/* Small keyframes for the pointing hand */}
       <style>{`
         @keyframes wiggle {
           0%, 100% { transform: translateX(0) rotate(-8deg); }
