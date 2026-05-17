@@ -168,10 +168,6 @@ export function Toolbar() {
           <span>{notebook.name}</span>
           <span className="text-ink/40 dark:text-white/40">·</span>
           <span>{savedLabel}</span>
-          <span className="text-ink/40 dark:text-white/40">·</span>
-          <span className="font-mono text-base">
-            {mode === "cursor" ? "Cursor tool (V)" : mode === "hand" ? "Hand tool (H)" : "Move tool (M)"}
-          </span>
         </div>
       </div>
       <div className="flex gap-2 pointer-events-auto">

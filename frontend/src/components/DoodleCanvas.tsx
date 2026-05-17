@@ -23,6 +23,11 @@ const nodeTypes = { code: CodeCellNode, explain: ExplanationNode, markdown: Mark
 const CELL_COL_X = 80;
 const EXPLAIN_COL_X = 740;
 const EXPLAIN_GAP_Y = 140;
+// Phantom right-side buffer added to focus regions so that when the
+// viewport centers the cell+callout cluster, the cluster lands LEFT of
+// dead-center and the right-most callout doesn't get clipped on
+// narrower screens. Tuning knob — bigger = more left shift.
+const FOCUS_RIGHT_BUFFER = 260;
 const MARKDOWN_BASE_H = 200;
 const CODE_BASE_H = 460;
 const CARD_W = 580;
@@ -215,10 +220,12 @@ function CanvasInner() {
     const h = estimateCellHeight(cell, calloutCount, cellHeights[cell.id]);
     const x = node.position.x - 40;
     const y = node.position.y - 40;
-    const width =
-      (cell.kind === "code" && calloutCount > 0
-        ? EXPLAIN_COL_X - CELL_COL_X + EXPLAIN_W
-        : CARD_W) + 80;
+    // Always size the focus region around the cell card itself (same
+    // as markdown slides). This keeps code and markdown slides centered
+    // identically — callouts sit to the right of the card and remain
+    // visible thanks to FOCUS_RIGHT_BUFFER without yanking the cluster
+    // further left when callouts are present.
+    const width = CARD_W + 80 + FOCUS_RIGHT_BUFFER;
     const height = h + 80;
     // Tighter padding in fullscreen so the cell fills more of the screen.
     rf.fitBounds(

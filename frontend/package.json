@@ -1,7 +1,7 @@
 {
   "name": "doodlecode-studio",
   "private": true,
-  "version": "1.3.4",
+  "version": "1.3.5",
   "description": "A doodle-powered Python notebook & presentation canvas.",
   "license": "MIT",
   "author": {

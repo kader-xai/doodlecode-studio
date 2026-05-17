@@ -6,7 +6,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.3.4] — 2026-05-16 — **Latest Stable** 🥇
+## [1.3.5] — 2026-05-17 — **Latest Stable** 🥇
+
+### Added
+- **`examples/roadmap/`** — 90 presentation-ready `.py` decks
+  converted from the
+  [`kader-xai/data-science-roadmap`](https://github.com/kader-xai/data-science-roadmap)
+  Jupyter notebooks. ~2,400 slides total across modules 01–90.
+  Code is preserved verbatim; markdown trimmed to short cards with
+  1–5 `@explain:` callouts per code slide. Module 1 is hand-tuned as
+  the reference style.
+- `examples/roadmap/README.md` — attribution + source link.
+
+### Fixed
+- **Presentation: callouts clipped on the right edge.** Added a
+  `FOCUS_RIGHT_BUFFER` to the fitBounds region used by the presenter
+  step-pan, so the right-most callout has breathing room on narrower
+  screens. Code and markdown slides now use the SAME focus-region
+  width (always sized around the cell card, never widened by the
+  callout column), so both slide types center at the same horizontal
+  position during a talk. Click-to-focus and open-pan keep their
+  original centering.
+
+## [1.3.4] — 2026-05-16
 
 ### Added
 - **Single-port deployment.** `./start.sh` builds the React UI once

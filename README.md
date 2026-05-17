@@ -8,7 +8,7 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node 18+](https://img.shields.io/badge/node-18+-brightgreen.svg)](https://nodejs.org/)
 [![Status: golden-stable](https://img.shields.io/badge/status-golden%20stable-gold.svg)](#status)
-[![Version](https://img.shields.io/badge/version-v1.3.4-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.3.5-blue.svg)](CHANGELOG.md)
 
 DoodleCode Studio turns a Python file into a colorful whiteboard of code
 cards and explanation bubbles you can run, edit, present, and export — all
@@ -166,7 +166,7 @@ See [SECURITY.md](SECURITY.md) for the threat model and reporting process.
 
 ## Status
 
-**🥇 Latest Stable — v1.3.4.** This is the recommended version for
+**🥇 Latest Stable — v1.3.5.** This is the recommended version for
 real-world use. Highlights:
 
 - 94 backend pytest + 40 frontend vitest = **134 green tests** in CI.
