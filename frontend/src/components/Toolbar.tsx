@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { exportNotebook, resetKernel, uploadNotebook } from "../api";
 import { useStore } from "../store";
 import { DesignPicker } from "./DesignPicker";
+import { isMediaOnlySource } from "./MarkdownNode";
 
 export function Toolbar() {
   const fileRef = useRef<HTMLInputElement>(null);
@@ -17,7 +18,6 @@ export function Toolbar() {
   const setAboutOpen = useStore((s) => s.setAboutOpen);
   const installing = useStore((s) => s.installing);
   const setInstallOpen = useStore((s) => s.setInstallOpen);
-  const setBrandingOpen = useStore((s) => s.setBrandingOpen);
   const branding = useStore((s) => s.branding);
   const fullscreen = useStore((s) => s.fullscreen);
   const positionOverrides = useStore((s) => s.cellPositionOverrides);
@@ -25,6 +25,64 @@ export function Toolbar() {
   const rollback = useStore((s) => s.rollbackLayout);
   const mode = useStore((s) => s.interactionMode);
   const setMode = useStore((s) => s.setInteractionMode);
+  const selection = useStore((s) => s.selection);
+  const setSelection = useStore((s) => s.setSelection);
+  const setOpenEditor = useStore((s) => s.setOpenEditor);
+  const deleteCell = useStore((s) => s.deleteCell);
+  const deleteCallout = useStore((s) => s.deleteCallout);
+  const addMediaCell = useStore((s) => s.addMediaCell);
+  const addBrowserCell = useStore((s) => s.addBrowserCell);
+  const addWhiteboardCell = useStore((s) => s.addWhiteboardCell);
+  const setCellSize = useStore((s) => s.setCellSize);
+  const notebookCells = useStore((s) => s.notebook.cells);
+
+  // Resolve the selected entity for the action bar.
+  const selCell = selection
+    ? notebookCells.find((c) => c.id === selection.cellId) ?? null
+    : null;
+  const selIsMediaOnly =
+    !!selCell && selCell.kind === "markdown" && isMediaOnlySource(selCell.source);
+
+  // Preset sizes for media-only cells. (w, h) in canvas pixels.
+  const MEDIA_PRESETS: { label: string; w: number; h: number; tip: string }[] = [
+    { label: "S",  w: 480,  h: 320, tip: "Small  (480 × 320)" },
+    { label: "M",  w: 720,  h: 480, tip: "Medium (720 × 480)" },
+    { label: "L",  w: 960,  h: 640, tip: "Large  (960 × 640)" },
+    { label: "XL", w: 1280, h: 800, tip: "X-Large (1280 × 800)" },
+    { label: "Fit", w: 1600, h: 900, tip: "Fit slide (1600 × 900)" },
+  ];
+  const selLabel = (() => {
+    if (!selection || !selCell) return "";
+    if (selection.type === "callout") {
+      return `Callout ${selection.index + 1} of "${selCell.meta?.title || selCell.id.slice(0, 6)}"`;
+    }
+    return selCell.meta?.title || (selCell.kind === "code" ? "Code cell" : "Text cell");
+  })();
+
+  const onEditSelection = () => {
+    if (!selection || !selCell) return;
+    if (selection.type === "callout") {
+      setOpenEditor({ kind: "callout", cellId: selection.cellId });
+    } else if (selCell.kind === "markdown") {
+      setOpenEditor({ kind: "text", cellId: selection.cellId });
+    } else {
+      setOpenEditor({ kind: "callout", cellId: selection.cellId });
+    }
+  };
+  const onDeleteSelection = () => {
+    if (!selection || !selCell) return;
+    if (selection.type === "callout") {
+      if (window.confirm(`Delete callout "${selLabel}"?`)) {
+        deleteCallout(selection.cellId, selection.index);
+        setSelection(null);
+      }
+    } else {
+      if (window.confirm(`Delete "${selLabel}"? The rest of the deck reorders automatically.`)) {
+        deleteCell(selection.cellId);
+        setSelection(null);
+      }
+    }
+  };
 
   // In fullscreen presentation mode the toolbar would be a distraction
   // (and would steal click events). Hide it completely — but AFTER all
@@ -120,18 +178,51 @@ export function Toolbar() {
             ＋ Text
           </button>
           <button
+            className="btn-sketch sky"
+            onClick={() => {
+              const url = window.prompt("Image URL (e.g. /demo/chart.png or https://…)");
+              if (url && url.trim()) addMediaCell(url.trim(), "image");
+            }}
+            title="Add a media-only slide containing one image (no title, full-bleed)"
+          >
+            ＋ Image
+          </button>
+          <button
+            className="btn-sketch sky"
+            onClick={() => {
+              const url = window.prompt("Video / GIF URL (.mp4, .webm, .gif…)");
+              if (url && url.trim()) addMediaCell(url.trim(), "video");
+            }}
+            title="Add a media-only slide containing one video or GIF (no title, full-bleed)"
+          >
+            ＋ Video
+          </button>
+          <button
+            className="btn-sketch sky"
+            onClick={() => {
+              const url = window.prompt(
+                "URL to embed (any web app or website that allows iframes; localhost works)",
+                "http://localhost:3000"
+              );
+              addBrowserCell(url ?? undefined);
+            }}
+            title="Add a slide that embeds a live web app via iframe"
+          >
+            ＋ Browser
+          </button>
+          <button
+            className="btn-sketch mint"
+            onClick={() => addWhiteboardCell()}
+            title="Add a whiteboard slide — draw with the pen, drop sticker images"
+          >
+            ＋ Whiteboard
+          </button>
+          <button
             className="btn-sketch violet"
             onClick={() => setInstallOpen(true)}
             title="Pip-install packages into the kernel"
           >
             📦 Install
-          </button>
-          <button
-            className="btn-sketch peach"
-            onClick={() => setBrandingOpen(true)}
-            title="Customize the logo and author byline"
-          >
-            ✏️ Edit Logo
           </button>
           <button className="btn-sketch peach" onClick={() => resetKernel()}>
             ↻ Kernel
@@ -150,7 +241,7 @@ export function Toolbar() {
               onClick={() => autoSpace(window.innerHeight)}
               title="Spread cells one-per-slide for presenting"
             >
-              📐 Auto-Space [Presentation]
+              📐 Space
             </button>
           )}
           <button className="btn-sketch pink" onClick={() => setPresenting(!presenting)}>
@@ -169,6 +260,61 @@ export function Toolbar() {
           <span className="text-ink/40 dark:text-white/40">·</span>
           <span>{savedLabel}</span>
         </div>
+
+        {/* Selection action bar — appears only when a cell or callout
+         *  is currently selected. Edit / Delete operate on the selected
+         *  item, so cards stay visually clean (no per-card buttons). */}
+        {selection && selCell && (
+          <div className="mt-1 flex items-center gap-2 flex-wrap font-hand">
+            <span className="text-base text-ink/70 dark:text-white/70 select-none">
+              Selected:
+            </span>
+            <span
+              className="text-base px-2 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/40 bg-white/80 dark:bg-black/40 text-ink dark:text-white max-w-[260px] truncate"
+              title={selLabel}
+            >
+              {selLabel}
+            </span>
+            <button
+              className="btn-sketch sky text-base !py-0.5 !px-3"
+              onClick={onEditSelection}
+              title="Open the editor for this item"
+            >
+              ✏️ Edit
+            </button>
+            <button
+              className="btn-sketch pink text-base !py-0.5 !px-3"
+              onClick={onDeleteSelection}
+              title="Delete this item"
+            >
+              🗑 Delete
+            </button>
+            <button
+              className="text-sm text-ink/60 dark:text-white/60 underline underline-offset-2 hover:opacity-80"
+              onClick={() => setSelection(null)}
+              title="Clear selection"
+            >
+              clear
+            </button>
+            {selIsMediaOnly && selection?.type === "cell" && (
+              <div className="flex items-center gap-1 ml-2 pl-2 border-l-2 border-ink/20 dark:border-white/20">
+                <span className="text-base text-ink/70 dark:text-white/70 select-none">
+                  Size:
+                </span>
+                {MEDIA_PRESETS.map((p) => (
+                  <button
+                    key={p.label}
+                    className="text-sm font-hand px-2 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/40 bg-white/80 dark:bg-black/40 text-ink dark:text-white hover:bg-marker-yellow dark:hover:bg-amber-700"
+                    onClick={() => setCellSize(selection.cellId, { width: p.w, height: p.h })}
+                    title={p.tip}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <div className="flex gap-2 pointer-events-auto">
         <DesignPicker />
@@ -179,6 +325,13 @@ export function Toolbar() {
         >
           {theme === "dark" ? "☀ Light" : "🌙 Dark"}
         </button>
+        <a
+          className="btn-sketch peach inline-block text-base"
+          href="/tools"
+          title="Open the /tools page (PPT → Images, etc.)"
+        >
+          🛠 Tools
+        </a>
         <button className="btn-sketch sky" onClick={() => setAboutOpen(true)}>
           ⓘ About
         </button>

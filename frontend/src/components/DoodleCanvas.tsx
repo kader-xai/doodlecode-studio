@@ -15,10 +15,18 @@ import ReactFlow, {
 import { CodeCellNode } from "./CodeCellNode";
 import { ExplanationNode } from "./ExplanationNode";
 import { MarkdownNode } from "./MarkdownNode";
+import { BrowserNode } from "./BrowserNode";
+import { WhiteboardNode } from "./WhiteboardNode";
 import { useStore } from "../store";
 import type { Cell, ExplainResponse } from "../types";
 
-const nodeTypes = { code: CodeCellNode, explain: ExplanationNode, markdown: MarkdownNode };
+const nodeTypes = {
+  code: CodeCellNode,
+  explain: ExplanationNode,
+  markdown: MarkdownNode,
+  browser: BrowserNode,
+  whiteboard: WhiteboardNode,
+};
 
 const CELL_COL_X = 80;
 const EXPLAIN_COL_X = 740;
@@ -66,9 +74,17 @@ function buildGraph(
     const override = positionOverrides?.[cell.id];
     const baseY = override?.y ?? y;
     if (cell.kind === "markdown") {
+      // Dispatch on cell.meta.cell_type so v2.2 cell variants
+      // (browser / whiteboard) render with their specialized
+      // components while plain markdown keeps the original path.
+      const variant = cell.meta?.cell_type;
+      const nodeType =
+        variant === "browser" ? "browser"
+        : variant === "whiteboard" ? "whiteboard"
+        : "markdown";
       nodes.push({
         id: `cell-${cell.id}`,
-        type: "markdown",
+        type: nodeType,
         position: { x: CELL_COL_X, y: baseY },
         data: {
           cellId: cell.id,
@@ -93,6 +109,8 @@ function buildGraph(
             type: "explain",
             position: { x: EXPLAIN_COL_X, y: baseY + ei * EXPLAIN_GAP_Y },
             data: {
+              cellId: cell.id,
+              index: ei,
               title: e.title,
               body: e.body,
               kind: e.tags?.[0] ?? "expr",
@@ -128,6 +146,8 @@ function buildGraph(
             type: "explain",
             position: { x: EXPLAIN_COL_X, y: baseY + ei * EXPLAIN_GAP_Y },
             data: {
+              cellId: cell.id,
+              index: ei,
               title: e.title,
               body: e.body,
               kind: e.tags?.[0] ?? "expr",
@@ -220,17 +240,40 @@ function CanvasInner() {
     const h = estimateCellHeight(cell, calloutCount, cellHeights[cell.id]);
     const x = node.position.x - 40;
     const y = node.position.y - 40;
-    // Always size the focus region around the cell card itself (same
-    // as markdown slides). This keeps code and markdown slides centered
-    // identically — callouts sit to the right of the card and remain
-    // visible thanks to FOCUS_RIGHT_BUFFER without yanking the cluster
-    // further left when callouts are present.
-    const width = CARD_W + 80 + FOCUS_RIGHT_BUFFER;
+    // Cell variants (whiteboard / browser / media-only) render wider
+    // than the default CARD_W. Use the cell's ACTUAL rendered width if
+    // we have it tracked in cellSize; otherwise fall back to known
+    // defaults per cell type. This keeps the focus region centered on
+    // the actual node rather than its left half.
+    const sizeMap = useStore.getState().cellSize;
+    const variant = cell.meta?.cell_type;
+    const isWideVariant = variant === "browser" || variant === "whiteboard";
+    const isMediaOnlyMd =
+      cell.kind === "markdown" &&
+      !!cell.source &&
+      /^!\[[^\]]*\]\([^)]+\)$/.test(cell.source.trim());
+    const cardW =
+      sizeMap[cell.id]?.width ??
+      (isWideVariant ? 960 : isMediaOnlyMd ? 560 : CARD_W);
+
+    // Two layouts:
+    //   * If the slide HAS callouts → keep the right-side buffer so the
+    //     bubbles aren't clipped on narrower screens.
+    //   * If the slide has NO callouts → tight region around the card
+    //     itself: it stays centered (no leftward shift) AND lands
+    //     bigger on screen because fitBounds picks a higher zoom.
+    const hasCallouts = calloutCount > 0;
+    const width = hasCallouts
+      ? cardW + 80 + FOCUS_RIGHT_BUFFER
+      : cardW + 40;
     const height = h + 80;
+    const padding = hasCallouts
+      ? (fullscreen ? 0.06 : 0.12)
+      : (fullscreen ? 0.04 : 0.08);
     // Tighter padding in fullscreen so the cell fills more of the screen.
     rf.fitBounds(
       { x, y, width, height },
-      { padding: fullscreen ? 0.06 : 0.12, duration: 550 }
+      { padding, duration: 550 }
     );
   }, [
     focused,
@@ -266,10 +309,22 @@ function CanvasInner() {
     return null;
   };
 
+  const setSelection = useStore((s) => s.setSelection);
+
   const onNodeClick = (_: any, node: Node) => {
     const cellId = resolveCellId(node);
     if (!cellId) return;
     focus(cellId);
+
+    // Selection drives the toolbar action bar (Edit / Delete).
+    if (node.id.startsWith("ex-")) {
+      const idxStr = node.id.match(/-(\d+)$/)?.[1];
+      const index = idxStr ? parseInt(idxStr, 10) : 0;
+      setSelection({ type: "callout", cellId, index });
+    } else {
+      setSelection({ type: "cell", cellId });
+    }
+
     if (presenting) return;
 
     const target = nodes.find((n) => n.id === `cell-${cellId}`);
@@ -279,6 +334,9 @@ function CanvasInner() {
       duration: 400,
     });
   };
+
+  // Click on empty canvas clears the selection so the action bar hides.
+  const onPaneClick = () => setSelection(null);
 
   // Double-click opens the right editor — callout for code cells and
   // explanation bubbles, text editor for markdown cells. Works in
@@ -305,6 +363,7 @@ function CanvasInner() {
       onEdgesChange={onEdgesChange}
       onNodeClick={onNodeClick}
       onNodeDoubleClick={onNodeDoubleClick}
+      onPaneClick={onPaneClick}
       nodeTypes={nodeTypes}
       defaultViewport={{ x: 0, y: 0, zoom: 0.7 }}
       minZoom={0.15}

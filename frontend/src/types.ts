@@ -1,5 +1,5 @@
 /** Bumped manually on user-visible changes. Mirrors backend/app/__init__.py. */
-export const APP_VERSION = "1.3.5";
+export const APP_VERSION = "1.3.6";
 
 /** File-format level. Bump on schema changes. */
 export const FILE_FORMAT_VERSION = 2;
@@ -24,6 +24,19 @@ export type CellMeta = {
   callouts?: CalloutBlock[];
   /** Image rendered INSIDE the text cell's body (📝 Edit owns this). */
   box_image?: string;
+  /** Extra cell types (v2.2, additive). When set, the cell is rendered
+   *  by a specialized component instead of the generic markdown
+   *  pipeline. Unknown values fall back to markdown. */
+  cell_type?: "browser" | "whiteboard" | string;
+  /** Browser cell: URL loaded in the iframe. */
+  browser_url?: string;
+  /** Whiteboard cell: "white" | "black" — default white. */
+  whiteboard_bg?: string;
+  /** Whiteboard cell: opaque JSON string of strokes; the canvas
+   *  renderer parses and re-emits this verbatim. */
+  strokes?: string;
+  /** Whiteboard cell: opaque JSON string of sticker positions. */
+  stickers?: string;
 };
 
 export type Cell = {

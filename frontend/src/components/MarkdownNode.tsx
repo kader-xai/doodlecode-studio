@@ -32,6 +32,74 @@ function renderInline(s: string) {
   return parts;
 }
 
+// Matches `![alt](url)` (the whole line is one image/video).
+const MEDIA_RE = /^\s*!\[([^\]]*)\]\(([^)]+)\)\s*$/;
+const VIDEO_EXT = /\.(mp4|webm|mov|m4v)(\?|#|$)/i;
+
+/** True if the cell's source is JUST one `![](...)` line (media-only). */
+export function isMediaOnlySource(src: string | undefined | null): boolean {
+  if (!src) return false;
+  const lines = src.trim().split("\n").map((l) => l.trim()).filter(Boolean);
+  if (lines.length !== 1) return false;
+  return /^!\[[^\]]*\]\([^)]+\)$/.test(lines[0]);
+}
+
+/** True if the cell's markdown body contains any media tag. */
+export function cellHasMedia(src: string | undefined | null): boolean {
+  if (!src) return false;
+  for (const ln of src.split("\n")) {
+    const m = ln.match(MEDIA_RE);
+    if (!m) continue;
+    return true;
+  }
+  return false;
+}
+
+function MediaBlock({ url, alt }: { url: string; alt: string }) {
+  const isVideo = VIDEO_EXT.test(url);
+  // Wrapper has `resize: both` so the user can drag the bottom-right
+  // corner to resize. `overflow: hidden` clips the resize-handle visual.
+  // The media element fills the wrapper (width 100%, auto-height).
+  if (isVideo) {
+    return (
+      <span
+        className="block my-2 mx-auto rounded-lg border-2 border-ink/70 dark:border-white/60 nowheel"
+        style={{ resize: "both", overflow: "hidden", maxWidth: "100%" }}
+      >
+        <video
+          src={url}
+          autoPlay
+          loop
+          muted
+          playsInline
+          preload="auto"
+          style={{ display: "block", width: "100%", height: "auto" }}
+        />
+      </span>
+    );
+  }
+  return (
+    <span
+      className="block my-2 rounded-lg border-2 border-ink/70 dark:border-white/60"
+      style={{
+        resize: "both",
+        overflow: "hidden",
+        // Show the image at its NATURAL size by default. `max-width:100%`
+        // keeps wide screenshots inside the card. Height adjusts via
+        // the resize handle in the bottom-right corner.
+        display: "inline-block",
+        maxWidth: "100%",
+      }}
+    >
+      <img
+        src={url}
+        alt={alt}
+        style={{ display: "block", width: "100%", height: "auto" }}
+      />
+    </span>
+  );
+}
+
 function renderBody(src: string) {
   const lines = src.split("\n");
   const out: JSX.Element[] = [];
@@ -43,6 +111,12 @@ function renderBody(src: string) {
     // long unbroken tokens (URLs, file paths) wrap inside the cell
     // instead of overflowing the right edge.
     const wrap = "break-words [overflow-wrap:anywhere]";
+    const media = line.match(MEDIA_RE);
+    if (media) {
+      out.push(<MediaBlock key={key++} url={media[2]} alt={media[1]} />);
+      i++;
+      continue;
+    }
     if (/^###\s+/.test(line)) {
       out.push(<h3 key={key++} className={`font-hand text-2xl mt-1 ${wrap}`}>{renderInline(line.replace(/^###\s+/, ""))}</h3>);
       i++;
@@ -83,8 +157,6 @@ export function MarkdownNode({
   const setExplain = useStore((s) => s.setExplain);
   const reportCellHeight = useStore((s) => s.reportCellHeight);
   const updateMeta = useStore((s) => s.updateCellMeta);
-  const setOpenEditor = useStore((s) => s.setOpenEditor);
-  const deleteCell = useStore((s) => s.deleteCell);
   const size = useStore((s) => s.cellSize[cellId]);
 
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -118,6 +190,56 @@ export function MarkdownNode({
   // ResizeObserver and rebuilds the wavy SVG to match in the same
   // frame, so the outline always wraps the actual painted card.
 
+  // A "media-only" cell has just a single `![](...)` in its body and
+  // no other prose. Rendered frameless and full-bleed — the image /
+  // video fills the card on BOTH width and height (via object-fit),
+  // and the existing corner ResizeHandle drives both dims.
+  const mediaOnly = (() => {
+    const src = (data.source || "").trim();
+    if (!src) return null;
+    const lines = src.split("\n").map((l) => l.trim()).filter(Boolean);
+    if (lines.length !== 1) return null;
+    const m = lines[0].match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (!m) return null;
+    return { alt: m[1], url: m[2], isVideo: VIDEO_EXT.test(m[2]) };
+  })();
+
+  if (mediaOnly) {
+    const cardH = size?.height ?? 360;
+    const inner: React.CSSProperties = {
+      display: "block",
+      width: "100%",
+      height: "100%",
+      objectFit: "contain",
+      background: "#000",
+    };
+    return (
+      <div ref={wrapRef} data-cell-id={cellId} style={{ width: W, position: "relative" }}>
+        <Handle type="target" position={Position.Left} />
+        <div
+          className="doodle-card relative p-0 overflow-hidden"
+          style={{ height: cardH, background: fill, borderRadius: 18 }}
+        >
+          {mediaOnly.isVideo ? (
+            <video
+              src={mediaOnly.url}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="auto"
+              style={inner}
+            />
+          ) : (
+            <img src={mediaOnly.url} alt={mediaOnly.alt} style={inner} />
+          )}
+        </div>
+        <ResizeHandle cellId={cellId} baseWidth={W} baseHeight={cardH} />
+        <Handle type="source" position={Position.Right} />
+      </div>
+    );
+  }
+
   return (
     <div ref={wrapRef} data-cell-id={cellId} style={{ width: W, position: "relative" }}>
       <Handle type="target" position={Position.Left} />
@@ -137,7 +259,7 @@ export function MarkdownNode({
         }}
       >
         <div
-          className="relative -mx-3 -mt-3 px-3 py-1.5 mb-2 border-b-2 border-ink/60 dark:border-white/60 flex items-center justify-between rounded-t-lg"
+          className="relative -mx-3 -mt-3 px-3 py-1.5 mb-2 border-b-2 border-ink/60 dark:border-white/60 rounded-t-lg"
           style={{ background: "rgba(255,255,255,0.45)" }}
         >
           <div className="flex items-baseline gap-2 min-w-0 flex-1">
@@ -149,49 +271,27 @@ export function MarkdownNode({
               }
             />
           </div>
-          <div className="flex gap-1 nodrag shrink-0">
-            <button
-              className="font-hand text-lg w-8 h-8 rounded-lg border-2 border-ink dark:border-white/70 bg-white/70 dark:bg-black/40 hover:translate-x-[1px] hover:translate-y-[1px] transition"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => { e.stopPropagation(); setOpenEditor({ kind: "text", cellId }); }}
-              title="Edit text box"
-            >
-              📝
-            </button>
-            <button
-              className="font-hand text-lg w-8 h-8 rounded-lg border-2 border-ink dark:border-white/70 bg-white/70 dark:bg-black/40 hover:translate-x-[1px] hover:translate-y-[1px] transition"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => { e.stopPropagation(); setOpenEditor({ kind: "callout", cellId }); }}
-              title="Edit side callout"
-            >
-              ✎
-            </button>
-            <button
-              className="font-hand text-lg w-8 h-8 rounded-lg border-2 border-ink dark:border-white/70 bg-[#ffc9c9] dark:bg-[#a61e4d] text-ink dark:text-white hover:translate-x-[1px] hover:translate-y-[1px] transition"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                const label = data.title || `Text ${cellId.slice(0, 6)}`;
-                if (window.confirm(`Delete "${label}"? The rest of the notebook reorders automatically.`)) {
-                  deleteCell(cellId);
-                }
-              }}
-              title="Delete this cell"
-            >
-              🗑
-            </button>
-          </div>
         </div>
         <div className="relative">
           {data.image && (
-            <img
-              src={data.image}
-              alt={data.title ?? ""}
-              className="mb-2 max-w-full max-h-72 object-contain rounded-lg border-2 border-ink/70 dark:border-white/60"
-            />
+            // Top-level cell image: render at its NATURAL size,
+            // constrained only by card width. The user can drag the
+            // corner to resize. Card auto-grows to fit.
+            <span
+              className="block mb-2 rounded-lg border-2 border-ink/70 dark:border-white/60"
+              style={{
+                resize: "both",
+                overflow: "hidden",
+                display: "inline-block",
+                maxWidth: "100%",
+              }}
+            >
+              <img
+                src={data.image}
+                alt={data.title ?? ""}
+                style={{ display: "block", width: "100%", height: "auto" }}
+              />
+            </span>
           )}
           {rendered}
         </div>

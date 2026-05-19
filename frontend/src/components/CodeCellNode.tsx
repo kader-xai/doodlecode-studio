@@ -19,8 +19,6 @@ export function CodeCellNode({ data }: NodeProps<{ cellId: string }>) {
   const updateMeta = useStore((s) => s.updateCellMeta);
   const setExec = useStore((s) => s.setExecResult);
   const setExplain = useStore((s) => s.setExplain);
-  const setOpenEditor = useStore((s) => s.setOpenEditor);
-  const deleteCell = useStore((s) => s.deleteCell);
   const reportCellHeight = useStore((s) => s.reportCellHeight);
   const theme = useStore((s) => s.theme);
   const dark = theme === "dark";
@@ -92,19 +90,10 @@ export function CodeCellNode({ data }: NodeProps<{ cellId: string }>) {
               }
             />
           </div>
+          {/* Only the Run button stays on the card — it's a per-cell
+           *  action with no toolbar equivalent. Edit Callout and Delete
+           *  have moved to the toolbar's selection action bar. */}
           <div className="flex gap-1 nodrag shrink-0">
-            <button
-              className="font-hand text-lg w-8 h-8 rounded-lg border-2 border-ink dark:border-white/70 bg-white/70 dark:bg-black/40 hover:translate-x-[1px] hover:translate-y-[1px] transition"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpenEditor({ kind: "callout", cellId });
-              }}
-              title="Edit callout"
-            >
-              ✎
-            </button>
             <button
               className="font-hand text-lg w-8 h-8 rounded-lg border-2 border-ink dark:border-white/70 bg-[#b2f2bb] dark:bg-[#2b8a3e] text-ink dark:text-white hover:translate-x-[1px] hover:translate-y-[1px] transition disabled:opacity-50"
               onPointerDown={(e) => e.stopPropagation()}
@@ -114,21 +103,6 @@ export function CodeCellNode({ data }: NodeProps<{ cellId: string }>) {
               title="Run cell"
             >
               {state?.running ? "…" : "▶"}
-            </button>
-            <button
-              className="font-hand text-lg w-8 h-8 rounded-lg border-2 border-ink dark:border-white/70 bg-[#ffc9c9] dark:bg-[#a61e4d] text-ink dark:text-white hover:translate-x-[1px] hover:translate-y-[1px] transition"
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                const label = cell.meta?.title || `Cell ${cellId.slice(0, 6)}`;
-                if (window.confirm(`Delete "${label}"? The rest of the notebook reorders automatically.`)) {
-                  deleteCell(cellId);
-                }
-              }}
-              title="Delete this cell"
-            >
-              🗑
             </button>
           </div>
         </div>

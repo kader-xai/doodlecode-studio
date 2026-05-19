@@ -6,7 +6,78 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.3.5] — 2026-05-17 — **Latest Stable** 🥇
+## [1.3.6] — 2026-05-17 — **Latest Stable** 🥇
+
+### Added
+- **New cell types** (file-format v2.2, additive — old files load
+  unchanged):
+  - **＋ Browser** cell — embeds any URL in an iframe with a URL bar.
+    Auto-prefixes the protocol, opens external sites in a real tab
+    via the ↗ link, sandbox is permissive enough for typical apps.
+  - **＋ Whiteboard** cell — canvas drawing surface with 7 pen
+    colors, 1–24 px width slider, white / black background toggle,
+    undo, clear, and draggable / resizable image stickers. Strokes
+    and sticker positions autosave into `cell.meta.strokes` /
+    `cell.meta.stickers` as JSON.
+  - **＋ Image / ＋ Video** toolbar buttons that drop a media-only
+    markdown cell with a single `![](…)`. Renders frameless and
+    full-bleed with `object-fit: contain`. Drag the corner to
+    resize both width and height, or pick **S / M / L / XL / Fit**
+    presets from the toolbar selection bar.
+- **Selection-driven toolbar action bar.** Click any cell or callout
+  → toolbar shows "Selected: …" with **✏️ Edit** and **🗑 Delete**.
+  Per-card buttons are gone — cards stay clean during presentation.
+- **`/tools` page** — visit `http://localhost:8000/tools` (or
+  toolbar 🛠 Tools button). First tool: **PPT → Images**. Upload a
+  `.pptx`, get one PNG per slide plus a `notes.txt` of speaker
+  notes under `~/.doodlecode/tools/<deck>/`. Uses LibreOffice
+  headless when installed; falls back to a python-pptx text
+  renderer if not (warning banner suggests `brew install --cask
+  libreoffice`).
+- **Inline media in markdown body** — `![](…)` inside text cells
+  renders the image / video right there, resizable by dragging the
+  corner.
+- **Demo media assets** (`frontend/public/demo/`) — bouncing-ball
+  GIF, wave MP4, chart PNG, architecture PNG — plus
+  `examples/media_demo.py` and `examples/full_demo.py` decks
+  exercising the new features.
+
+### Fixed
+- **Wide cells (whiteboard / browser / media-only) no longer
+  shift right during presentation.** The presenter `fitBounds`
+  region now uses the cell's actual rendered width (from
+  `cellSize` + per-type defaults: 960 px for whiteboard / browser,
+  560 px for media-only, 580 px for the rest) instead of always
+  `CARD_W`. Cluster lands centered, fills the screen.
+- **Browser URL bar.** Wrapped in `<form onSubmit={preventDefault}>`
+  with `type="submit"` on Go so Enter / click never triggers a
+  parent-page navigation. URLs without a protocol auto-prefix
+  (`localhost:3000` → `http://`, otherwise → `https://`).
+- **Slide counter** in the presenter bar now has explicit
+  `text-ink dark:text-white` (was inheriting black on dark).
+
+### Removed
+- **Per-card edit / delete buttons** on code, markdown, and callout
+  nodes — replaced by the toolbar selection action bar.
+- **✏️ Edit Logo** toolbar button — cluttered the space; the
+  branding editor + store action are still in the codebase for
+  later re-exposure (e.g. from About).
+
+### Changed
+- "📐 Auto-Space [Presentation]" toolbar button renamed to
+  **📐 Space** — clearer, less tooltip-heavy.
+- Tool name labels ("Cursor tool (V)", "Hand tool (H)", …) removed
+  from the status line below the toolbar; tooltips on the icons
+  still explain each tool.
+
+### Compatibility
+- File format **v2.2** — adds optional `cell_type`, `browser_url`,
+  `whiteboard_bg`, `strokes`, `stickers` to `CellMeta`. Old `.py`
+  files load identically; new files written with these features
+  are silently ignored by older parsers. **100 / 100 backend
+  pytest** and **40 / 40 frontend vitest** pass.
+
+## [1.3.5] — 2026-05-17
 
 ### Added
 - **`examples/roadmap/`** — 90 presentation-ready `.py` decks

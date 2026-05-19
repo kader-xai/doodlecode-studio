@@ -42,6 +42,20 @@ class CellMeta(BaseModel):
     # v2.1: image rendered inside the cell body (markdown text box).
     # Distinct from `image` (callout bubble image).
     box_image: Optional[str] = None
+    # v2.2: extra cell types — additive, backward-compatible. Older
+    # parsers ignore these and treat the cell as plain markdown.
+    #   cell_type:     "browser" | "whiteboard" (or None for plain text)
+    #   browser_url:   iframe source for browser cells
+    #   whiteboard_bg: "white" | "black" (default white)
+    #   strokes:       opaque JSON string of {color,width,points[]} —
+    #                  round-tripped untouched through serializer.
+    #   stickers:      opaque JSON string of {url,x,y,w,h}[] for
+    #                  draggable image overlays on whiteboards.
+    cell_type: Optional[str] = None
+    browser_url: Optional[str] = None
+    whiteboard_bg: Optional[str] = None
+    strokes: Optional[str] = None
+    stickers: Optional[str] = None
 
 
 class Cell(BaseModel):

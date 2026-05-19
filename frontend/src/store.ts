@@ -67,6 +67,30 @@ type Store = {
   updateCellMeta: (id: string, meta: CellMeta | null) => void;
   addCell: (after?: string, kind?: "code" | "markdown") => void;
   deleteCell: (id: string) => void;
+  /**
+   * Delete one callout from a cell.
+   * `index === 0` clears the primary callout (cell.meta.title /
+   * .explain / .image). Higher indices splice cell.meta.callouts.
+   * Maps to the same numbering the explain endpoint hands back via
+   * `block_id = "<cellId>-callout-<index>"`.
+   */
+  deleteCallout: (cellId: string, index: number) => void;
+  /** Insert a brand-new media-only markdown cell carrying a single
+   *  `![alt](url)` block. Used by the toolbar's + Image / + Video
+   *  buttons so the user can drop in a screenshot or a clip without
+   *  hand-writing markdown. */
+  addMediaCell: (url: string, alt?: string) => void;
+  /** Insert a browser cell (iframe + URL bar). */
+  addBrowserCell: (url?: string) => void;
+  /** Insert a whiteboard cell (pen + colors + bg toggle + stickers). */
+  addWhiteboardCell: () => void;
+  /** Active selection — the toolbar's action bar reads this to know
+   *  which Edit / Delete to dispatch. */
+  selection:
+    | null
+    | { type: "cell"; cellId: string }
+    | { type: "callout"; cellId: string; index: number };
+  setSelection: (s: Store["selection"]) => void;
   setExecResult: (id: string, r: ExecuteResponse | undefined, running?: boolean) => void;
   setExplain: (id: string, e: ExplainResponse | undefined) => void;
   setPresenting: (v: boolean) => void;
@@ -194,6 +218,7 @@ export const useStore = create<Store>((set, get) => ({
     return { ...BRANDING_DEFAULT };
   })(),
   brandingOpen: false,
+  selection: null,
   fontScale: (() => {
     try {
       const v = parseFloat(localStorage.getItem("doodlecode.fontScale") ?? "1");
@@ -292,6 +317,95 @@ export const useStore = create<Store>((set, get) => ({
     });
     scheduleAutosave(next);
   },
+
+  deleteCallout: (cellId, index) => {
+    const s = get();
+    const cell = s.notebook.cells.find((c) => c.id === cellId);
+    if (!cell) return;
+    const meta: CellMeta = { ...(cell.meta ?? {}) };
+    if (index === 0) {
+      // Primary callout: strip title/explain/image but keep the cell.
+      delete meta.title;
+      delete meta.explain;
+      delete meta.image;
+    } else {
+      const list = (meta.callouts ?? []).slice();
+      const target = index - 1;
+      if (target < 0 || target >= list.length) return;
+      list.splice(target, 1);
+      if (list.length) meta.callouts = list;
+      else delete meta.callouts;
+    }
+    const nextCells = s.notebook.cells.map((c) =>
+      c.id === cellId ? { ...c, meta } : c
+    );
+    const next: Notebook = { ...s.notebook, cells: nextCells };
+    // Force the /explain re-fetch on the next render by dropping the
+    // cached explanations for this cell.
+    const cellState = { ...s.cellState };
+    if (cellState[cellId]) {
+      cellState[cellId] = { ...cellState[cellId], explain: undefined };
+    }
+    set({ notebook: next, cellState });
+    scheduleAutosave(next);
+  },
+
+  addMediaCell: (url, alt) => {
+    const s = get();
+    const cleanUrl = url.trim();
+    if (!cleanUrl) return;
+    const label = (alt ?? "media").trim() || "media";
+    const cell: Cell = {
+      id: crypto.randomUUID(),
+      kind: "markdown",
+      // Single ![]() line — MarkdownNode detects this as a "media-only"
+      // cell and renders the media full-bleed with NO title strip.
+      source: `![${label}](${cleanUrl})`,
+      meta: { color: "sky" }, // intentionally no title — keeps it clean
+    };
+    const cells = [...s.notebook.cells, cell];
+    const next: Notebook = { ...s.notebook, cells };
+    set({ notebook: next, focusedCellId: cell.id });
+    scheduleAutosave(next);
+  },
+
+  addBrowserCell: (url) => {
+    const s = get();
+    const cell: Cell = {
+      id: crypto.randomUUID(),
+      kind: "markdown",
+      source: "",
+      meta: {
+        color: "sky",
+        cell_type: "browser",
+        browser_url: (url ?? "").trim() || undefined,
+      },
+    };
+    const cells = [...s.notebook.cells, cell];
+    const next: Notebook = { ...s.notebook, cells };
+    set({ notebook: next, focusedCellId: cell.id });
+    scheduleAutosave(next);
+  },
+
+  addWhiteboardCell: () => {
+    const s = get();
+    const cell: Cell = {
+      id: crypto.randomUUID(),
+      kind: "markdown",
+      source: "",
+      meta: {
+        color: "mint",
+        cell_type: "whiteboard",
+        whiteboard_bg: "white",
+      },
+    };
+    const cells = [...s.notebook.cells, cell];
+    const next: Notebook = { ...s.notebook, cells };
+    set({ notebook: next, focusedCellId: cell.id });
+    scheduleAutosave(next);
+  },
+
+  setSelection: (sel) => set({ selection: sel }),
 
   setExecResult: (id, r, running) =>
     set((s) => ({

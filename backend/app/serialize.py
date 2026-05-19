@@ -85,6 +85,16 @@ def _serialize_cell(cell: Cell) -> str:
         lines: list[str] = [header]
         if meta.box_image:
             lines.append(f"# @box_image: {meta.box_image}")
+        if meta.cell_type:
+            lines.append(f"# @cell_type: {meta.cell_type}")
+        if meta.browser_url:
+            lines.append(f"# @browser_url: {meta.browser_url}")
+        if meta.whiteboard_bg:
+            lines.append(f"# @whiteboard_bg: {meta.whiteboard_bg}")
+        if meta.strokes:
+            lines.append(f"# @strokes: {meta.strokes}")
+        if meta.stickers:
+            lines.append(f"# @stickers: {meta.stickers}")
         lines.extend(_serialize_callout_directives(primary, header_already=True))
         for extra in extras:
             inline_parts: list[str] = []

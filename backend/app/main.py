@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from . import __version__ as APP_VERSION
 from .explain import explain_code
 from .install import pip_install
+from .tools import TOOLS_DIR, convert_pptx
 from .kernel import pool
 from .models import (
     FILE_FORMAT_VERSION,
@@ -136,6 +137,33 @@ async def upload(file: UploadFile = File(...)) -> Notebook:
         raise HTTPException(status_code=400, detail=f"Could not parse {name}: {e}") from e
 
 
+@api.post("/tools/ppt-to-images")
+async def tool_ppt_to_images(file: UploadFile = File(...)) -> dict:
+    """Render every slide of a .pptx as a PNG and extract speaker notes.
+
+    Files land under ~/.doodlecode/tools/<deck>/  — served back to the
+    browser at /tools-files/<deck>/<file>."""
+    raw = await file.read()
+    if not raw:
+        raise HTTPException(status_code=400, detail="Empty upload.")
+    try:
+        result = convert_pptx(file.filename or "deck.pptx", raw)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e)) from e
+    return {
+        "ok": True,
+        "deck": result.deck_name,
+        "folder": result.folder,
+        "slides": result.slides,
+        "notes_file": result.notes_file,
+        "renderer": result.renderer,
+        "message": result.message,
+        # URLs the frontend can pull directly.
+        "slide_urls": [f"/tools-files/{result.deck_name}/{s}" for s in result.slides],
+        "notes_url": f"/tools-files/{result.deck_name}/{result.notes_file}",
+    }
+
+
 app.include_router(api, prefix="/api")
 # Backwards-compat: also expose the routes at the root path so older
 # clients (and the dev-server proxy) that hit "/execute" instead of
@@ -145,6 +173,10 @@ app.include_router(api)
 # Serve the built React app at the root. `frontend/dist` is created by
 # `npm run build` and shipped with the release. If it isn't present
 # (e.g. during pytest), we just skip the mount — the API still works.
+# Files produced by /tools (PPT slides + notes) — served as plain
+# static content so the frontend can <img src=…> them directly.
+app.mount("/tools-files", StaticFiles(directory=TOOLS_DIR), name="tools-files")
+
 _DIST = Path(__file__).resolve().parent.parent.parent / "frontend" / "dist"
 if _DIST.is_dir():
     app.mount("/assets", StaticFiles(directory=_DIST / "assets"), name="assets")

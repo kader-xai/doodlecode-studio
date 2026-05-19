@@ -7,6 +7,8 @@ const W = 320;
 export function ExplanationNode({
   data,
 }: NodeProps<{
+  cellId: string;
+  index: number;
   title: string;
   body: string;
   kind: string;
@@ -18,10 +20,8 @@ export function ExplanationNode({
   const textCls = dark ? "text-white" : "text-ink";
   const subCls = dark ? "text-white/90" : "text-ink/85";
 
-  // No need to manage SVG sizing here — DoodleBorder measures its own
-  // parent via ResizeObserver and rebuilds the wavy outline whenever
-  // the card resizes. The colored CSS background covers the card so
-  // text always sits on the section color even mid-resize.
+  // Edit / Delete moved to the toolbar's selection action bar. Click
+  // the callout to select it, then use the toolbar buttons.
 
   return (
     <div style={{ width: W, position: "relative" }}>

@@ -8,9 +8,15 @@ import { CalloutEditor } from "./components/CalloutEditor";
 import { TextEditor } from "./components/TextEditor";
 import { InstallModal } from "./components/InstallModal";
 import { BrandingEditor } from "./components/BrandingEditor";
+import { ToolsPage } from "./components/ToolsPage";
 import { useStore } from "./store";
 
 export default function App() {
+  // Lightweight router — anything under /tools renders the standalone
+  // tools page. Keeps the main canvas free of routing infrastructure.
+  if (typeof window !== "undefined" && window.location.pathname.startsWith("/tools")) {
+    return <ToolsPage />;
+  }
   const theme = useStore((s) => s.theme);
   const aboutOpen = useStore((s) => s.aboutOpen);
   const presenting = useStore((s) => s.presenting);
