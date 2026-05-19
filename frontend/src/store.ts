@@ -31,7 +31,11 @@ type Store = {
   /** Active presenter overlay tool. `none` = nothing extra. `pen` =
    *  Excalidraw-style red ink that fades in ~1.4 s. `highlighter` =
    *  thick yellow ink that lingers ~4 s. */
-  presenterTool: "none" | "pen" | "highlighter";
+  presenterTool: "none" | "pen" | "highlighter" | "fixedPen";
+  /** Increments when the user presses the presenter "erase all"
+   *  button. The PresenterOverlay subscribes and wipes its strokes
+   *  whenever this counter changes. */
+  presenterInkClearCounter: number;
   /** Browser-level fullscreen state (mirror of document.fullscreenElement).
    *  When true + presenting, the toolbar hides and the presenter bar
    *  auto-fades after a few seconds of mouse-idle. */
@@ -111,7 +115,8 @@ type Store = {
   setCellSize: (id: string, size: { width?: number; height?: number }) => void;
   setInteractionMode: (m: "cursor" | "hand" | "move") => void;
   setOpenEditor: (v: { kind: "callout" | "text"; cellId: string } | null) => void;
-  setPresenterTool: (t: "none" | "pen" | "highlighter") => void;
+  setPresenterTool: (t: "none" | "pen" | "highlighter" | "fixedPen") => void;
+  clearPresenterInk: () => void;
   setInstallOpen: (v: boolean) => void;
   setFullscreen: (v: boolean) => void;
   setDesign: (d: "doodle" | "professional" | "serif" | "mono") => void;
@@ -195,6 +200,7 @@ export const useStore = create<Store>((set, get) => ({
   interactionMode: "cursor",
   openEditor: null,
   presenterTool: "none",
+  presenterInkClearCounter: 0,
   installOpen: false,
   fullscreen: false,
   design: (() => {
@@ -512,6 +518,8 @@ export const useStore = create<Store>((set, get) => ({
   setInteractionMode: (m) => set({ interactionMode: m }),
   setOpenEditor: (v) => set({ openEditor: v }),
   setPresenterTool: (t) => set({ presenterTool: t }),
+  clearPresenterInk: () =>
+    set((s) => ({ presenterInkClearCounter: s.presenterInkClearCounter + 1 })),
   setInstallOpen: (v) => set({ installOpen: v }),
   setFullscreen: (v) => set({ fullscreen: v }),
   setDesign: (d) => {

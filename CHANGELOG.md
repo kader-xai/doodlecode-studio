@@ -6,7 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.3.8] — 2026-05-17 — **Latest Stable** 🥇
+## [1.3.9] — 2026-05-17 — **Latest Stable** 🥇
+
+### Added
+- **🖊 Fixed pen** — third presenter ink tool. Same red color and
+  width as ✒️ Pen, but the stroke does NOT fade — it stays on top
+  of the slide until you erase or leave presentation. Keyboard
+  shortcut **X**.
+- **🧽 Erase all** — wipes every ink stroke currently on screen
+  (pen, highlighter, fixed pen) in one click. Bumps a store
+  counter that the overlay subscribes to. Keyboard shortcut **E**.
+
+### Changed
+- Presenter bar bottom hint updated:
+  `← → · P pen · H highlighter · X fixed · E erase · F fullscreen · Esc exit`.
+
+### Compatibility
+- Exiting presentation still clears every annotation, including
+  fixed-pen strokes — slides are never permanently inked. No file-
+  format changes.
+
+## [1.3.8] — 2026-05-17
 
 ### Added
 - **Whiteboard shape tools** — Pen / Line / Circle / Arrow / Eraser.

@@ -99,6 +99,10 @@ export function PresenterBar() {
         setTool(tool === "pen" ? "none" : "pen");
       } else if (e.key === "h" || e.key === "H") {
         setTool(tool === "highlighter" ? "none" : "highlighter");
+      } else if (e.key === "x" || e.key === "X") {
+        setTool(tool === "fixedPen" ? "none" : "fixedPen");
+      } else if (e.key === "e" || e.key === "E") {
+        useStore.getState().clearPresenterInk();
       } else if (e.key === "f" || e.key === "F") {
         toggleFullscreen();
       }
@@ -135,7 +139,7 @@ export function PresenterBar() {
         Next ▶
       </button>
 
-      {/* Presenter ink tools — Excalidraw-style pen + highlighter */}
+      {/* Presenter ink tools — fading pen + highlighter + fixed pen + erase-all */}
       <div className="ml-2 flex gap-1 border-l-2 border-ink/30 dark:border-white/30 pl-2">
         <button
           className={toolBtn(tool === "pen")}
@@ -152,6 +156,20 @@ export function PresenterBar() {
           🖍
         </button>
         <button
+          className={toolBtn(tool === "fixedPen")}
+          onClick={() => setTool(tool === "fixedPen" ? "none" : "fixedPen")}
+          title="Fixed pen — red ink that stays until you erase (X)"
+        >
+          🖊
+        </button>
+        <button
+          className={toolBtn(false)}
+          onClick={() => useStore.getState().clearPresenterInk()}
+          title="Erase all ink on the screen (E)"
+        >
+          🧽
+        </button>
+        <button
           className={toolBtn(fullscreen)}
           onClick={toggleFullscreen}
           title="Fullscreen — hide chrome, auto-fade this bar (F)"
@@ -161,7 +179,7 @@ export function PresenterBar() {
       </div>
 
       <div className="font-hand text-base ml-2 text-ink/60 dark:text-white/60 select-none">
-        ← → · P pen · H highlighter · F fullscreen · Esc exit
+        ← → · P pen · H highlighter · X fixed · E erase · F fullscreen · Esc exit
       </div>
     </div>
   );

@@ -2,45 +2,49 @@ import { useEffect, useRef, useState } from "react";
 import { useStore } from "../store";
 
 type Point = { x: number; y: number };
-type Stroke = { points: Point[]; tool: "pen" | "highlighter"; bornAt: number };
+type InkTool = "pen" | "highlighter" | "fixedPen";
+type Stroke = { points: Point[]; tool: InkTool; bornAt: number };
 
 /**
- * Two presenter ink tools, both Excalidraw-style:
+ * Three presenter ink tools:
  *
- *   - **pen**          Thin red ink that fades in ~1.4s. Draw a quick
- *                      circle around something and it vanishes by the
- *                      time the audience's eye follows.
- *   - **highlighter**  Thick translucent yellow ink that stays ~4s.
- *                      Good for stable annotations on a slide.
+ *   - **pen**       Thin red ink that fades in ~1.4s. Quick gesture
+ *                   that vanishes by the time the audience's eye
+ *                   follows. Good for "look here".
+ *   - **highlighter** Thick translucent yellow that lingers ~4s.
+ *                   Useful for slightly-longer emphasis.
+ *   - **fixedPen**  Same red ink as pen, but the stroke STAYS until
+ *                   you press the eraser button (🧽) or leave
+ *                   presentation. Use for diagrams, longer
+ *                   annotations, math written on top of the slide.
  *
- * While either tool is active the SVG captures pointer events so the
- * drag is registered. Otherwise the SVG is pointer-events:none so the
- * canvas keeps responding normally. z-index sits between the canvas
- * and the UI chrome so the presenter bar / modals stay clickable.
+ * Strokes auto-clear whenever the user leaves presentation mode OR
+ * the presenter "erase all" button is pressed (which bumps
+ * `presenterInkClearCounter` in the store).
  */
-const STYLES = {
-  pen: { color: "rgba(255, 70, 70, 0.95)", width: 5, fade: 1400 },
-  highlighter: { color: "rgba(255, 220, 0, 0.45)", width: 16, fade: 4000 },
-} as const;
+const STYLES: Record<InkTool, { color: string; width: number; fade: number }> = {
+  pen:         { color: "rgba(255, 70, 70, 0.95)",  width: 5,  fade: 1400    },
+  highlighter: { color: "rgba(255, 220, 0, 0.45)",  width: 16, fade: 4000    },
+  fixedPen:    { color: "rgba(255, 70, 70, 0.95)",  width: 5,  fade: Infinity },
+};
 
 export function PresenterOverlay() {
   const presenting = useStore((s) => s.presenting);
   const tool = useStore((s) => s.presenterTool);
+  const clearCounter = useStore((s) => s.presenterInkClearCounter);
 
   const [strokes, setStrokes] = useState<Stroke[]>([]);
-  const [current, setCurrent] = useState<{ points: Point[]; tool: "pen" | "highlighter" } | null>(
-    null
-  );
+  const [current, setCurrent] = useState<{ points: Point[]; tool: InkTool } | null>(null);
   const rafRef = useRef<number | null>(null);
 
-  // CSS hook so the cursor reflects the active tool.
+  // Cursor classes for active tools.
   useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("highlighter-active", presenting && tool === "highlighter");
-    root.classList.toggle("pen-active", presenting && tool === "pen");
+    root.classList.toggle("pen-active", presenting && (tool === "pen" || tool === "fixedPen"));
   }, [presenting, tool]);
 
-  // Wipe ink when leaving presentation.
+  // Wipe when leaving presentation.
   useEffect(() => {
     if (!presenting) {
       setStrokes([]);
@@ -48,8 +52,14 @@ export function PresenterOverlay() {
     }
   }, [presenting]);
 
-  // Animation loop — fades strokes by age and drops them when fully
-  // transparent. Idle when nothing's on screen.
+  // Wipe on every "erase all" click.
+  useEffect(() => {
+    if (clearCounter === 0) return;
+    setStrokes([]);
+    setCurrent(null);
+  }, [clearCounter]);
+
+  // Fade loop — strokes with fade=Infinity are never dropped.
   useEffect(() => {
     if (!presenting || (!strokes.length && !current)) return;
     let alive = true;
@@ -57,7 +67,11 @@ export function PresenterOverlay() {
       if (!alive) return;
       const now = Date.now();
       setStrokes((all) =>
-        all.filter((s) => now - s.bornAt < STYLES[s.tool].fade)
+        all.filter((s) => {
+          const fade = STYLES[s.tool].fade;
+          if (!isFinite(fade)) return true;          // fixedPen: keep forever
+          return now - s.bornAt < fade;
+        })
       );
       rafRef.current = requestAnimationFrame(tick);
     };
@@ -68,7 +82,7 @@ export function PresenterOverlay() {
     };
   }, [presenting, strokes.length, current]);
 
-  const isDrawTool = tool === "pen" || tool === "highlighter";
+  const isDrawTool = tool === "pen" || tool === "highlighter" || tool === "fixedPen";
 
   const startDraw = (e: React.PointerEvent) => {
     if (!isDrawTool) return;
@@ -111,8 +125,9 @@ export function PresenterOverlay() {
     >
       {strokes.map((s, i) => {
         const cfg = STYLES[s.tool];
-        const age = now - s.bornAt;
-        const opacity = Math.max(0, 1 - age / cfg.fade);
+        const opacity = isFinite(cfg.fade)
+          ? Math.max(0, 1 - (now - s.bornAt) / cfg.fade)
+          : 1;
         return (
           <polyline
             key={i}
