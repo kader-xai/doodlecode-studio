@@ -247,14 +247,16 @@ function CanvasInner() {
     // the actual node rather than its left half.
     const sizeMap = useStore.getState().cellSize;
     const variant = cell.meta?.cell_type;
-    const isWideVariant = variant === "browser" || variant === "whiteboard";
     const isMediaOnlyMd =
       cell.kind === "markdown" &&
       !!cell.source &&
       /^!\[[^\]]*\]\([^)]+\)$/.test(cell.source.trim());
     const cardW =
       sizeMap[cell.id]?.width ??
-      (isWideVariant ? 960 : isMediaOnlyMd ? 560 : CARD_W);
+      (variant === "browser" ? 1280
+        : variant === "whiteboard" ? 1100
+        : isMediaOnlyMd ? 720
+        : CARD_W);
 
     // Two layouts:
     //   * If the slide HAS callouts → keep the right-side buffer so the

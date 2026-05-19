@@ -49,6 +49,30 @@ body {
   color: #ececec;
 }
 
+/* Page-background swatches. Each rule sets a solid fill + a matching
+ * dot pattern. The contrast of cards / text is handled separately by
+ * the .dark cascade — html.bg-black also gets the .dark class so the
+ * existing dark-mode rules kick in without duplication.
+ *
+ * Pick one of the four via the toolbar "🌓 Background" picker. */
+html.bg-sandal body {
+  background: #fdf7e6;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px);
+}
+html.bg-gray body {
+  background: #e9ecef;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+}
+html.bg-white body {
+  background: #ffffff;
+  background-image: radial-gradient(rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+}
+html.bg-black body {
+  background: #0f1115;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  color: #ececec;
+}
+
 .dark { color-scheme: dark; }
 
 /* Dark-mode global text contrast floor.
@@ -174,5 +198,45 @@ html.design-mono {
 /* Body / text helpers in dark */
 .dark input, .dark textarea {
   background: #1f2228; color: #ececec; border-color: #444;
+}
+
+/* -----------------------------------------------------------------------
+ * Presenter ambient — hand-drawn doodle shapes drifting behind the
+ * cards during 🎬 Present. Rendered by <PresenterAmbient/>.
+ * - Capped opacity so the cards stay the focus.
+ * - `stroke` is animated via @keyframes doodle-hue so the palette
+ *   slowly rotates through the same colors the toolbar uses.
+ * - Pointer events off — never blocks clicks or drags.
+ * --------------------------------------------------------------------- */
+.doodle-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  /* Subtle in editor; livelier in presentation (see modifier below). */
+  opacity: 0.22;
+}
+.doodle-ambient.doodle-ambient--presenting { opacity: 0.45; }
+.doodle-ambient svg path { stroke: #c2255c; }
+.dark .doodle-ambient { opacity: 0.16; }
+.dark .doodle-ambient.doodle-ambient--presenting { opacity: 0.32; }
+
+@keyframes doodle-drift {
+  0%   { transform: translate3d(0, 0, 0) rotate(0deg);     opacity: 0; }
+  10%  { opacity: 0.6; }
+  50%  { transform: translate3d(24px, -32px, 0) rotate(20deg); opacity: 0.6; }
+  90%  { opacity: 0.6; }
+  100% { transform: translate3d(-18px, 22px, 0) rotate(-12deg); opacity: 0; }
+}
+
+@keyframes doodle-hue {
+  0%   { stroke: #c2255c; }   /* pink   */
+  17%  { stroke: #f08c00; }   /* amber  */
+  33%  { stroke: #2f9e44; }   /* green  */
+  50%  { stroke: #1971c2; }   /* blue   */
+  67%  { stroke: #ae3ec9; }   /* violet */
+  83%  { stroke: #e8590c; }   /* orange */
+  100% { stroke: #c2255c; }
 }
 

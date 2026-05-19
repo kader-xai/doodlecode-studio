@@ -43,6 +43,11 @@ type Store = {
   /** Global font scale (1.0 = default). Applied to <html>'s font-size so
    *  every rem-based Tailwind utility scales together. Clamped 0.8–1.6. */
   fontScale: number;
+  /** Ambient shape theme for presenter mode. `off` hides the layer. */
+  presenterAmbient: "doodle" | "zen" | "tech" | "ideas" | "off";
+  /** Page background color. `black` implies dark mode; the other
+   *  three are light. Drives the `bg-<name>` class on <html>. */
+  pageBg: "sandal" | "gray" | "white" | "black";
   /** User-customizable branding shown in the toolbar + About modal.
    *  `logo` is any short string (emoji recommended). `byline` is the
    *  full author credit line (e.g. "Co-AI Developed by Jane Doe"). */
@@ -111,6 +116,8 @@ type Store = {
   setFullscreen: (v: boolean) => void;
   setDesign: (d: "doodle" | "professional" | "serif" | "mono") => void;
   setFontScale: (n: number) => void;
+  setPresenterAmbient: (v: Store["presenterAmbient"]) => void;
+  setPageBg: (v: Store["pageBg"]) => void;
   setBranding: (b: { logo: string; byline: string }) => void;
   setBrandingOpen: (v: boolean) => void;
 };
@@ -225,6 +232,25 @@ export const useStore = create<Store>((set, get) => ({
       if (!isNaN(v) && v >= 0.8 && v <= 1.6) return v;
     } catch {}
     return 1;
+  })(),
+  presenterAmbient: (() => {
+    try {
+      const v = localStorage.getItem("doodlecode.presenterAmbient");
+      if (v === "doodle" || v === "zen" || v === "tech" || v === "ideas" || v === "off") {
+        return v;
+      }
+    } catch {}
+    return "doodle";
+  })(),
+  pageBg: (() => {
+    try {
+      const v = localStorage.getItem("doodlecode.pageBg");
+      if (v === "sandal" || v === "gray" || v === "white" || v === "black") return v;
+      // First-time load: keep parity with the legacy theme toggle.
+      const t = localStorage.getItem("doodlecode.theme");
+      if (t === "dark") return "black";
+    } catch {}
+    return "sandal";
   })(),
   cellHeight: {},
   cellPositionOverrides: null,
@@ -501,6 +527,17 @@ export const useStore = create<Store>((set, get) => ({
     set({ branding: clean });
   },
   setBrandingOpen: (v) => set({ brandingOpen: v }),
+  setPresenterAmbient: (v) => {
+    try { localStorage.setItem("doodlecode.presenterAmbient", v); } catch {}
+    set({ presenterAmbient: v });
+  },
+  setPageBg: (v) => {
+    try { localStorage.setItem("doodlecode.pageBg", v); } catch {}
+    // Black implies dark mode; everything else is light.
+    const nextTheme: "dark" | "light" = v === "black" ? "dark" : "light";
+    try { localStorage.setItem("doodlecode.theme", nextTheme); } catch {}
+    set({ pageBg: v, theme: nextTheme });
+  },
   setFontScale: (n) => {
     const clamped = Math.min(1.6, Math.max(0.8, Math.round(n * 100) / 100));
     try { localStorage.setItem("doodlecode.fontScale", String(clamped)); } catch {}

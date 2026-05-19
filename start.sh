@@ -26,6 +26,20 @@ pip install -q -r requirements.txt
 python -m ipykernel install --user --name doodlecode --display-name "DoodleCode" \
   >/dev/null 2>&1 || true
 
+# Optional dependency: LibreOffice powers /tools' PPT → Images.
+# Without it the converter falls back to text-only PNGs (clearly
+# marked in the UI). Print a one-time install hint so users can
+# upgrade to real slide screenshots when they need them.
+if ! command -v soffice >/dev/null 2>&1 && ! command -v libreoffice >/dev/null 2>&1; then
+  echo ""
+  echo "💡 LibreOffice not found — the PPT → Images tool will use a"
+  echo "   text-only fallback renderer. For accurate slide screenshots:"
+  echo "     macOS:   brew install --cask libreoffice"
+  echo "     Linux:   sudo apt install libreoffice  (or your distro's pkg)"
+  echo "     Windows: download from https://www.libreoffice.org/download"
+  echo ""
+fi
+
 # --------------------------- Frontend build -----------------------------
 cd "$ROOT/frontend"
 if [ ! -d node_modules ]; then

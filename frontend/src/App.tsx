@@ -9,6 +9,7 @@ import { TextEditor } from "./components/TextEditor";
 import { InstallModal } from "./components/InstallModal";
 import { BrandingEditor } from "./components/BrandingEditor";
 import { ToolsPage } from "./components/ToolsPage";
+import { PresenterAmbient } from "./components/PresenterAmbient";
 import { useStore } from "./store";
 
 export default function App() {
@@ -33,6 +34,15 @@ export default function App() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
+
+  // Apply the chosen page background as a class on <html>. Removing all
+  // four bg-* classes first keeps the toggle clean.
+  const pageBg = useStore((s) => s.pageBg);
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove("bg-sandal", "bg-gray", "bg-white", "bg-black");
+    root.classList.add(`bg-${pageBg}`);
+  }, [pageBg]);
 
   // Apply the active design as a class on <html> so the font CSS
   // custom properties switch instantly.
@@ -101,6 +111,7 @@ export default function App() {
         presenting ? "presenting" : ""
       } w-screen h-screen relative overflow-hidden`}
     >
+      <PresenterAmbient />
       <Toolbar />
       <DoodleCanvas />
       <PresenterBar />

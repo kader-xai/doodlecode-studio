@@ -2,6 +2,8 @@ import { useRef } from "react";
 import { exportNotebook, resetKernel, uploadNotebook } from "../api";
 import { useStore } from "../store";
 import { DesignPicker } from "./DesignPicker";
+import { AmbientPicker } from "./AmbientPicker";
+import { BackgroundPicker } from "./BackgroundPicker";
 import { isMediaOnlySource } from "./MarkdownNode";
 
 export function Toolbar() {
@@ -13,8 +15,6 @@ export function Toolbar() {
   const setPresenting = useStore((s) => s.setPresenting);
   const notebook = useStore((s) => s.notebook);
   const savedAt = useStore((s) => s.savedAt);
-  const theme = useStore((s) => s.theme);
-  const toggleTheme = useStore((s) => s.toggleTheme);
   const setAboutOpen = useStore((s) => s.setAboutOpen);
   const installing = useStore((s) => s.installing);
   const setInstallOpen = useStore((s) => s.setInstallOpen);
@@ -42,6 +42,11 @@ export function Toolbar() {
     : null;
   const selIsMediaOnly =
     !!selCell && selCell.kind === "markdown" && isMediaOnlySource(selCell.source);
+  const selVariant = selCell?.meta?.cell_type;
+  const selIsResizableVariant =
+    selIsMediaOnly ||
+    selVariant === "browser" ||
+    selVariant === "whiteboard";
 
   // Preset sizes for media-only cells. (w, h) in canvas pixels.
   const MEDIA_PRESETS: { label: string; w: number; h: number; tip: string }[] = [
@@ -296,7 +301,7 @@ export function Toolbar() {
             >
               clear
             </button>
-            {selIsMediaOnly && selection?.type === "cell" && (
+            {selIsResizableVariant && selection?.type === "cell" && (
               <div className="flex items-center gap-1 ml-2 pl-2 border-l-2 border-ink/20 dark:border-white/20">
                 <span className="text-base text-ink/70 dark:text-white/70 select-none">
                   Size:
@@ -318,13 +323,8 @@ export function Toolbar() {
       </div>
       <div className="flex gap-2 pointer-events-auto">
         <DesignPicker />
-        <button
-          className="btn-sketch violet"
-          onClick={toggleTheme}
-          title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-        >
-          {theme === "dark" ? "☀ Light" : "🌙 Dark"}
-        </button>
+        <AmbientPicker />
+        <BackgroundPicker />
         <a
           className="btn-sketch peach inline-block text-base"
           href="/tools"

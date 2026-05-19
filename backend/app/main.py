@@ -12,6 +12,7 @@ from . import __version__ as APP_VERSION
 from .explain import explain_code
 from .install import pip_install
 from .tools import TOOLS_DIR, convert_pptx
+from .proxy import fetch_proxied
 from .kernel import pool
 from .models import (
     FILE_FORMAT_VERSION,
@@ -135,6 +136,17 @@ async def upload(file: UploadFile = File(...)) -> Notebook:
         return from_py(name, raw)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Could not parse {name}: {e}") from e
+
+
+@api.get("/proxy")
+def http_proxy(url: str):
+    """Fetch `url` server-side, strip iframe-blocking headers, return
+    the body. Used by Browser cells in 'proxy mode' to bypass
+    X-Frame-Options / CSP frame-ancestors. SSRF-guarded (no private
+    IPs). 8 MB / 15 s caps. Cookies do NOT carry over — every request
+    is an unauthenticated GET. See backend/app/proxy.py for the full
+    list of trade-offs."""
+    return fetch_proxied(url)
 
 
 @api.post("/tools/ppt-to-images")

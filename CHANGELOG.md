@@ -6,7 +6,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.3.6] — 2026-05-17 — **Latest Stable** 🥇
+## [1.3.7] — 2026-05-17 — **Latest Stable** 🥇
+
+### Added
+- **✨ Vibe picker** — five presenter-ambient themes: 🎨 Doodle
+  (squiggles), 🌿 Zen (ensō, leaves, clouds, mountains), 💻 Tech
+  (servers, terminals, chips, gears, Wi-Fi), 💡 Ideas (lightbulbs,
+  sparkles, paper planes, sticky notes), 🚫 Off. Hand-drawn SVG
+  paths in a uniform 60 × 60 viewBox; each theme has 6–9 shapes;
+  stroke color slowly cycles through the doodle palette.
+- **🌓 BG picker** — page background swatches: **Sandal** (default
+  warm), **Gray** (neutral), **White** (projector-ready), **Black**
+  (auto-enables dark mode). Replaces the binary 🌙/☀ toggle.
+- **Browser cell — Back / Forward / Refresh** — session-only URL
+  stack maintained per cell (not persisted to .py). ◀ ▶ buttons are
+  disabled when the stack ends; ↻ remounts the iframe via key bump.
+- **Browser cell — 🛡 Proxy toggle** — opt-in routing through
+  `/api/proxy` that strips `X-Frame-Options` / CSP frame-ancestors
+  and injects `<base href>` so public sites that refuse iframing
+  can be embedded. SSRF-guarded, 8 MB / 15 s caps. Cookies are
+  intentionally NOT forwarded — every fetch is a clean GET. UI
+  hint surfaces the trade-offs.
+- **Browser cell — 1280 × 760 default** with 16:9 aspect and per-
+  type focus width during presentation so the iframe fills the
+  screen on every step-pan.
+- **/tools — LibreOffice-backed PPT renderer** — accurate slide
+  screenshots (fonts, colors, layouts intact) replace the text-only
+  fallback when LibreOffice is on PATH. `start.sh` prints a one-
+  line install hint if missing.
+
+### Changed
+- **Doodle ambient now visible outside presentation** at lower
+  opacity (0.22 light / 0.16 dark vs 0.45 / 0.32 in presenter).
+  The vibe choice is reflected immediately while editing.
+- **Background contrast preserved** across all four page bg
+  swatches — dark text on light bgs, white text on black, dot-
+  pattern texture stays soft on every variant.
+
+### Fixed
+- **Wide cells (Whiteboard / Browser / media-only) no longer shift
+  right during presentation.** fitBounds focus region uses the
+  cell's actual rendered width (cellSize override + per-type
+  defaults: 1280 px browser, 1100 px whiteboard, 720 px media,
+  580 px otherwise).
+- **Browser URL bar can't navigate the parent page** — input wrapped
+  in `<form onSubmit={preventDefault}>`, Go is `type="submit"`,
+  protocol auto-prefixed for `localhost:…` (http) and bare hosts
+  (https).
+
+### Compatibility
+- File format unchanged (still v2.2). New UI state
+  (`presenterAmbient`, `pageBg`, browser proxy toggle, browser
+  history) is session-only / localStorage and never serialized into
+  `.py` files.
+
+## [1.3.6] — 2026-05-17
 
 ### Added
 - **New cell types** (file-format v2.2, additive — old files load

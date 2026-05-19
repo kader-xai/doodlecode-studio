@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "doodlecode-studio-backend"
-version = "1.3.6"
+version = "1.3.7"
 description = "FastAPI + Jupyter kernel backend for DoodleCode Studio."
 readme = "../README.md"
 license = { file = "../LICENSE" }
