@@ -127,7 +127,12 @@ describe("store: addCell / deleteCell", () => {
     const added = cells[cells.length - 1];
     expect(added.kind).toBe("markdown");
     expect(added.source).toContain("New slide");
-    expect(added.meta?.title).toBe("New slide");
+    // As of v1.3.7 we intentionally omit the title from the default
+    // text cell — otherwise the explain endpoint would auto-spawn a
+    // callout from it. The cell is born clean; users add titles
+    // (and callouts) deliberately.
+    expect(added.meta?.title).toBeUndefined();
+    expect(added.meta?.color).toBe("sky");
   });
 
   it("addCell focuses the newly added cell", () => {

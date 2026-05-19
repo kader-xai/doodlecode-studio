@@ -36,8 +36,15 @@ def explain_code(
     if not meta:
         return ExplainResponse(blocks=[], explanations=[])
 
-    # Primary (legacy) callout
-    if meta.title or meta.explain or meta.image:
+    # Primary (legacy) callout.
+    #
+    # A callout exists ONLY when the user explicitly authored content
+    # for it — `# @explain:` text or `# @image:` attachment. A bare
+    # cell title alone is just a header label and must not spawn a
+    # side bubble. (Otherwise every newly-added text / image / video
+    # / browser / whiteboard cell would arrive with an empty callout
+    # the user has to clean up.)
+    if meta.explain or meta.image:
         explanations.append(Explanation(
             block_id=f"{cell_id}-callout-0",
             title=meta.title or (meta.kind.title() if meta.kind else "Note"),
@@ -47,9 +54,11 @@ def explain_code(
             image=meta.image,
         ))
 
-    # Extra callouts (v2)
+    # Extra callouts (v2). Same rule: at least one of explain / image
+    # must be set. Title alone won't promote a `# @callout` marker to
+    # a visible bubble.
     for i, c in enumerate(meta.callouts or [], start=1):
-        if not (c.title or c.explain or c.image):
+        if not (c.explain or c.image):
             continue
         explanations.append(Explanation(
             block_id=f"{cell_id}-callout-{i}",

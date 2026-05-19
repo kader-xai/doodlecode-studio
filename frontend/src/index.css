@@ -222,6 +222,13 @@ html.design-mono {
 .dark .doodle-ambient { opacity: 0.16; }
 .dark .doodle-ambient.doodle-ambient--presenting { opacity: 0.32; }
 
+/* Browser cell loading-bar — indeterminate progress stripe.
+ * Used by BrowserNode while waiting for the iframe's onLoad event. */
+@keyframes browser-progress {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
 @keyframes doodle-drift {
   0%   { transform: translate3d(0, 0, 0) rotate(0deg);     opacity: 0; }
   10%  { opacity: 0.6; }

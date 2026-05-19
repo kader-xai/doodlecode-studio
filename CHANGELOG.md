@@ -6,7 +6,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.3.9] — 2026-05-17 — **Latest Stable** 🥇
+## [1.4.0] — 2026-05-17 — **Latest Stable** 🥇
+
+### Added — new cell type
+- **＋ Diagram cell** with three renderers:
+  - **Mermaid** (lazy-loaded ~700 KB across small chunks) for graphs,
+    flowcharts, trees, mindmaps.
+  - **KaTeX** for LaTeX math (matrices, equations).
+  - **Chart** — sketchy roughjs-based bar / line / pie (no extra
+    bundle since roughjs is already a dep).
+  - `# @step N` markers split the source into reveal layers; during
+    🎬 Present, the right arrow advances each step before moving to
+    the next slide.
+  - **Double-click** any diagram cell to open the source editor; the
+    editor has a renderer-kind dropdown, a title field, a sample
+    loader, and an **A− / A+** font-size pill that live-syncs to the
+    cell (70 % – 240 %).
+  - Demo at `examples/diagram_demo.py` (9 slides, exercises all three
+    renderers and the step-reveal flow).
+
+### Added — UI polish
+- **📝 Edit text** popover now has an **A− / A+** font-size pill
+  that live-resizes the markdown body (70 % – 240 %, applied via CSS
+  `transform: scale()` so headings + bullets + paragraphs + inline
+  code + images all scale together).
+- **📁 File ▾** menu — New notebook / Open / Save consolidated from
+  three loose top buttons.
+- **＋ Add ▾** menu — Code / Text / Image / Video / Browser /
+  Whiteboard / Diagram consolidated from seven loose buttons. Each
+  option carries a one-line subtitle.
+- **Selection action bar** (Edit / Callout / Delete / size presets)
+  now appears **inline in the top row** instead of as a second row.
+  Hides when nothing is selected.
+
+### Fixed — Browser cell stability
+- **Loading indicator** — animated progress stripe across the iframe
+  area while waiting for `onLoad`.
+- **"Page didn't load" overlay** (direct mode) — if the iframe
+  doesn't fire `onLoad` within 7 s, an overlay surfaces the likely
+  cause (`X-Frame-Options` / `CSP frame-ancestors`) with two
+  recovery buttons: **🛡 Try Proxy** and **↗ Open in new tab**.
+- **"Proxy couldn't fetch" overlay** (proxy mode) — pre-fetches the
+  URL through `/api/proxy?…` and surfaces backend errors (SSRF
+  guard, 502 upstream timeout, 8 MB payload cap, etc.) cleanly with
+  **🌐 Try Direct** and **↗ Open in new tab** fallbacks.
+
+### Compatibility
+- File format **v2.3** (additive). New optional `CellMeta` fields:
+  - `diagram_kind`, `diagram_font_scale` — Diagram cells.
+  - `text_font_scale` — Markdown / text cells.
+  Older parsers ignore them. 102 backend round-trip tests + 40
+  frontend vitest pass.
+
+## [1.3.9] — 2026-05-17
 
 ### Added
 - **🖊 Fixed pen** — third presenter ink tool. Same red color and

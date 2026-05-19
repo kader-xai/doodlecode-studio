@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useState } from "react";
 import { useStore } from "../store";
+import { splitSteps } from "./DiagramNode";
 
 export function PresenterBar() {
   const presenting = useStore((s) => s.presenting);
@@ -57,7 +58,14 @@ export function PresenterBar() {
     (i: number) => {
       const next = Math.max(0, Math.min(cells.length - 1, i));
       const target = cells[next];
-      if (target) focus(target.id);
+      if (target) {
+        focus(target.id);
+        // Reset any diagram step counter when we land on a diagram
+        // slide so the deck always starts at step 1 of N.
+        if (target.meta?.cell_type === "diagram") {
+          useStore.getState().resetDiagramStep(target.id);
+        }
+      }
     },
     [cells, focus]
   );
@@ -82,6 +90,17 @@ export function PresenterBar() {
       if (e.key === "ArrowRight" || e.key === " ") {
         e.preventDefault();
         e.stopPropagation();
+        // Diagram cells with multi-step sources: advance the step
+        // first. Only when we've shown the last step does → move on
+        // to the next slide.
+        const current = cells[idx];
+        if (current?.meta?.cell_type === "diagram") {
+          const total = splitSteps(current.source || "").length;
+          if (total > 1) {
+            const advanced = useStore.getState().advanceDiagramStep(current.id, total);
+            if (advanced) return;
+          }
+        }
         goTo(idx + 1);
       } else if (e.key === "ArrowLeft") {
         e.preventDefault();
@@ -135,7 +154,21 @@ export function PresenterBar() {
       <div className="font-hand text-2xl px-2 select-none text-ink dark:text-white">
         Slide {idx + 1} / {cells.length}
       </div>
-      <button className="btn-sketch mint" onClick={() => goTo(idx + 1)} title="→ / Space / PageDown">
+      <button
+        className="btn-sketch mint"
+        onClick={() => {
+          const current = cells[idx];
+          if (current?.meta?.cell_type === "diagram") {
+            const total = splitSteps(current.source || "").length;
+            if (total > 1) {
+              const advanced = useStore.getState().advanceDiagramStep(current.id, total);
+              if (advanced) return;
+            }
+          }
+          goTo(idx + 1);
+        }}
+        title="→ / Space / PageDown"
+      >
         Next ▶
       </button>
 

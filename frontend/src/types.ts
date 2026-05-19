@@ -1,5 +1,5 @@
 /** Bumped manually on user-visible changes. Mirrors backend/app/__init__.py. */
-export const APP_VERSION = "1.3.9";
+export const APP_VERSION = "1.4.0";
 
 /** File-format level. Bump on schema changes. */
 export const FILE_FORMAT_VERSION = 2;
@@ -37,6 +37,17 @@ export type CellMeta = {
   strokes?: string;
   /** Whiteboard cell: opaque JSON string of sticker positions. */
   stickers?: string;
+  /** User-resized card dimensions in canvas px. Set on save so size
+   *  drags survive a reopen. */
+  cell_width?: number;
+  cell_height?: number;
+  /** Diagram cell: which renderer reads the source.
+   *  "mermaid" | "math" | "chart". */
+  diagram_kind?: string;
+  /** Diagram cell: font-size multiplier. 1.0 default. */
+  diagram_font_scale?: number;
+  /** Markdown / text cell: font-size multiplier. 1.0 default. */
+  text_font_scale?: number;
 };
 
 export type Cell = {

@@ -181,6 +181,12 @@ export function MarkdownNode({
   const rendered = useMemo(() => renderBody(data.source || ""), [data.source]);
   const fill = colorFor({ color: data.color, kind: data.kind ?? "intro", dark });
   const W = size?.width ?? DEFAULT_W;
+  // Per-cell text font scale. Applied as a CSS transform on the
+  // rendered body so headings + paragraphs + bullets all scale
+  // together (Tailwind utility classes set explicit sizes, so a
+  // wrapper font-size wouldn't propagate). 0.7–2.4 clamp.
+  const rawTextScale = cell?.meta?.text_font_scale ?? 1;
+  const textScale = Math.max(0.7, Math.min(2.4, rawTextScale));
 
   // Sizing is now driven entirely by CSS:
   //   - User dragged the corner → `height: size.height` locks the card.
@@ -293,7 +299,15 @@ export function MarkdownNode({
               />
             </span>
           )}
-          {rendered}
+          <div
+            style={{
+              transform: textScale === 1 ? undefined : `scale(${textScale})`,
+              transformOrigin: "top left",
+              width: textScale > 1 ? `${100 / textScale}%` : "100%",
+            }}
+          >
+            {rendered}
+          </div>
         </div>
         <ResizeHandle cellId={cellId} baseWidth={W} baseHeight={size?.height ?? 200} />
       </div>

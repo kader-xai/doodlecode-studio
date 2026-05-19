@@ -65,6 +65,18 @@ export function TextEditor({
   // separate fields so editing one never bleeds into the other.
   const [image, setImage] = useState<string | undefined>(meta?.box_image);
   const [body, setBody] = useState(source);
+  // Per-cell text font scale. Live-syncs to the cell on every bump
+  // so the user can see the markdown body resize while still editing.
+  const [textScale, setTextScale] = useState<number>(meta?.text_font_scale ?? 1);
+
+  const bumpScale = (delta: number) => {
+    const next = Math.max(0.7, Math.min(2.4, Math.round((textScale + delta) * 10) / 10));
+    setTextScale(next);
+    updateMeta(cellId, {
+      ...(meta ?? {}),
+      text_font_scale: next !== 1 ? next : undefined,
+    });
+  };
 
   const rootRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -142,6 +154,7 @@ export function TextEditor({
       title: title.trim() || undefined,
       color: color || undefined,
       box_image: image || undefined,
+      text_font_scale: textScale !== 1 ? textScale : undefined,
     };
     const hasContent =
       nextMeta.title ||
@@ -173,17 +186,45 @@ export function TextEditor({
       <div className="bg-white dark:bg-[#1f2228] border-2 border-ink dark:border-white/70 rounded-2xl shadow-sketch overflow-hidden">
         <div
           onMouseDown={startDrag}
-          className="flex items-center justify-between px-3 py-1.5 bg-marker-yellow dark:bg-amber-700 border-b-2 border-ink dark:border-white/70 cursor-move select-none"
+          className="flex items-center justify-between gap-2 px-3 py-1.5 bg-marker-yellow dark:bg-amber-700 border-b-2 border-ink dark:border-white/70 cursor-move select-none"
           title="Drag to move"
         >
-          <div className="text-xl">📝 Edit text box</div>
-          <button
-            className="px-1.5 rounded border border-ink/60 dark:border-white/60 hover:bg-white/40 dark:hover:bg-black/30"
-            onClick={onClose}
-            title="Close"
-          >
-            ✕
-          </button>
+          <div className="text-xl shrink-0">📝 Edit text</div>
+          <div className="flex items-center gap-1" onMouseDown={(e) => e.stopPropagation()}>
+            {/* Font-size control for the rendered markdown body.
+             *  Live-syncs to the cell so the visible text resizes
+             *  behind the editor on each click. */}
+            <div className="flex items-center gap-0.5 border-2 border-ink/40 dark:border-white/40 rounded-lg px-1 py-0.5 bg-white/60 dark:bg-black/30">
+              <button
+                type="button"
+                className="w-6 h-6 rounded font-hand text-sm text-ink dark:text-white hover:bg-marker-yellow dark:hover:bg-amber-800 disabled:opacity-40"
+                onClick={() => bumpScale(-0.1)}
+                disabled={textScale <= 0.7 + 1e-3}
+                title="Smaller text (A−)"
+              >
+                A−
+              </button>
+              <span className="font-mono text-[10px] px-1 text-ink/70 dark:text-white/70 select-none w-9 text-center">
+                {Math.round(textScale * 100)}%
+              </span>
+              <button
+                type="button"
+                className="w-6 h-6 rounded font-hand text-sm text-ink dark:text-white hover:bg-marker-yellow dark:hover:bg-amber-800 disabled:opacity-40"
+                onClick={() => bumpScale(0.1)}
+                disabled={textScale >= 2.4 - 1e-3}
+                title="Larger text (A+)"
+              >
+                A+
+              </button>
+            </div>
+            <button
+              className="px-1.5 rounded border border-ink/60 dark:border-white/60 hover:bg-white/40 dark:hover:bg-black/30"
+              onClick={onClose}
+              title="Close"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className="p-3 max-h-[80vh] overflow-auto scrollbar-none">

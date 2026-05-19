@@ -17,6 +17,7 @@ import { ExplanationNode } from "./ExplanationNode";
 import { MarkdownNode } from "./MarkdownNode";
 import { BrowserNode } from "./BrowserNode";
 import { WhiteboardNode } from "./WhiteboardNode";
+import { DiagramNode } from "./DiagramNode";
 import { useStore } from "../store";
 import type { Cell, ExplainResponse } from "../types";
 
@@ -26,6 +27,7 @@ const nodeTypes = {
   markdown: MarkdownNode,
   browser: BrowserNode,
   whiteboard: WhiteboardNode,
+  diagram: DiagramNode,
 };
 
 const CELL_COL_X = 80;
@@ -81,6 +83,7 @@ function buildGraph(
       const nodeType =
         variant === "browser" ? "browser"
         : variant === "whiteboard" ? "whiteboard"
+        : variant === "diagram" ? "diagram"
         : "markdown";
       nodes.push({
         id: `cell-${cell.id}`,
@@ -255,6 +258,7 @@ function CanvasInner() {
       sizeMap[cell.id]?.width ??
       (variant === "browser" ? 1280
         : variant === "whiteboard" ? 1100
+        : variant === "diagram" ? 1100
         : isMediaOnlyMd ? 720
         : CARD_W);
 
@@ -350,6 +354,9 @@ function CanvasInner() {
     if (!cell) return;
     if (node.id.startsWith("ex-")) {
       setOpenEditor({ kind: "callout", cellId });
+    } else if (cell.meta?.cell_type === "diagram") {
+      // Diagram cells: double-click jumps to the source editor.
+      setOpenEditor({ kind: "diagram", cellId });
     } else if (cell.kind === "markdown") {
       setOpenEditor({ kind: "text", cellId });
     } else {

@@ -56,6 +56,20 @@ class CellMeta(BaseModel):
     whiteboard_bg: Optional[str] = None
     strokes: Optional[str] = None
     stickers: Optional[str] = None
+    # User-dragged card dimensions (px). Stored on save so resizing
+    # survives a reopen. Additive — older parsers ignore.
+    cell_width: Optional[int] = None
+    cell_height: Optional[int] = None
+    # Diagram cells: which renderer drives the source.
+    #   "mermaid" — Mermaid syntax (graphs, flowcharts, mindmaps…)
+    #   "math"    — LaTeX (KaTeX) for equations / matrices
+    #   "chart"   — JSON spec rendered with roughjs (bar/line/pie)
+    diagram_kind: Optional[str] = None
+    # Per-cell font multiplier for Diagram cells. 1.0 = default size.
+    # Clamped at render time to a sensible range (e.g. 0.6–2.4).
+    diagram_font_scale: Optional[float] = None
+    # Markdown / text cells: per-cell font multiplier. 1.0 = default.
+    text_font_scale: Optional[float] = None
 
 
 class Cell(BaseModel):

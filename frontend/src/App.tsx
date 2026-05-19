@@ -6,6 +6,7 @@ import { Toolbar } from "./components/Toolbar";
 import { About } from "./components/About";
 import { CalloutEditor } from "./components/CalloutEditor";
 import { TextEditor } from "./components/TextEditor";
+import { DiagramEditor } from "./components/DiagramEditor";
 import { InstallModal } from "./components/InstallModal";
 import { BrandingEditor } from "./components/BrandingEditor";
 import { ToolsPage } from "./components/ToolsPage";
@@ -134,6 +135,12 @@ export default function App() {
           cellId={openEditor.cellId}
           source={cell.source}
           meta={cell.meta}
+          onClose={() => setOpenEditor(null)}
+        />
+      )}
+      {openEditor?.kind === "diagram" && cell && (
+        <DiagramEditor
+          cellId={openEditor.cellId}
           onClose={() => setOpenEditor(null)}
         />
       )}

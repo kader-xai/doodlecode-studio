@@ -165,6 +165,11 @@ _CELL_EXTRA_KEYS = (
     "whiteboard_bg",
     "strokes",
     "stickers",
+    "cell_width",
+    "cell_height",
+    "diagram_kind",
+    "diagram_font_scale",
+    "text_font_scale",
 )
 
 
@@ -227,6 +232,20 @@ def _apply_cell_extras(meta: CellMeta, extras: dict[str, str]) -> CellMeta:
         meta.strokes = extras["strokes"]
     if "stickers" in extras:
         meta.stickers = extras["stickers"]
+    if "cell_width" in extras:
+        try: meta.cell_width = int(extras["cell_width"])
+        except (TypeError, ValueError): pass
+    if "cell_height" in extras:
+        try: meta.cell_height = int(extras["cell_height"])
+        except (TypeError, ValueError): pass
+    if "diagram_kind" in extras:
+        meta.diagram_kind = extras["diagram_kind"]
+    if "diagram_font_scale" in extras:
+        try: meta.diagram_font_scale = float(extras["diagram_font_scale"])
+        except (TypeError, ValueError): pass
+    if "text_font_scale" in extras:
+        try: meta.text_font_scale = float(extras["text_font_scale"])
+        except (TypeError, ValueError): pass
     return meta
 
 

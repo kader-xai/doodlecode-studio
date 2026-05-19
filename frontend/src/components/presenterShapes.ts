@@ -8,7 +8,7 @@
  * not "vector icon".
  */
 
-export type AmbientTheme = "doodle" | "zen" | "tech" | "ideas" | "off";
+export type AmbientTheme = "doodle" | "zen" | "tech" | "ideas" | "science" | "off";
 
 export type ShapeDef = {
   /** SVG path d-string in 60×60 viewBox */
@@ -161,11 +161,95 @@ const IDEAS: ShapeDef[] = [
   },
 ];
 
+// -------------------- Science (polymath doodles) --------------------
+const SCIENCE: ShapeDef[] = [
+  // Einstein-style head — wild hair scribbles + glasses + mustache
+  {
+    d: "M20 26 a10 11 0 1 0 20 0 a10 11 0 1 0 -20 0",
+    d2:
+      "M14 20 q3 -8 7 -4 M22 14 q3 -6 7 -2 M30 11 q4 -4 8 0 " +
+      "M40 14 q4 -2 6 4 M44 20 q2 -3 4 0 " +
+      "M24 28 a2 2 0 1 0 0.1 0 M36 28 a2 2 0 1 0 0.1 0 " +
+      "M24 36 q6 3 12 0",
+    weight: 2,
+  },
+  // Newton's apple — fruit + leaf + stem
+  {
+    d: "M30 22 q-12 0 -12 14 q0 16 12 16 q12 0 12 -16 q0 -14 -12 -14 z",
+    d2: "M30 22 q1 -6 6 -8 M30 22 q-1 -4 -6 -3 M34 16 q5 -3 6 2 q-3 0 -6 -2",
+    weight: 2,
+  },
+  // Atom — nucleus + three rotated orbits
+  {
+    d: "M30 30 m-3 0 a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0",
+    d2:
+      "M10 30 a20 8 0 1 0 40 0 a20 8 0 1 0 -40 0 " +
+      "M30 30 m-20 0 a20 8 60 1 0 40 0 a20 8 60 1 0 -40 0 " +
+      "M30 30 m-20 0 a20 8 -60 1 0 40 0 a20 8 -60 1 0 -40 0",
+    weight: 2,
+  },
+  // DNA helix — two interweaving strands + base-pair rungs
+  {
+    d: "M18 8 Q42 18 18 28 Q-6 38 18 48 Q42 58 18 58",
+    d2:
+      "M42 8 Q18 18 42 28 Q66 38 42 48 Q18 58 42 58 " +
+      "M22 14 L38 14 M22 22 L38 22 M22 32 L38 32 M22 42 L38 42 M22 52 L38 52",
+    weight: 2,
+  },
+  // Telescope (Galileo) — barrel + tripod
+  {
+    d: "M10 16 L46 8 L52 14 L16 22 Z",
+    d2: "M30 22 L22 52 M30 22 L38 52 M30 22 L30 54 M20 50 L40 50",
+    weight: 2,
+  },
+  // Microscope — base + curved arm + eyepiece + objective
+  {
+    d: "M14 52 h32 v3 h-32 z M28 52 v-14 M28 38 q0 -12 12 -14 M40 24 a4 4 0 1 0 0 0.1",
+    d2: "M28 38 v-4 h-3 v8 h3 z",
+    weight: 2,
+  },
+  // Erlenmeyer flask — neck + body + cap + bubbles
+  {
+    d: "M22 8 v12 L10 50 q-2 4 4 4 h32 q6 0 4 -4 L38 20 V8 z",
+    d2: "M22 8 h16 M18 42 a2 2 0 1 0 0.1 0 M30 46 a1 1 0 1 0 0.1 0",
+    weight: 2,
+  },
+  // Lightning bolt — Tesla / Franklin
+  {
+    d: "M30 4 L18 30 L28 30 L20 56 L42 26 L32 26 L40 4 Z",
+    weight: 2,
+  },
+  // Darwin's finch — silhouette + beak + legs
+  {
+    d: "M10 30 q4 -10 18 -10 q10 0 18 8 q-2 8 -10 8 q-6 -2 -10 6 q-12 0 -16 -12 z",
+    d2: "M30 22 L36 20 L34 24 z M16 38 L12 52 M22 38 L18 52",
+    weight: 2,
+  },
+  // Marie Curie — head + bun + long dress
+  {
+    d: "M30 8 a5 5 0 1 0 0 0.1",
+    d2:
+      "M28 6 q-4 -3 -4 -7 q4 3 9 -2 " +
+      "M22 18 q8 -2 16 0 L44 54 q-14 4 -28 0 Z " +
+      "M30 22 v32",
+    weight: 2,
+  },
+  // Feynman diagram — incoming + outgoing fermions + wavy photon
+  {
+    d: "M10 50 L24 32 M50 50 L36 32 M24 32 L36 32",
+    d2:
+      "M30 32 q2 -4 4 0 t4 0 t4 0 t4 0 " +
+      "M30 32 q-2 -4 -4 0 t-4 0 t-4 0 t-4 0",
+    weight: 2,
+  },
+];
+
 const CATALOGS: Record<Exclude<AmbientTheme, "off">, ShapeDef[]> = {
   doodle: DOODLE,
   zen: ZEN,
   tech: TECH,
   ideas: IDEAS,
+  science: SCIENCE,
 };
 
 export function shapesFor(theme: AmbientTheme): ShapeDef[] {
@@ -177,6 +261,7 @@ export const THEME_OPTIONS: { id: AmbientTheme; label: string; subtitle: string 
   { id: "doodle", label: "🎨 Doodle", subtitle: "the original squiggles" },
   { id: "zen",    label: "🌿 Zen",    subtitle: "calm, philosophical — clouds, leaves, ensō" },
   { id: "tech",   label: "💻 Tech",   subtitle: "servers, code, chips, terminals" },
-  { id: "ideas",  label: "💡 Ideas",  subtitle: "sparkles, lightbulbs, paper planes" },
-  { id: "off",    label: "🚫 Off",    subtitle: "no ambient — pure focus" },
+  { id: "ideas",   label: "💡 Ideas",   subtitle: "sparkles, lightbulbs, paper planes" },
+  { id: "science", label: "🔬 Science", subtitle: "Einstein, Newton, atoms, DNA, telescopes" },
+  { id: "off",     label: "🚫 Off",     subtitle: "no ambient — pure focus" },
 ];

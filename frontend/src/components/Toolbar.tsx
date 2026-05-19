@@ -1,16 +1,13 @@
-import { useRef } from "react";
-import { exportNotebook, resetKernel, uploadNotebook } from "../api";
+import { resetKernel } from "../api";
 import { useStore } from "../store";
 import { DesignPicker } from "./DesignPicker";
 import { AmbientPicker } from "./AmbientPicker";
 import { BackgroundPicker } from "./BackgroundPicker";
+import { FileMenu } from "./FileMenu";
+import { AddMenu } from "./AddMenu";
 import { isMediaOnlySource } from "./MarkdownNode";
 
 export function Toolbar() {
-  const fileRef = useRef<HTMLInputElement>(null);
-  const setNotebook = useStore((s) => s.setNotebook);
-  const newNotebook = useStore((s) => s.newNotebook);
-  const addCell = useStore((s) => s.addCell);
   const presenting = useStore((s) => s.presenting);
   const setPresenting = useStore((s) => s.setPresenting);
   const notebook = useStore((s) => s.notebook);
@@ -30,9 +27,6 @@ export function Toolbar() {
   const setOpenEditor = useStore((s) => s.setOpenEditor);
   const deleteCell = useStore((s) => s.deleteCell);
   const deleteCallout = useStore((s) => s.deleteCallout);
-  const addMediaCell = useStore((s) => s.addMediaCell);
-  const addBrowserCell = useStore((s) => s.addBrowserCell);
-  const addWhiteboardCell = useStore((s) => s.addWhiteboardCell);
   const setCellSize = useStore((s) => s.setCellSize);
   const notebookCells = useStore((s) => s.notebook.cells);
 
@@ -42,11 +36,13 @@ export function Toolbar() {
     : null;
   const selIsMediaOnly =
     !!selCell && selCell.kind === "markdown" && isMediaOnlySource(selCell.source);
-  const selVariant = selCell?.meta?.cell_type;
-  const selIsResizableVariant =
-    selIsMediaOnly ||
-    selVariant === "browser" ||
-    selVariant === "whiteboard";
+  // Every cell type is resizable now — code + markdown both honor
+  // `cellSize` (code cards stretch the Monaco editor; markdown cards
+  // grow to fit). Outputs in code cells render BELOW the card, so
+  // they're never clipped by the chosen preset, and the presenter
+  // focus region uses `estimateCellHeight` which already includes
+  // output height.
+  const selIsResizableVariant = !!selCell;
 
   // Preset sizes for media-only cells. (w, h) in canvas pixels.
   const MEDIA_PRESETS: { label: string; w: number; h: number; tip: string }[] = [
@@ -68,6 +64,9 @@ export function Toolbar() {
     if (!selection || !selCell) return;
     if (selection.type === "callout") {
       setOpenEditor({ kind: "callout", cellId: selection.cellId });
+    } else if (selCell.meta?.cell_type === "diagram") {
+      // Diagram cells: edit the source notation (Mermaid / Math / Chart).
+      setOpenEditor({ kind: "diagram", cellId: selection.cellId });
     } else if (selCell.kind === "markdown") {
       setOpenEditor({ kind: "text", cellId: selection.cellId });
     } else {
@@ -93,34 +92,6 @@ export function Toolbar() {
   // (and would steal click events). Hide it completely — but AFTER all
   // hooks have run so React's hook count stays stable.
   if (fullscreen && presenting) return null;
-
-  const onUpload = async (f: File) => {
-    const nb = await uploadNotebook(f);
-    nb.name = f.name;
-    setNotebook(nb);
-  };
-
-  const onNew = () => {
-    const name = window.prompt(
-      "Name for the new file (e.g. lesson_intro.py):",
-      "untitled.py"
-    );
-    if (!name || !name.trim()) return;
-    newNotebook(name);
-  };
-
-  const onSave = async () => {
-    const text = await exportNotebook(notebook);
-    const blob = new Blob([text], { type: "text/x-python" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = notebook.name.endsWith(".py") ? notebook.name : `${notebook.name}.py`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-  };
 
   const savedLabel = savedAt
     ? `saved ${Math.max(1, Math.round((Date.now() - savedAt) / 1000))}s ago`
@@ -156,72 +127,8 @@ export function Toolbar() {
             ))}
           </div>
 
-          <button className="btn-sketch" onClick={onNew}>
-            📄 New
-          </button>
-          <button className="btn-sketch sky" onClick={() => fileRef.current?.click()}>
-            📂 Open
-          </button>
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".py,.ipynb,.md,.markdown,.txt"
-            className="hidden"
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) onUpload(f);
-              e.currentTarget.value = "";
-            }}
-          />
-          <button className="btn-sketch mint" onClick={onSave} title="Download notebook.name as .py">
-            💾 Save
-          </button>
-          <button className="btn-sketch mint" onClick={() => addCell(undefined, "code")} title="Add a new code cell">
-            ＋ Code
-          </button>
-          <button className="btn-sketch sky" onClick={() => addCell(undefined, "markdown")} title="Add a text / slide box">
-            ＋ Text
-          </button>
-          <button
-            className="btn-sketch sky"
-            onClick={() => {
-              const url = window.prompt("Image URL (e.g. /demo/chart.png or https://…)");
-              if (url && url.trim()) addMediaCell(url.trim(), "image");
-            }}
-            title="Add a media-only slide containing one image (no title, full-bleed)"
-          >
-            ＋ Image
-          </button>
-          <button
-            className="btn-sketch sky"
-            onClick={() => {
-              const url = window.prompt("Video / GIF URL (.mp4, .webm, .gif…)");
-              if (url && url.trim()) addMediaCell(url.trim(), "video");
-            }}
-            title="Add a media-only slide containing one video or GIF (no title, full-bleed)"
-          >
-            ＋ Video
-          </button>
-          <button
-            className="btn-sketch sky"
-            onClick={() => {
-              const url = window.prompt(
-                "URL to embed (any web app or website that allows iframes; localhost works)",
-                "http://localhost:3000"
-              );
-              addBrowserCell(url ?? undefined);
-            }}
-            title="Add a slide that embeds a live web app via iframe"
-          >
-            ＋ Browser
-          </button>
-          <button
-            className="btn-sketch mint"
-            onClick={() => addWhiteboardCell()}
-            title="Add a whiteboard slide — draw with the pen, drop sticker images"
-          >
-            ＋ Whiteboard
-          </button>
+          <FileMenu />
+          <AddMenu />
           <button
             className="btn-sketch violet"
             onClick={() => setInstallOpen(true)}
@@ -252,6 +159,64 @@ export function Toolbar() {
           <button className="btn-sketch pink" onClick={() => setPresenting(!presenting)}>
             {presenting ? "✕ Exit" : "🎬 Present"}
           </button>
+
+          {/* Selection action bar — INLINE with the top row.
+           *  Appears only when a cell / callout is selected, so cards
+           *  stay clean and the top row stays compact otherwise. */}
+          {selection && selCell && (
+            <div className="flex items-center gap-1.5 ml-2 pl-2 border-l-2 border-ink/30 dark:border-white/30 font-hand">
+              <span
+                className="text-sm px-2 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/40 bg-white/80 dark:bg-black/40 text-ink dark:text-white max-w-[180px] truncate"
+                title={selLabel}
+              >
+                {selLabel}
+              </span>
+              <button
+                className="btn-sketch sky text-sm !py-0.5 !px-2"
+                onClick={onEditSelection}
+                title="Open the editor for this item"
+              >
+                ✏️ Edit
+              </button>
+              {selection?.type === "cell" && (
+                <button
+                  className="btn-sketch mint text-sm !py-0.5 !px-2"
+                  onClick={() => setOpenEditor({ kind: "callout", cellId: selection.cellId })}
+                  title="Add or edit the side callout bubble(s) for this cell"
+                >
+                  💬 Callout
+                </button>
+              )}
+              <button
+                className="btn-sketch pink text-sm !py-0.5 !px-2"
+                onClick={onDeleteSelection}
+                title="Delete this item"
+              >
+                🗑 Delete
+              </button>
+              {selIsResizableVariant && selection?.type === "cell" && (
+                <div className="flex items-center gap-0.5 ml-1 pl-1 border-l-2 border-ink/20 dark:border-white/20">
+                  {MEDIA_PRESETS.map((p) => (
+                    <button
+                      key={p.label}
+                      className="text-xs font-hand px-1.5 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/40 bg-white/80 dark:bg-black/40 text-ink dark:text-white hover:bg-marker-yellow dark:hover:bg-amber-700"
+                      onClick={() => setCellSize(selection.cellId, { width: p.w, height: p.h })}
+                      title={p.tip}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+              <button
+                className="text-xs text-ink/60 dark:text-white/60 underline underline-offset-2 hover:opacity-80 ml-1"
+                onClick={() => setSelection(null)}
+                title="Clear selection"
+              >
+                clear
+              </button>
+            </div>
+          )}
         </div>
         <div className="font-hand text-lg ml-1 text-ink/70 dark:text-white/70 select-none flex items-center gap-3 flex-wrap">
           <button
@@ -265,61 +230,6 @@ export function Toolbar() {
           <span className="text-ink/40 dark:text-white/40">·</span>
           <span>{savedLabel}</span>
         </div>
-
-        {/* Selection action bar — appears only when a cell or callout
-         *  is currently selected. Edit / Delete operate on the selected
-         *  item, so cards stay visually clean (no per-card buttons). */}
-        {selection && selCell && (
-          <div className="mt-1 flex items-center gap-2 flex-wrap font-hand">
-            <span className="text-base text-ink/70 dark:text-white/70 select-none">
-              Selected:
-            </span>
-            <span
-              className="text-base px-2 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/40 bg-white/80 dark:bg-black/40 text-ink dark:text-white max-w-[260px] truncate"
-              title={selLabel}
-            >
-              {selLabel}
-            </span>
-            <button
-              className="btn-sketch sky text-base !py-0.5 !px-3"
-              onClick={onEditSelection}
-              title="Open the editor for this item"
-            >
-              ✏️ Edit
-            </button>
-            <button
-              className="btn-sketch pink text-base !py-0.5 !px-3"
-              onClick={onDeleteSelection}
-              title="Delete this item"
-            >
-              🗑 Delete
-            </button>
-            <button
-              className="text-sm text-ink/60 dark:text-white/60 underline underline-offset-2 hover:opacity-80"
-              onClick={() => setSelection(null)}
-              title="Clear selection"
-            >
-              clear
-            </button>
-            {selIsResizableVariant && selection?.type === "cell" && (
-              <div className="flex items-center gap-1 ml-2 pl-2 border-l-2 border-ink/20 dark:border-white/20">
-                <span className="text-base text-ink/70 dark:text-white/70 select-none">
-                  Size:
-                </span>
-                {MEDIA_PRESETS.map((p) => (
-                  <button
-                    key={p.label}
-                    className="text-sm font-hand px-2 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/40 bg-white/80 dark:bg-black/40 text-ink dark:text-white hover:bg-marker-yellow dark:hover:bg-amber-700"
-                    onClick={() => setCellSize(selection.cellId, { width: p.w, height: p.h })}
-                    title={p.tip}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
       </div>
       <div className="flex gap-2 pointer-events-auto">
         <DesignPicker />

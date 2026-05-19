@@ -27,7 +27,7 @@ type Store = {
   interactionMode: "cursor" | "hand" | "move";
   /** The currently-open inline editor, if any. A singleton so two
    *  popovers can't fight for the screen. */
-  openEditor: { kind: "callout" | "text"; cellId: string } | null;
+  openEditor: { kind: "callout" | "text" | "diagram"; cellId: string } | null;
   /** Active presenter overlay tool. `none` = nothing extra. `pen` =
    *  Excalidraw-style red ink that fades in ~1.4 s. `highlighter` =
    *  thick yellow ink that lingers ~4 s. */
@@ -48,7 +48,7 @@ type Store = {
    *  every rem-based Tailwind utility scales together. Clamped 0.8–1.6. */
   fontScale: number;
   /** Ambient shape theme for presenter mode. `off` hides the layer. */
-  presenterAmbient: "doodle" | "zen" | "tech" | "ideas" | "off";
+  presenterAmbient: "doodle" | "zen" | "tech" | "ideas" | "science" | "off";
   /** Page background color. `black` implies dark mode; the other
    *  three are light. Drives the `bg-<name>` class on <html>. */
   pageBg: "sandal" | "gray" | "white" | "black";
@@ -93,6 +93,15 @@ type Store = {
   addBrowserCell: (url?: string) => void;
   /** Insert a whiteboard cell (pen + colors + bg toggle + stickers). */
   addWhiteboardCell: () => void;
+  /** Insert a diagram cell (Mermaid / KaTeX / Chart). */
+  addDiagramCell: (kind?: "mermaid" | "math" | "chart") => void;
+  /** Per-cell current reveal-step for diagram cells. */
+  diagramStep: Record<string, number>;
+  resetDiagramStep: (cellId: string) => void;
+  /** Advance the step for a diagram cell. Returns true if the step
+   *  actually advanced; false if we were already at the last step.
+   *  The presenter uses the false return to fall through to "next slide". */
+  advanceDiagramStep: (cellId: string, totalSteps: number) => boolean;
   /** Active selection — the toolbar's action bar reads this to know
    *  which Edit / Delete to dispatch. */
   selection:
@@ -114,7 +123,7 @@ type Store = {
   rollbackLayout: () => void;
   setCellSize: (id: string, size: { width?: number; height?: number }) => void;
   setInteractionMode: (m: "cursor" | "hand" | "move") => void;
-  setOpenEditor: (v: { kind: "callout" | "text"; cellId: string } | null) => void;
+  setOpenEditor: (v: { kind: "callout" | "text" | "diagram"; cellId: string } | null) => void;
   setPresenterTool: (t: "none" | "pen" | "highlighter" | "fixedPen") => void;
   clearPresenterInk: () => void;
   setInstallOpen: (v: boolean) => void;
@@ -199,6 +208,7 @@ export const useStore = create<Store>((set, get) => ({
   installing: null,
   interactionMode: "cursor",
   openEditor: null,
+  diagramStep: {},
   presenterTool: "none",
   presenterInkClearCounter: 0,
   installOpen: false,
@@ -242,7 +252,10 @@ export const useStore = create<Store>((set, get) => ({
   presenterAmbient: (() => {
     try {
       const v = localStorage.getItem("doodlecode.presenterAmbient");
-      if (v === "doodle" || v === "zen" || v === "tech" || v === "ideas" || v === "off") {
+      if (
+        v === "doodle" || v === "zen" || v === "tech" ||
+        v === "ideas" || v === "science" || v === "off"
+      ) {
         return v;
       }
     } catch {}
@@ -263,7 +276,27 @@ export const useStore = create<Store>((set, get) => ({
   cellSize: {},
 
   setNotebook: (notebook) => {
-    set({ notebook, cellState: {}, focusedCellId: notebook.cells[0]?.id ?? null });
+    // Rehydrate any persisted card dimensions from each cell's meta so
+    // size drags survive a Save → reopen cycle. The serializer round-
+    // trips `meta.cell_width` / `meta.cell_height`; this just splays
+    // them back into the cellSize map the canvas already reads.
+    const cellSize: Record<string, { width?: number; height?: number }> = {};
+    for (const c of notebook.cells) {
+      const w = c.meta?.cell_width;
+      const h = c.meta?.cell_height;
+      if (w || h) {
+        cellSize[c.id] = {
+          ...(w ? { width: w } : {}),
+          ...(h ? { height: h } : {}),
+        };
+      }
+    }
+    set({
+      notebook,
+      cellState: {},
+      cellSize,
+      focusedCellId: notebook.cells[0]?.id ?? null,
+    });
     scheduleAutosave(notebook);
   },
 
@@ -301,9 +334,25 @@ export const useStore = create<Store>((set, get) => ({
             id: crypto.randomUUID(),
             kind: "markdown",
             source: "# New slide\n\nClick **📝 Edit** in the header to write here.",
-            meta: { color: "sky", title: "New slide" },
+            // No `title` here — the explain endpoint only spawns a
+            // side callout when meta.explain or meta.image is set,
+            // so a bare new text cell stays clean.
+            meta: { color: "sky" },
           }
-        : { id: crypto.randomUUID(), kind: "code", source: "" };
+        : {
+            // ＋ Code arrives with ONE primary callout pre-populated.
+            // The user almost always wants a side bubble next to a
+            // code cell — this seeds it so the right-column bubble
+            // appears immediately and the user can ✏️ Edit it.
+            id: crypto.randomUUID(),
+            kind: "code",
+            source: "",
+            meta: {
+              color: "yellow",
+              title: "Notes",
+              explain: "Write a short note about this code here.",
+            },
+          };
     const cells = [...nb.cells];
     const idx = after ? cells.findIndex((c) => c.id === after) : cells.length - 1;
     cells.splice(idx + 1, 0, cell);
@@ -417,6 +466,37 @@ export const useStore = create<Store>((set, get) => ({
     const next: Notebook = { ...s.notebook, cells };
     set({ notebook: next, focusedCellId: cell.id });
     scheduleAutosave(next);
+  },
+
+  addDiagramCell: (kind = "mermaid") => {
+    const s = get();
+    const sample =
+      kind === "math"
+        ? "AB = \\begin{bmatrix} 1 & 2 \\\\ 3 & 4 \\end{bmatrix} \\begin{bmatrix} 5 \\\\ 6 \\end{bmatrix} = \\begin{bmatrix} 17 \\\\ 39 \\end{bmatrix}"
+        : kind === "chart"
+        ? '{\n  "type": "bar",\n  "title": "Sample data",\n  "data": [\n    ["A", 10],\n    ["B", 24],\n    ["C", 17]\n  ]\n}'
+        : "graph TB\n  A[Start] --> B[Middle]\n  B --> C[End]";
+    const cell: Cell = {
+      id: crypto.randomUUID(),
+      kind: "markdown",
+      source: sample,
+      // No title / explain — diagram cells don't auto-spawn callouts.
+      meta: { color: "violet", cell_type: "diagram", diagram_kind: kind },
+    };
+    const cells = [...s.notebook.cells, cell];
+    const next: Notebook = { ...s.notebook, cells };
+    set({ notebook: next, focusedCellId: cell.id });
+    scheduleAutosave(next);
+  },
+
+  resetDiagramStep: (cellId) =>
+    set((s) => ({ diagramStep: { ...s.diagramStep, [cellId]: 1 } })),
+
+  advanceDiagramStep: (cellId, totalSteps) => {
+    const cur = get().diagramStep[cellId] ?? 1;
+    if (cur >= totalSteps) return false;
+    set((s) => ({ diagramStep: { ...s.diagramStep, [cellId]: cur + 1 } }));
+    return true;
   },
 
   addWhiteboardCell: () => {
@@ -551,17 +631,37 @@ export const useStore = create<Store>((set, get) => ({
     try { localStorage.setItem("doodlecode.fontScale", String(clamped)); } catch {}
     set({ fontScale: clamped });
   },
-  setCellSize: (id, size) =>
-    set((s) => {
-      const prev = s.cellSize[id] ?? {};
-      const next = { ...prev, ...size };
-      // Drop the entry entirely when both dimensions are cleared.
-      if (next.width === undefined && next.height === undefined) {
-        const { [id]: _drop, ...rest } = s.cellSize;
-        return { cellSize: rest };
-      }
-      return { cellSize: { ...s.cellSize, [id]: next } };
-    }),
+  setCellSize: (id, size) => {
+    const s = get();
+    const prev = s.cellSize[id] ?? {};
+    const next = { ...prev, ...size };
+    // Reflect the new size into the cell's meta so Save writes it
+    // into the .py file. (cellSize itself stays as the fast in-memory
+    // path the canvas reads on every render.)
+    const cell = s.notebook.cells.find((c) => c.id === id);
+    if (cell) {
+      const meta: CellMeta = { ...(cell.meta ?? {}) };
+      if (next.width === undefined) delete meta.cell_width;
+      else meta.cell_width = Math.round(next.width);
+      if (next.height === undefined) delete meta.cell_height;
+      else meta.cell_height = Math.round(next.height);
+      const cells = s.notebook.cells.map((c) =>
+        c.id === id ? { ...c, meta } : c
+      );
+      const notebook: Notebook = { ...s.notebook, cells };
+      const cellSize = (next.width === undefined && next.height === undefined)
+        ? Object.fromEntries(Object.entries(s.cellSize).filter(([k]) => k !== id))
+        : { ...s.cellSize, [id]: next };
+      set({ notebook, cellSize });
+      scheduleAutosave(notebook);
+    } else {
+      set({
+        cellSize: (next.width === undefined && next.height === undefined)
+          ? Object.fromEntries(Object.entries(s.cellSize).filter(([k]) => k !== id))
+          : { ...s.cellSize, [id]: next },
+      });
+    }
+  },
   newNotebook: (rawName) => {
     const name = (rawName.trim().endsWith(".py")
       ? rawName.trim()

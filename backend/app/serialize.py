@@ -95,6 +95,16 @@ def _serialize_cell(cell: Cell) -> str:
             lines.append(f"# @strokes: {meta.strokes}")
         if meta.stickers:
             lines.append(f"# @stickers: {meta.stickers}")
+        if meta.cell_width is not None:
+            lines.append(f"# @cell_width: {int(meta.cell_width)}")
+        if meta.cell_height is not None:
+            lines.append(f"# @cell_height: {int(meta.cell_height)}")
+        if meta.diagram_kind:
+            lines.append(f"# @diagram_kind: {meta.diagram_kind}")
+        if meta.diagram_font_scale is not None:
+            lines.append(f"# @diagram_font_scale: {float(meta.diagram_font_scale):.2f}")
+        if meta.text_font_scale is not None:
+            lines.append(f"# @text_font_scale: {float(meta.text_font_scale):.2f}")
         lines.extend(_serialize_callout_directives(primary, header_already=True))
         for extra in extras:
             inline_parts: list[str] = []
@@ -137,6 +147,10 @@ def _serialize_cell(cell: Cell) -> str:
     lines: list[str] = [header]
     if meta.box_image:
         lines.append(f"# @box_image: {meta.box_image}")
+    if meta.cell_width is not None:
+        lines.append(f"# @cell_width: {int(meta.cell_width)}")
+    if meta.cell_height is not None:
+        lines.append(f"# @cell_height: {int(meta.cell_height)}")
     lines.extend(_serialize_callout_directives(primary, header_already=True))
     for extra in extras:
         # Inline kind/color/title on the `# @callout` line for compactness.
