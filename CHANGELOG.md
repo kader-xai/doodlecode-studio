@@ -6,7 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.3.7] — 2026-05-17 — **Latest Stable** 🥇
+## [1.3.8] — 2026-05-17 — **Latest Stable** 🥇
+
+### Added
+- **Whiteboard shape tools** — Pen / Line / Circle / Arrow / Eraser.
+  Pen stays freehand; Line / Circle / Arrow draw via click-drag with
+  live preview; Eraser removes any stroke under the cursor (segment
+  hit-test, radius driven by the width slider). Arrow gets a filled
+  triangular arrowhead. Each saved stroke now carries an optional
+  `kind` field; whiteboards written by 1.3.7 still load as pen
+  strokes automatically.
+
+### Compatibility
+- File format v2.2 unchanged. `cell.meta.strokes` schema is purely
+  additive (new optional `kind` field on each stroke object).
+
+## [1.3.7] — 2026-05-17
 
 ### Added
 - **✨ Vibe picker** — five presenter-ambient themes: 🎨 Doodle
