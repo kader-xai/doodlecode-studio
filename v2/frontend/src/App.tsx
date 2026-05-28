@@ -97,6 +97,16 @@ export function App() {
         return;
       }
 
+      // Iter 71: Cmd/Ctrl+/ toggles collapse on the selected cell.
+      // No-op without a selection. Works on every cell kind that has
+      // a chevron (Code / Markdown / Diagram / Browser / Whiteboard).
+      if ((e.metaKey || e.ctrlKey) && e.key === "/") {
+        if (!sid) return;
+        e.preventDefault();
+        state.toggleCollapse(sid);
+        return;
+      }
+
       // Iter 57: Cmd/Ctrl+Shift+[ collapses every cell;
       //          Cmd/Ctrl+Shift+] expands every cell.
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "[" || e.key === "{")) {

@@ -27,6 +27,7 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "Cmd/Ctrl+1", what: "Fit entire canvas in view", when: "anywhere" },
   { keys: "Cmd/Ctrl+K", what: "Open cell palette — filter & jump to any cell", when: "anywhere" },
   { keys: "▾ / ▸ chevron", what: "Collapse / expand a single cell", when: "anywhere" },
+  { keys: "Cmd/Ctrl+/", what: "Toggle collapse on selected cell", when: "cell selected" },
   { keys: "Cmd/Ctrl+Shift+[", what: "Collapse every cell", when: "anywhere" },
   { keys: "Cmd/Ctrl+Shift+]", what: "Expand every cell", when: "anywhere" },
   { keys: "■ Stop", what: "Interrupt running cell (SIGINT)", when: "code cell running" },
