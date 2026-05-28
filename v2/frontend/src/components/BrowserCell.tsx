@@ -3,6 +3,7 @@ import { Handle, NodeProps, Position } from "reactflow";
 import { DoodleBorder } from "./DoodleBorder";
 import { EditableTitle } from "./EditableTitle";
 import { ResizeHandle } from "./ResizeHandle";
+import { hostOf } from "../lib/cellPreview";
 import { useStore } from "../store";
 
 const DEFAULT_W = 720;
@@ -27,21 +28,7 @@ function wrapProxied(url: string): string {
   return PROXY_PREFIX + encodeURIComponent(url);
 }
 
-/** Iter 69: extract the hostname for a small chip on collapsed browser
- *  cells. Strips the leading `www.` so the chip is shorter, and falls
- *  back to the raw source when URL parsing fails. */
-function hostOf(source: string): string {
-  const url = source.replace(/^doodle:\/\/proxy\?u=/, (m) => {
-    try { return decodeURIComponent(source.slice(m.length)); }
-    catch { return ""; }
-  });
-  try {
-    const u = new URL(url);
-    return u.host.replace(/^www\./, "");
-  } catch {
-    return source.replace(/^https?:\/\//, "").split("/")[0] || "(blank)";
-  }
-}
+// Iter 73: hostOf moved to lib/cellPreview.ts so it's unit-testable.
 
 /**
  * Browser cell — iframe with URL bar + Back/Forward/Refresh.

@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DoodleBorder } from "./DoodleBorder";
+import { firstLine } from "../lib/cellPreview";
 import { useStore } from "../store";
 
 /**
@@ -12,27 +13,6 @@ import { useStore } from "../store";
  *   - ↑ / ↓ move the highlight, Enter picks, Esc closes.
  *   - Type to filter (case-insensitive substring on the visible title).
  */
-/**
- * Iter 64: pull a short, readable first-line out of a cell body.
- * Stripping leading markdown markers (`#`, `-`, `*`) and Python
- * comment `#` keeps the preview informative on common cells.
- */
-function firstLine(source: string, kind: string): string {
-  for (const raw of source.split("\n")) {
-    const t = raw.trim();
-    if (!t) continue;
-    let s = t;
-    if (kind === "markdown") {
-      s = s.replace(/^#+\s*/, "").replace(/^[-*]\s+/, "");
-    } else if (kind === "code") {
-      // Strip a comment marker so "# header" becomes "header".
-      s = s.replace(/^#\s*/, "");
-    }
-    return s.length > 60 ? s.slice(0, 57) + "…" : s;
-  }
-  return "";
-}
-
 /**
  * Iter 68: wrap the matching substring (case-insensitive) of `text`
  * in a highlight `<mark>` so the user sees what the filter caught.
