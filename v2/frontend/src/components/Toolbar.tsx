@@ -383,7 +383,10 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
               if (clean) setNotebookName(clean);
             }}
             placeholder="Untitled"
-            className="font-hand text-lg text-ink/70 dark:text-white/70"
+            // Iter 96: override the EditableTitle default cursor-move
+            // (meant for draggable cells) — the toolbar chip isn't
+            // draggable, so a text cursor is the correct hint.
+            className="font-hand text-lg text-ink/70 dark:text-white/70 !cursor-text"
           />
           <span className="text-ink/40 dark:text-white/40 select-none">·</span>
           <span className="select-none">{savedLabel}</span>
