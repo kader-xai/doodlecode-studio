@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Tests (iter 147)
+- Lock `nextCell` / `prevCell` reading-order traversal + end-of-list
+  clamping. From `null` focus, `nextCell` picks the first cell; both
+  walkers CLAMP at the ends rather than wrapping. 92 frontend tests.
+
 ### Tests (iter 146)
 - Lock `rollbackLayout` no-op when never spaced — cell positions
   stay untouched if `originalPositions` is null. Prevents a future

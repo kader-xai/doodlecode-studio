@@ -686,6 +686,27 @@ describe("store: collapse (iter 53/57)", () => {
     expect(useStore.getState().cells.every((c) => !c.collapsed)).toBe(true);
   });
 
+  it("nextCell / prevCell walk reading order and clamp at the ends (iter 147)", () => {
+    // Seed cells are a (y=0) → b (y=100) → c (y=200). Walk forward
+    // to the end then assert it CLAMPS at c rather than wrapping;
+    // prevCell mirrors at the front.
+    useStore.setState({ focusedCellId: null });
+    useStore.getState().nextCell();
+    expect(useStore.getState().focusedCellId).toBe("a");
+    useStore.getState().nextCell();
+    expect(useStore.getState().focusedCellId).toBe("b");
+    useStore.getState().nextCell();
+    expect(useStore.getState().focusedCellId).toBe("c");
+    useStore.getState().nextCell(); // clamp — no wrap-around
+    expect(useStore.getState().focusedCellId).toBe("c");
+    useStore.getState().prevCell();
+    expect(useStore.getState().focusedCellId).toBe("b");
+    useStore.getState().prevCell();
+    expect(useStore.getState().focusedCellId).toBe("a");
+    useStore.getState().prevCell(); // clamp at the front
+    expect(useStore.getState().focusedCellId).toBe("a");
+  });
+
   it("setAllCollapsed preserves object identity for already-matching cells (iter 142)", () => {
     // Cell 'b' starts collapsed; a + c don't. After setAllCollapsed(true),
     // only a and c should be new object references. 'b' must stay the
