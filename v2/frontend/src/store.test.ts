@@ -309,6 +309,24 @@ describe("store: multi-select + group ops (iter 33-35)", () => {
     expect(a.x).toBe(0); // unchanged
   });
 
+  it("alignSelected('distV') spreads ≥3 cells with equal gaps (iter 150)", () => {
+    // Re-seed with separated vertical positions so the gap is non-trivial.
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "", x: 0, y: 0,   w: 100, h: 100 },
+        { id: "b", kind: "code", source: "", x: 0, y: 100, w: 100, h: 100 },
+        { id: "c", kind: "code", source: "", x: 0, y: 500, w: 100, h: 100 },
+      ],
+      runtimes: {},
+      selectedIds: ["a", "b", "c"],
+    });
+    useStore.getState().alignSelected("distV");
+    // T=0, B=600. totalH=300, span=600, gap=(600-300)/2=150.
+    // a stays at 0; b at 0+100+150=250; c at 250+100+150=500.
+    const ys = useStore.getState().cells.map((c) => c.y);
+    expect(ys).toEqual([0, 250, 500]);
+  });
+
   it("alignSelected('bottom') aligns bottom edges (iter 149)", () => {
     // Seed cells have h=100; bottoms are 100, 150, 200. B = 200.
     // Each cell y = B - h = 200 - 100 = 100.
