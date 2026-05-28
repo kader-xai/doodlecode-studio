@@ -268,16 +268,61 @@ function newId(): string {
   return `c${Date.now().toString(36)}${_idSeq.toString(36)}`;
 }
 
+/**
+ * Iter 151: place new cells in a clean column flow.
+ *
+ * Previous behavior stepped diagonally from (80, 80) and stopped at
+ * the first un-occupied 40-px slot. That works mathematically — but
+ * the visible result is a staircase of cells trailing off the canvas,
+ * each at a different x. The user complained that boxes "appear here
+ * and there" and you have to drag them into a column manually.
+ *
+ * New behavior:
+ *   - Empty canvas → start at (CANVAS_ORIGIN_X, CANVAS_ORIGIN_Y).
+ *   - Otherwise → take the LAST cell in reading order (cellsInOrder)
+ *     and place the new one one column-width below it, at the SAME x.
+ *     Result: every cell appears stacked vertically under the last
+ *     one. The flow is obvious and the link between them (if drawn)
+ *     is a clean down-arrow.
+ *
+ * Falls back to diagonal stepping ONLY if the resulting slot is
+ * already occupied (edge case after a load + manual rearrange).
+ */
+const CANVAS_ORIGIN_X = 120;
+const CANVAS_ORIGIN_Y = 100;
+const COLUMN_GAP_Y = 80; // pixels between the bottom of one cell and the top of the next
+
 function spawnPosition(cells: Cell[]): { x: number; y: number } {
+  if (cells.length === 0) {
+    return { x: CANVAS_ORIGIN_X, y: CANVAS_ORIGIN_Y };
+  }
+  // Find the bottom-most cell in reading order. Reading order is
+  // y-bucket first then x — so this picks the last cell the user
+  // sees as the "end" of their flow.
+  const BUCKET = 40;
+  const ordered = [...cells].sort((a, b) => {
+    const ay = Math.round(a.y / BUCKET);
+    const by = Math.round(b.y / BUCKET);
+    if (ay !== by) return ay - by;
+    return a.x - b.x;
+  });
+  const last = ordered[ordered.length - 1];
+  const lastH = last.h ?? (last.kind === "code" ? 360 : last.kind === "markdown" ? 220 : 360);
+  const x = last.x;
+  const y = last.y + lastH + COLUMN_GAP_Y;
+
+  // Collision check — fall back to diagonal stepping from there if
+  // something else is already occupying the slot (rare, but happens
+  // after a user manually arranges and then triggers a New cell).
   const STEP = 40;
   const occupied = new Set(cells.map((c) => `${Math.round(c.x / STEP)}:${Math.round(c.y / STEP)}`));
-  let x = 80, y = 80;
+  let cx = x, cy = y;
   for (let i = 0; i < 200; i++) {
-    if (!occupied.has(`${Math.round(x / STEP)}:${Math.round(y / STEP)}`)) return { x, y };
-    x += STEP;
-    y += STEP;
+    if (!occupied.has(`${Math.round(cx / STEP)}:${Math.round(cy / STEP)}`)) return { x: cx, y: cy };
+    cx += STEP;
+    cy += STEP;
   }
-  return { x, y };
+  return { x: cx, y: cy };
 }
 
 function triggerDownload(filename: string, text: string) {

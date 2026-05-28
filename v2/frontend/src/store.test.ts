@@ -47,6 +47,22 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().cells.length).toBe(before);
   });
 
+  it("addCell stacks new cells in a vertical column below the last (iter 151)", () => {
+    // Seed two cells, one above the other.
+    useStore.setState({
+      cells: [
+        { id: "top",    kind: "code", source: "", x: 200, y: 100, h: 300 },
+        { id: "bottom", kind: "code", source: "", x: 200, y: 500, h: 300 },
+      ],
+    });
+    const id = useStore.getState().addCell();
+    const added = useStore.getState().cells.find((c) => c.id === id)!;
+    // New cell appears under the bottom cell at the same x.
+    expect(added.x).toBe(200);
+    // bottom.y (500) + bottom.h (300) + COLUMN_GAP_Y (80) = 880.
+    expect(added.y).toBe(880);
+  });
+
   it("addCell never spawns on top of an existing cell (iter 136)", () => {
     // Seed the canvas with a wall of cells covering the default spawn
     // origin so spawnPosition must step diagonally past them.

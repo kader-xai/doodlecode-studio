@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Changed (iter 151)
+- **Auto-arrange: new cells now stack in a vertical column** below
+  the bottom-most existing cell instead of stepping diagonally from
+  (80, 80). Empty canvas → (120, 100); subsequent adds → same x,
+  `bottom.y + bottom.h + 80` y. Resolves the long-standing
+  "boxes appear here and there" complaint — every new cell lands
+  exactly where the user expects the flow to continue.
+
+### Tests (iter 150)
+- Coverage for `alignSelected("distV")` — equal-gap vertical
+  distribution across 3+ cells.
+- Test-setup shim for Node 22's native `localStorage` (it requires
+  `--localstorage-file` and otherwise collides with jsdom's stub).
+  Without the shim, the entire store.test.ts file fails to import.
+
 ### Tests (iter 149)
 - Coverage for `alignSelected("bottom")` and `("middleY")`. Closes
   the vertical-axis side of the align matrix to match iter 148's
