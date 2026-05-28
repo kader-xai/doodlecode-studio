@@ -1,6 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## v2.1.0 — multi-select, group ops, cell↔cell connections
+
+19 iterations of UX work on top of the 2.0.0 base. Highlights below;
+test suite went from 23 → 52 (14 backend + 38 frontend).
 
 ### Added (iter 32-42 batch)
 - **Drag image files onto canvas → Media cell** at the drop point.

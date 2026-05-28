@@ -123,6 +123,25 @@ v2/
 21. **`/api/proxy` SSRF guard.** Resolve the hostname and refuse any
     private / loopback / link-local / multicast / reserved / metadata
     address. 8 MB cap, 15 s timeout, GET only, http/https only.
+21c. **Cell↔cell links are symmetric.** `linkCells(a, b)` writes the
+    link on BOTH endpoints (a.links += b, b.links += a). Same for
+    `unlinkCells`. `deleteCell` then prunes the dangling reference
+    from every survivor. The visual is a single line drawn once
+    (ConnectionsLayer dedupes by sorted-id key); the bidirectional
+    storage exists so deletion of either endpoint cleans up — if
+    only the outgoing side were tracked we'd leak references on
+    delete.
+
+21d. **`DoodleBorder` must render at the parent's real W×H, not a
+    100×100 stretched viewBox.** The original implementation used
+    `viewBox="0 0 100 100"` + `preserveAspectRatio="none"`, which
+    visibly distorted the wobble pattern on non-square cells
+    (browsers, media). The current implementation uses a
+    `ResizeObserver` to read the parent box and renders the path at
+    1:1 inside `viewBox="0 0 W H"`, with anchors resampled along
+    each edge every ~64 px so long sides actually wobble. Don't
+    revert to the stretched-viewBox approach.
+
 21b. **Never trust ReactFlow's `<EdgeRenderer>` for overlays we
     derive ourselves.** ReactFlow drops edges whose source/target
     nodes don't have measured handle bounds (see `getNodeData`
