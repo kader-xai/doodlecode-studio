@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Tests (iter 137)
+- Lock `cellsInOrder` y-jitter tolerance: cells whose `y` differ by
+  less than the 40 px row bucket sort by `x`, not by `y`. Prevents
+  a future refactor from accidentally tightening the bucket and
+  reshuffling the reading order when cells aren't perfectly aligned.
+
 ### Tests (iter 136)
 - Lock `addCell` non-collision: when the diagonal of default spawn
   slots is fully occupied, `spawnPosition` must step past them so

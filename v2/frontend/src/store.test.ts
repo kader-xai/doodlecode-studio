@@ -634,4 +634,20 @@ describe("store: cellsInOrder", () => {
     const ids = useStore.getState().cellsInOrder().map((c) => c.id);
     expect(ids).toEqual(["b", "a", "c"]);
   });
+
+  it("tolerates small y-jitter within the row bucket (iter 137)", () => {
+    // Bucket width is 40, so y=0 and y=19 land in the same row;
+    // the secondary sort by x should win. The third cell sits well
+    // below in a separate bucket.
+    useStore.setState({
+      cells: [
+        { id: "right", kind: "code", source: "", x: 300, y: 0 },
+        { id: "left",  kind: "code", source: "", x: 0,   y: 19 },
+        { id: "below", kind: "code", source: "", x: 100, y: 200 },
+      ],
+      runtimes: {},
+    });
+    const ids = useStore.getState().cellsInOrder().map((c) => c.id);
+    expect(ids).toEqual(["left", "right", "below"]);
+  });
 });
