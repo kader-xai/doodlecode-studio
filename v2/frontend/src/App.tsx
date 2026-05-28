@@ -282,6 +282,11 @@ export function App() {
           (document.activeElement as HTMLElement | null)?.blur?.();
         } else if (helpOpen) {
           setHelpOpen(false);
+        } else if (state.paletteOpen) {
+          // Iter 123: belt-and-braces — the palette's own input
+          // handles Esc when focused, but if focus drifts (user
+          // moused outside the input) the App-level fallback fires.
+          state.setPaletteOpen(false);
         } else if (sid) {
           state.setSelected(null);
         }
