@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Tests (iter 146)
+- Lock `rollbackLayout` no-op when never spaced — cell positions
+  stay untouched if `originalPositions` is null. Prevents a future
+  refactor that loses the early-return guard from clobbering the
+  user's layout the first time they hit **S**. 91 frontend tests.
+
 ### Tests (iter 145)
 - Lock `spaceForPresentation` snapshot stability: re-pressing **S**
   to re-spread cells must NOT overwrite `originalPositions` with

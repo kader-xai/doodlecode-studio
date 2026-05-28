@@ -217,6 +217,18 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().originalPositions).toBeNull();
   });
 
+  it("rollbackLayout is a no-op when never spaced (iter 146)", () => {
+    // No prior spaceForPresentation → originalPositions is null.
+    // rollbackLayout must NOT clobber cell positions in this state.
+    useStore.getState().moveCell("c0", 111, 222);
+    expect(useStore.getState().originalPositions).toBeNull();
+    useStore.getState().rollbackLayout();
+    const c = useStore.getState().cells.find((x) => x.id === "c0")!;
+    expect(c.x).toBe(111);
+    expect(c.y).toBe(222);
+    expect(useStore.getState().originalPositions).toBeNull();
+  });
+
   it("spaceForPresentation re-press preserves the ORIGINAL snapshot (iter 145)", () => {
     // Place the cell, snapshot at (500, 700) via the first space.
     useStore.getState().moveCell("c0", 500, 700);
