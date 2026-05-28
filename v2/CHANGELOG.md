@@ -1,3 +1,15 @@
+# Changelog
+
+## [Unreleased]
+
+### Fixed (iter 111-112)
+- **First cell is auto-focused after `File → New` / `File → Open` /
+  `.py` drag-drop.** Keyboard shortcuts (Cmd+K, Cmd+/, Shift+Enter,
+  Cmd+Enter) used to silently no-op until the user clicked
+  something. Now the seed cell on a fresh notebook, and the first
+  cell in reading order on a loaded one, become the primary
+  selection immediately.
+
 ## v2.5.2 — post-delete focus + palette polish
 
 10 iterations on top of v2.5.1 (101-109). Test suite went 80 → 85.
