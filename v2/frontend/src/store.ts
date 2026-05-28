@@ -322,7 +322,19 @@ export const useStore = create<AppState>((set, get) => {
     execCounter: 0,
     selectedId: null,
     selectedIds: [],
-    setSelectedIds: (ids) => set({ selectedIds: ids }),
+    setSelectedIds: (ids) =>
+      // Iter 76: keep selectedId in sync with selectedIds. If the
+      // previous primary is no longer in the new set, fall back to
+      // the first member (or null when empty). Toolbar surfaces
+      // bound to selectedId would otherwise still target a cell
+      // the user just deselected — misleading state.
+      set((s) => ({
+        selectedIds: ids,
+        selectedId:
+          s.selectedId && ids.includes(s.selectedId)
+            ? s.selectedId
+            : ids[0] ?? null,
+      })),
     renameTick: {},
     requestRename: (id) => {
       set((s) => ({ renameTick: { ...s.renameTick, [id]: (s.renameTick[id] ?? 0) + 1 } }));

@@ -317,6 +317,36 @@ describe("store: duplicate semantics (iter 60)", () => {
   });
 });
 
+describe("store: setSelectedIds keeps primary in sync (iter 76)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "", x: 0, y: 0 },
+        { id: "b", kind: "code", source: "", x: 0, y: 100 },
+        { id: "c", kind: "code", source: "", x: 0, y: 200 },
+      ],
+      runtimes: {},
+      selectedId: "a",
+      selectedIds: ["a"],
+    });
+  });
+
+  it("preserves primary when it's still in the new set", () => {
+    useStore.getState().setSelectedIds(["a", "b"]);
+    expect(useStore.getState().selectedId).toBe("a");
+  });
+
+  it("picks the first member when previous primary is dropped", () => {
+    useStore.getState().setSelectedIds(["b", "c"]);
+    expect(useStore.getState().selectedId).toBe("b");
+  });
+
+  it("clears primary when the new set is empty", () => {
+    useStore.getState().setSelectedIds([]);
+    expect(useStore.getState().selectedId).toBeNull();
+  });
+});
+
 describe("store: collapse (iter 53/57)", () => {
   beforeEach(() => {
     useStore.setState({
