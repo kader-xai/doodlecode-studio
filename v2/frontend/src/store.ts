@@ -841,7 +841,10 @@ export const useStore = create<AppState>((set, get) => {
       autosave();
     },
     unlinkCells: (from, to) => {
-      if (!from || !to) return;
+      // Iter 132: mirror linkCells' guard — refuse missing args
+      // AND self-references so the "from === to" path can't drop a
+      // legitimate link out of a cell's own list by name collision.
+      if (!from || !to || from === to) return;
       set((s) => {
         const cells = s.cells.map((c) => {
           if (c.id === from && c.links?.includes(to)) {

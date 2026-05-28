@@ -380,6 +380,14 @@ describe("store: cell↔cell links (iter 45)", () => {
     expect(cells.find((c) => c.id === "b")!.links).toEqual([]);
   });
 
+  it("unlinkCells refuses self-references (iter 132)", () => {
+    useStore.getState().linkCells("a", "b");
+    useStore.getState().unlinkCells("a", "a");
+    // The legitimate a→b link must survive a self-unlink attempt.
+    const cellA = useStore.getState().cells.find((c) => c.id === "a")!;
+    expect(cellA.links).toEqual(["b"]);
+  });
+
   it("unlinkCells on a never-linked pair is a no-op (iter 127)", () => {
     useStore.getState().unlinkCells("a", "c");
     const cells = useStore.getState().cells;

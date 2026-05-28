@@ -12,6 +12,14 @@
 - Lock `alignSelected("distH")` no-op behavior with only 2 cells —
   distribution needs ≥3 anchors. 74 frontend tests now.
 
+### Fixed (iter 132)
+- **`unlinkCells` now refuses self-references** (`from === to`).
+  Without the guard a self-call would walk the cell's own list and
+  drop any link whose target id happened to match the cell's own
+  id — which can't happen today but would silently break if a
+  future refactor relaxed `linkCells`'s self-link guard. New test
+  covers the path. 75 frontend tests.
+
 ## v2.5.4 — Esc / Tab fixes + edge-case tests
 
 7 iterations on top of v2.5.3 (121-127). Test suite went 85 → 88.
