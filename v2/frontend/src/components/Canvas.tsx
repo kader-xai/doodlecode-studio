@@ -359,6 +359,14 @@ function CanvasInner() {
       // before clobbering the current canvas (matches the File →
       // Open flow's affordance).
       if (f.name.endsWith(".py")) {
+        // Iter 97: cap notebook size at 10 MB. Notebooks with that
+        // many embedded callout images can technically reach a few
+        // MB; 10 MB is a generous ceiling that still blocks the
+        // truly broken inputs that'd stall FileReader.
+        if (f.size > 10 * 1024 * 1024) {
+          window.alert(`File too large (${(f.size / 1024 / 1024).toFixed(1)}MB > 10MB cap)`);
+          return;
+        }
         if (!window.confirm(`Open "${f.name}" as a notebook? Current canvas will be replaced.`)) {
           return;
         }
