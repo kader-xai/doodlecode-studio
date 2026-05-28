@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 
-### Added (iter 81-84)
+### Added (iter 81-88)
 - **Drag-drop `.py` file** onto the canvas opens it as a notebook
   (after a confirm prompt). Filename becomes the new notebook name.
   Image drag-drop still works for `image/*` files (iter 32).
@@ -10,8 +10,14 @@
   `showSaveFilePicker` to pick a new file location, then binds the
   returned handle for subsequent silent Cmd+S writes. Falls back to
   a plain download on browsers without the File System Access API.
+  After save, the notebook name syncs from the picked filename.
 - **Cmd/Ctrl+\\** toggles dark / light theme without leaving the
   keyboard.
+- **Inline rename notebook from toolbar** — double-click the
+  notebook name to enter an inline edit. Enter / blur commits, Esc
+  cancels.
+- **Palette: Tab / Shift+Tab** acts like ↑ / ↓ (VS Code idiom). Pairs
+  with the existing Home / End / PgUp / PgDn nav.
 
 ### Docs
 - `v2/README.md` gains a "Drag & drop" section covering the two
