@@ -10,6 +10,20 @@
   cell in reading order on a loaded one, become the primary
   selection immediately.
 
+### Changed (iter 114-115)
+- **▶▶ Run All selects and pans to the failed cell on error.** The
+  alert that fired on a halted Run All still pointed to the failed
+  title, but the user had to scroll to find it. Now the failed cell
+  becomes the primary selection (red iter-40 border lights up) and
+  the canvas centers on it.
+
+### Changed (iter 116)
+- **Toolbar buttons that act on cells visibly disable when no cells
+  apply.** ▶▶ Run All, 🧹 Clear, and ▾/▸ All grey out with
+  cursor-not-allowed and explanatory tooltips when the notebook is
+  empty (or has no code cells). Avoids "clicked but nothing
+  happened" confusion.
+
 ## v2.5.2 — post-delete focus + palette polish
 
 10 iterations on top of v2.5.1 (101-109). Test suite went 80 → 85.
