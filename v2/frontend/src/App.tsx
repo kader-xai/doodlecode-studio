@@ -134,10 +134,16 @@ export function App() {
         return;
       }
 
-      // Iter 51: Shift+Enter — run the selected code cell. Jupyter
-      // convention. No-op when nothing is selected or the selected
-      // cell isn't code.
-      if (e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && e.key === "Enter") {
+      // Iter 51/91: Shift+Enter OR Cmd/Ctrl+Enter runs the selected
+      // code cell. Jupyter has both — Shift advances in real Jupyter,
+      // Cmd doesn't — but we don't auto-advance so they're the same
+      // thing. Accepting both matches what muscle memory expects.
+      if (
+        e.key === "Enter" &&
+        !e.altKey &&
+        ((e.shiftKey && !e.metaKey && !e.ctrlKey) ||
+          ((e.metaKey || e.ctrlKey) && !e.shiftKey))
+      ) {
         if (!sid) return;
         const cell = state.cells.find((c) => c.id === sid);
         if (cell?.kind !== "code") return;
