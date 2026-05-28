@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  font-family: "Patrick Hand", "Caveat", ui-sans-serif, system-ui;
+  color: #2a2a2a;
+}
+.dark html, .dark body, html.dark, body.dark {
+  color: #f0f0f0;
+}
+
+/* Buttons use cursor:pointer everywhere. Restore even though tailwind
+ * preflight resets it to inherit. */
+button, [role="button"], a {
+  cursor: pointer;
+}
+button:disabled { cursor: not-allowed; }
+
+/* Presenter ink belt-and-braces: while a draw tool is active, kill
+ * pointer events on the things most likely to swallow the cursor
+ * before it reaches our SVG overlay. The overlay also sits at
+ * z-9999, but this prevents any stray hover effects too. */
+html.ink-active iframe,
+html.ink-active .monaco-editor,
+html.ink-active .react-flow__pane,
+html.ink-active .react-flow__viewport {
+  pointer-events: none !important;
+}
+html.ink-pen, html.ink-pen *,
+html.ink-highlighter, html.ink-highlighter * {
+  cursor: crosshair !important;
+}
+
+/* Flowing dashed connector — used on cell ↔ callout edges so the
+ * dashes appear to march from the source toward the target. The
+ * dash pattern below renders as evenly-spaced round dots (1px dash
+ * + 10px gap with `round` linecap). Lowering `--flow-period` makes
+ * the dots move faster. */
+.doodle-edge-flow .react-flow__edge-path {
+  stroke-dasharray: 1 10 !important;
+  stroke-linecap: round;
+  animation: doodle-dash-flow var(--flow-period, 1s) linear infinite;
+}
+@keyframes doodle-dash-flow {
+  to { stroke-dashoffset: -22; }
+}
+
+/* AmbientLayer drift — each shape feeds --dx/--dy/--rot from JS so
+ * the keyframe stays a single shared definition. `alternate` makes
+ * the motion seamless without a teleport on loop. */
+@keyframes doodle-drift {
+  from { transform: translate3d(0, 0, 0) rotate(0deg); }
+  to   { transform: translate3d(var(--dx, 0px), var(--dy, 0px), 0) rotate(var(--rot, 0deg)); }
+}

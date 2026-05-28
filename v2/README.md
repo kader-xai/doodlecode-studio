@@ -1,0 +1,132 @@
+# DoodleCode Studio v2.0
+
+A doodle-powered Python notebook + presentation canvas. Code cells with a
+persistent Python kernel, markdown, images, YouTube embeds, live browser
+panes, a whiteboard, doodle-style flowcharts + bar charts, Mermaid,
+KaTeX math, multi-callout bubbles with images, presentation mode with
+fading pen / highlighter / fixed-pen ink — all in **one local app, one
+`.py` file per notebook**.
+
+## Quickstart
+
+```bash
+cd v2
+./start.sh           # builds the UI once, serves everything on http://localhost:8001
+./start.sh --dev     # Vite hot-reload on :5174 + API on :8001
+```
+
+First run will create a `backend/.venv`, install Python deps, install
+npm deps, build the frontend, and launch FastAPI.
+
+## Optional tools
+
+For the **PPT → PNG** converter under `/tools`:
+
+```bash
+# macOS
+brew install libreoffice poppler
+# Ubuntu
+sudo apt install libreoffice poppler-utils
+```
+
+For **matplotlib inline figures** in code cells:
+
+```python
+# from inside a code cell:
+import matplotlib.pyplot as plt
+plt.plot([1, 2, 3]); plt.show()
+```
+
+If matplotlib isn't installed yet, open **📦 Install** in the toolbar
+and type `matplotlib`.
+
+## Cell types
+
+| Cell        | Add via                     | Body content                              |
+|-------------|-----------------------------|-------------------------------------------|
+| Code        | `＋ Code` / N               | Python; runs in a persistent kernel       |
+| Text        | `＋ Text` / T               | Markdown — `#`/`-`/`**`/`` ` ``           |
+| Media       | `＋ Media` / M              | Image, video, YouTube, or Vimeo URL       |
+| Browser     | `＋ Browser` / W            | Live website in an iframe (with proxy)    |
+| Whiteboard  | `＋ Draw` / D               | Pen + highlighter + 5 colors + 3 bgs      |
+| Diagram     | `＋ Diagram` / G            | Doodle flow+chart, Mermaid, or KaTeX math |
+
+## Keyboard
+
+| Key                       | Action                                    |
+|---------------------------|-------------------------------------------|
+| V / H                     | Select tool / Hand (pan) tool             |
+| N / T / M / W / D / G     | Add code / text / media / browser / draw / diagram |
+| F2                        | Rename selected cell                      |
+| Cmd/Ctrl+D                | Duplicate selected cell                   |
+| Backspace / Delete        | Delete selected cell or callout           |
+| C                         | Open callout editor for selected cell     |
+| Tab / Shift+Tab           | Cycle selection                           |
+| Esc                       | Deselect · close overlays · exit modes    |
+| Cmd/Ctrl+S                | Save (silently if bound to disk)          |
+| ?                         | Toggle shortcut help overlay              |
+| S                         | Toggle Space / Together layout            |
+| F5 / Shift+P              | Toggle 🎬 Present                         |
+| → / Space / PageDown      | Next slide (in present)                   |
+| ← / PageUp                | Previous slide                            |
+| Home / End                | First / last slide                        |
+| R                         | Run focused code cell (in present)        |
+| P / H / X                 | Pen / Highlighter / Fixed-pen ink         |
+| E                         | Erase all ink                             |
+| F                         | Toggle browser fullscreen                 |
+| B                         | Toggle interact mode (browser cell only)  |
+
+## File format
+
+One `.py` file per notebook. Cells are separated by `# %%` headers.
+
+```python
+# doodlecode format-version: 3
+# notebook: my-deck
+
+# %% kind=code id=c0 x=80 y=80 w=580 h=300
+# @title: Hello, Python
+# @explain: This is a callout bubble
+print("hi")
+
+# %% kind=diagram id=d0 x=720 y=80 w=560 h=420
+# @title: Flow + chart
+# @diagram_kind: doodle
+flowchart
+A --> B
+B --> C
+
+chart: progress
+A: 6
+B: 8
+C: 10
+```
+
+Old `# @explain:` files load as `callouts[0]` automatically — files
+written by any prior version still open.
+
+## Tests
+
+```bash
+cd v2/frontend && npm test
+cd v2/backend  && .venv/bin/python -m pytest tests/ -q
+```
+
+## Architecture
+
+- **Backend** — FastAPI (`v2/backend/app/`)
+  - `main.py` — routes
+  - `kernel.py` + `runner.py` — persistent Python child process
+  - `executor.py` — façade
+  - `notebook_io.py` — `.py` serializer + parser
+  - `proxy.py` — X-Frame-bypass proxy with SSRF guard
+  - `installer.py` — pip install with regex allow-list
+  - `tools.py` — PPT → PNG (LibreOffice + pdftoppm)
+- **Frontend** — React 18 + Vite + Zustand + ReactFlow (`v2/frontend/src/`)
+  - `store.ts` — single source of truth for cells, selection, theme, etc.
+  - `components/` — one file per cell type + toolbar + modals
+  - `lib/` — markdown renderer, doodle-diagram compiler
+
+## License
+
+MIT.

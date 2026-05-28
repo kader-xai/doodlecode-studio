@@ -1,0 +1,324 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import ReactFlow, {
+  Background,
+  BackgroundVariant,
+  Controls,
+  Edge,
+  Node,
+  NodeChange,
+  NodeTypes,
+  ReactFlowInstance,
+  applyNodeChanges,
+} from "reactflow";
+import "reactflow/dist/style.css";
+
+import { BrowserCell } from "./BrowserCell";
+import { CalloutBubble } from "./CalloutBubble";
+import { CodeCell } from "./CodeCell";
+import { DiagramCell } from "./DiagramCell";
+import { MarkdownCell } from "./MarkdownCell";
+import { MediaCell } from "./MediaCell";
+import { WhiteboardCell } from "./WhiteboardCell";
+import { useStore } from "../store";
+import type { Cell } from "../types";
+
+const nodeTypes: NodeTypes = {
+  code: CodeCell,
+  markdown: MarkdownCell,
+  media: MediaCell,
+  browser: BrowserCell,
+  whiteboard: WhiteboardCell,
+  diagram: DiagramCell,
+  callout: CalloutBubble,
+};
+
+/** Cell widths used to right-position the callout bubble. */
+const CELL_WIDTH_FALLBACK: Record<string, number> = {
+  code: 580,
+  markdown: 560,
+  diagram: 560,
+};
+const CALLOUT_GAP = 40;
+/** Approximate rendered width of a callout bubble — must match the
+ *  `BUBBLE_W` constant in CalloutBubble.tsx. Used to grow the
+ *  presentation-centering bounding box when callouts exist. */
+const BUBBLE_W = 280;
+
+/**
+ * Infinite canvas. ReactFlow drives drag/selection UX; the store is
+ * the source of truth.
+ *
+ * Drag pattern (the one that works with controlled-mode ReactFlow):
+ *   - Local `nodes` state mirrors the store on every cell-shape change
+ *     (add/delete/store-side move). ReactFlow reads from this.
+ *   - During drag, `onNodesChange` runs `applyNodeChanges` to update
+ *     local `nodes` LIVE — that's what lets the user see the card move
+ *     under the cursor.
+ *   - When drag ends (`change.dragging === false`), we commit the new
+ *     position into the store (which then triggers autosave).
+ *
+ * This is the same controlled-but-locally-buffered pattern ReactFlow
+ * docs recommend; doing the store write on every micro-move would
+ * cause re-renders during drag and visually drop frames.
+ */
+export function Canvas() {
+  const cells = useStore((s) => s.cells);
+  const selectedId = useStore((s) => s.selectedId);
+  const moveCell = useStore((s) => s.moveCell);
+  const setSelected = useStore((s) => s.setSelected);
+  const dark = useStore((s) => s.theme === "dark");
+  const presenting = useStore((s) => s.presenting);
+  const focusedCellId = useStore((s) => s.focusedCellId);
+  const mode = useStore((s) => s.interactionMode);
+
+  // Two-mode truth table (Figma-style):
+  //   select (default) : drag cells to move; click empty pane deselects.
+  //   hand             : drag empty pane to pan; cells locked.
+  // Wheel pans in both modes (panOnScroll); Cmd/Ctrl+wheel zooms.
+  const panOnDrag = mode === "hand";
+  const nodesDraggable = mode === "select";
+  const canvasCursor = mode === "hand" ? "grab" : "default";
+
+  const instanceRef = useRef<ReactFlowInstance | null>(null);
+
+  // Pan-to-focused-cell on presentation focus changes. We center on
+  // the **bounding box** of the cell PLUS any callout bubbles to its
+  // right, so the slide is balanced left/right whether or not it has
+  // a callout column. (The previous +120px right bias pushed
+  // callout-less cells off-center to the left.)
+  useEffect(() => {
+    if (!presenting || !focusedCellId) return;
+    const inst = instanceRef.current;
+    if (!inst) return;
+    const cell = cells.find((c) => c.id === focusedCellId);
+    if (!cell) return;
+    const w = cell.w ?? CELL_WIDTH_FALLBACK[cell.kind] ?? 560;
+    const h = cell.h ?? 360;
+    const hasCallouts = (cell.callouts?.length ?? 0) > 0;
+    // Include the callout column in the bounding box when present
+    // so both the cell and the bubble are visually balanced.
+    const totalW = w + (hasCallouts ? CALLOUT_GAP + BUBBLE_W : 0);
+    const cx = cell.x + totalW / 2;
+    const cy = cell.y + h / 2;
+    const z = inst.getZoom();
+    inst.setCenter(cx, cy, { zoom: z, duration: 350 });
+  }, [presenting, focusedCellId, cells]);
+
+  // Per-cellId stable `data` object. ReactFlow passes `data` straight
+  // to the user node component, and changes to its identity cause the
+  // node to re-render. We keep ONE `{cellId}` object per cell so the
+  // node's prop identity never flickers while the user types — which
+  // is what was blurring the markdown textarea.
+  const dataCacheRef = useRef<Map<string, { cellId: string }>>(new Map());
+  const dataFor = (id: string) => {
+    let d = dataCacheRef.current.get(id);
+    if (!d) {
+      d = { cellId: id };
+      dataCacheRef.current.set(id, d);
+    }
+    return d;
+  };
+  // Separate cache for callout-bubble data objects (each carries an
+  // `index` because a cell can host multiple bubbles).
+  const calloutDataRef = useRef<Map<string, { cellId: string; index: number }>>(new Map());
+  const calloutDataFor = (cellId: string, index: number) => {
+    const k = `${cellId}::${index}`;
+    let d = calloutDataRef.current.get(k);
+    if (!d || d.index !== index || d.cellId !== cellId) {
+      d = { cellId, index };
+      calloutDataRef.current.set(k, d);
+    }
+    return d;
+  };
+
+  // Stable per-node style object too.
+  const STYLE = useRef({ outline: "none" }).current;
+
+  /** Stack of bubbles for one cell, each at the next y-offset. */
+  const calloutNodesFor = (c: Cell, parentX: number, parentY: number): Node[] => {
+    const list = c.callouts ?? [];
+    if (!list.length) return [];
+    const cellW = c.w ?? CELL_WIDTH_FALLBACK[c.kind] ?? 560;
+    const x = parentX + cellW + CALLOUT_GAP;
+    const STACK_DY = 200; // approximate; each bubble is ~180-200px tall
+    return list.map((_, idx) => ({
+      id: `${c.id}::callout::${idx}`,
+      type: "callout",
+      position: { x, y: parentY + idx * STACK_DY },
+      data: calloutDataFor(c.id, idx),
+      selected: false,
+      style: STYLE,
+      draggable: false,
+      selectable: false,
+    }));
+  };
+
+  /** Build the full node list, including derived callout bubbles. */
+  const buildNodes = (): Node[] => {
+    const out: Node[] = [];
+    for (const c of cells) {
+      out.push({
+        id: c.id,
+        type: c.kind,
+        position: { x: c.x, y: c.y },
+        data: dataFor(c.id),
+        selected: c.id === selectedId,
+        style: STYLE,
+        draggable: true,
+      });
+      out.push(...calloutNodesFor(c, c.x, c.y));
+    }
+    return out;
+  };
+
+  const [nodes, setNodes] = useState<Node[]>(() => buildNodes());
+
+  useEffect(() => {
+    setNodes((prev) => {
+      const byId = new Map(prev.map((n) => [n.id, n]));
+      const out: Node[] = [];
+      for (const c of cells) {
+        const existing = byId.get(c.id);
+        const samePos =
+          existing && existing.position.x === c.x && existing.position.y === c.y;
+        const sameSel = existing && existing.selected === (c.id === selectedId);
+        const sameType = existing && existing.type === c.kind;
+        // During presentation, give non-focused cells reduced
+        // opacity so the audience's eye lands on the active slide.
+        const cellStyle: React.CSSProperties =
+          presenting && focusedCellId && c.id !== focusedCellId
+            ? { ...STYLE, opacity: 0.35, transition: "opacity 350ms ease" }
+            : presenting
+            ? { ...STYLE, transition: "opacity 350ms ease" }
+            : STYLE;
+        if (
+          existing &&
+          samePos &&
+          sameSel &&
+          sameType &&
+          existing.style === cellStyle
+        ) {
+          out.push(existing);
+        } else {
+          out.push({
+            id: c.id,
+            type: c.kind,
+            position: samePos ? existing!.position : { x: c.x, y: c.y },
+            data: dataFor(c.id),
+            selected: c.id === selectedId,
+            style: cellStyle,
+            draggable: true,
+          });
+        }
+        // Append callout bubbles after each cell. Position is always
+        // derived from the parent so users don't drag them manually.
+        const parentPos = samePos ? existing!.position : { x: c.x, y: c.y };
+        out.push(...calloutNodesFor(c, parentPos.x, parentPos.y));
+      }
+      return out;
+    });
+    // Prune the data cache for deleted cells so it doesn't leak.
+    const live = new Set(cells.map((c) => c.id));
+    for (const k of dataCacheRef.current.keys()) {
+      if (!live.has(k)) dataCacheRef.current.delete(k);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cells, selectedId, STYLE, presenting, focusedCellId]);
+
+  // Dashed connector — one per (cell, callout index). Only the first
+  // bubble connects to the cell directly; later bubbles connect to
+  // the previous bubble so the chain reads top-to-bottom.
+  const edges: Edge[] = useMemo(() => {
+    const out: Edge[] = [];
+    for (const c of cells) {
+      const list = c.callouts ?? [];
+      list.forEach((_, idx) => {
+        const target = `${c.id}::callout::${idx}`;
+        const source = idx === 0 ? c.id : `${c.id}::callout::${idx - 1}`;
+        out.push({
+          id: `e:${c.id}:${idx}`,
+          source,
+          target,
+          // `doodle-edge-flow` is defined in index.css — it overrides
+          // the dasharray to a dot pattern and animates the offset so
+          // the dots flow from cell toward callout.
+          className: "doodle-edge-flow",
+          style: { stroke: dark ? "#aaa" : "#555", strokeWidth: 2.5 },
+          animated: false,
+          interactionWidth: 0,
+        });
+      });
+    }
+    return out;
+  }, [cells, dark]);
+
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      // Live update local state so the cell visually follows the cursor
+      // AND we have the authoritative post-drag position to commit.
+      setNodes((curr) => {
+        const next = applyNodeChanges(changes, curr);
+
+        // Commit drag-end positions by reading from the freshly-applied
+        // state. We can't just use `ch.position` because ReactFlow's
+        // final `dragging:false` change sometimes arrives WITHOUT a
+        // position field — only the prior dragging:true events carried
+        // it. Reading `next` is the always-correct source.
+        for (const ch of changes) {
+          if (ch.type === "position" && ch.dragging === false) {
+            // Skip synthetic callout pseudo-nodes — their position is
+            // derived from the parent cell each render.
+            if (ch.id.includes("::callout::")) continue;
+            const node = next.find((n) => n.id === ch.id);
+            if (node) moveCell(node.id, node.position.x, node.position.y);
+          }
+          if (ch.type === "select") {
+            if (ch.selected) setSelected(ch.id);
+            else if (useStore.getState().selectedId === ch.id) setSelected(null);
+          }
+        }
+        return next;
+      });
+    },
+    [moveCell, setSelected],
+  );
+
+  return (
+    <div className="w-full h-full">
+      <ReactFlow
+        nodes={nodes}
+        nodeTypes={nodeTypes}
+        edges={edges}
+        onInit={(inst) => { instanceRef.current = inst; }}
+        onNodesChange={onNodesChange}
+        onPaneClick={() => setSelected(null)}
+        nodesConnectable={false}
+        elementsSelectable
+        nodesDraggable={nodesDraggable}
+        panOnDrag={panOnDrag}
+        panOnScroll
+        zoomOnPinch
+        zoomOnScroll={false}
+        minZoom={0.3}
+        maxZoom={2}
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        proOptions={{ hideAttribution: true }}
+        style={{ cursor: canvasCursor }}
+      >
+        <Background
+          variant={BackgroundVariant.Dots}
+          gap={24}
+          size={1.5}
+          color={dark ? "#3a3f47" : "#d4c89a"}
+        />
+        {!presenting && (
+          <Controls
+            showInteractive={false}
+            className="!bg-white/80 dark:!bg-[#262a31]/80 !border-2 !border-ink/40 dark:!border-white/30 !rounded-xl"
+          />
+        )}
+      </ReactFlow>
+    </div>
+  );
+}
+
