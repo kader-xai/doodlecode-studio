@@ -22,6 +22,7 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "💬 / C", what: "Add or edit a callout on the selected cell", when: "cell selected" },
   { keys: "B", what: "Toggle interact mode for selected browser cell", when: "browser cell selected" },
   { keys: "▶ button", what: "Run focused code cell", when: "anywhere" },
+  { keys: "Shift+Enter", what: "Run the selected code cell (Jupyter-style)", when: "code cell selected" },
   { keys: "■ Stop", what: "Interrupt running cell (SIGINT)", when: "code cell running" },
   { keys: "🔗 Link", what: "Connect two selected cells with a sketchy line", when: "2 cells selected" },
   { keys: "Cmd/Ctrl+Shift+Enter", what: "Run All code cells in order (▶▶)", when: "anywhere" },

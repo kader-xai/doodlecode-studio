@@ -103,6 +103,18 @@ export function App() {
         return;
       }
 
+      // Iter 51: Shift+Enter — run the selected code cell. Jupyter
+      // convention. No-op when nothing is selected or the selected
+      // cell isn't code.
+      if (e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && e.key === "Enter") {
+        if (!sid) return;
+        const cell = state.cells.find((c) => c.id === sid);
+        if (cell?.kind !== "code") return;
+        e.preventDefault();
+        state.runCell(sid);
+        return;
+      }
+
       // Iter 36: Cmd/Ctrl+Shift+Enter — run every code cell sequentially.
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "Enter") {
         e.preventDefault();
