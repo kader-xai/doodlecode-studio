@@ -584,6 +584,17 @@ describe("store: palette (iter 62/63)", () => {
     useStore.getState().panToCell("a"); // same id, but tick should still bump
     expect(useStore.getState().panToTick).toBe(after1 + 1);
   });
+
+  it("panToCell refuses non-existent ids (iter 133)", () => {
+    useStore.getState().panToCell("a");
+    const baseline = useStore.getState();
+    useStore.getState().panToCell("ghost");
+    const after = useStore.getState();
+    // selection stays on 'a', tick does NOT bump
+    expect(after.selectedId).toBe("a");
+    expect(after.selectedIds).toEqual(["a"]);
+    expect(after.panToTick).toBe(baseline.panToTick);
+  });
 });
 
 describe("store: cellsInOrder", () => {

@@ -890,6 +890,11 @@ export const useStore = create<AppState>((set, get) => {
     setPaletteOpen: (on) => set({ paletteOpen: on }),
     panToTick: 0,
     panToCell: (id) => {
+      // Iter 133: refuse non-existent ids. Without this guard a stale
+      // id (e.g. from a queued runAllCells failure after the user
+      // deleted the cell) would set selectedId to a dangling string,
+      // breaking rule 21e (selectedId must reference a real cell).
+      if (!get().cells.some((c) => c.id === id)) return;
       set((s) => ({ selectedId: id, selectedIds: [id], panToTick: s.panToTick + 1 }));
     },
 

@@ -12,6 +12,14 @@
 - Lock `alignSelected("distH")` no-op behavior with only 2 cells —
   distribution needs ≥3 anchors. 74 frontend tests now.
 
+### Fixed (iter 133)
+- **`panToCell` now refuses non-existent ids.** Without the guard,
+  a stale id (e.g. `runAllCells` returning a deleted cell id) would
+  set `selectedId` to a dangling string, breaking rule 21e
+  (`selectedId` must reference a real cell) and bumping
+  `panToTick` to no avail. New test covers the path. 76 frontend
+  tests.
+
 ### Fixed (iter 132)
 - **`unlinkCells` now refuses self-references** (`from === to`).
   Without the guard a self-call would walk the cell's own list and
