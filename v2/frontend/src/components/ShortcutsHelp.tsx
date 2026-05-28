@@ -1,4 +1,5 @@
 import { DoodleBorder } from "./DoodleBorder";
+import { APP_VERSION } from "../types";
 
 const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "V / H", what: "Select-and-move / Hand-pan tool mode", when: "anywhere" },
@@ -98,6 +99,9 @@ export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
             spot on the canvas (or press Esc) to deselect. With 2+ cells selected
             an Align bar appears in the toolbar for left/center/right/top/middle/
             bottom + distribute-H/V.
+          </p>
+          <p className="font-hand text-sm mt-2 text-ink/40 dark:text-white/40 text-right">
+            DoodleCode Studio v{APP_VERSION}
           </p>
         </div>
       </div>

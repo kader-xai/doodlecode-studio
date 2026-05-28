@@ -2,6 +2,14 @@
 
 export type OutputType = "stdout" | "stderr" | "error" | "done" | "image_png";
 
+/**
+ * Iter 98: app version. CLAUDE rule 29 — kept in lockstep with
+ * `backend/app/__init__.py:__version__` and `frontend/package.json`.
+ * Surfaced in the help overlay so users can tell what they're on
+ * without opening the source.
+ */
+export const APP_VERSION = "2.5.0";
+
 export interface CellOutput {
   type: OutputType;
   text: string;
