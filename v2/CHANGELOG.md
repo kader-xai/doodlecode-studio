@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Tests (iter 136)
+- Lock `addCell` non-collision: when the diagonal of default spawn
+  slots is fully occupied, `spawnPosition` must step past them so
+  the new cell never lands on top of an existing one.
+
 ## v2.5.5 — Selection-sync hardening
 
 5 iterations on top of v2.5.4 (130-134). Round of guards against

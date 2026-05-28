@@ -47,6 +47,30 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().cells.length).toBe(before);
   });
 
+  it("addCell never spawns on top of an existing cell (iter 136)", () => {
+    // Seed the canvas with a wall of cells covering the default spawn
+    // origin so spawnPosition must step diagonally past them.
+    useStore.setState({
+      cells: Array.from({ length: 5 }, (_, i) => ({
+        id: `seed${i}`,
+        kind: "code" as const,
+        source: "",
+        x: 80 + i * 40,
+        y: 80 + i * 40,
+      })),
+    });
+    const id = useStore.getState().addCell();
+    const added = useStore.getState().cells.find((c) => c.id === id)!;
+    // The new cell must occupy a slot none of the seeds already do.
+    const STEP = 40;
+    const key = (x: number, y: number) =>
+      `${Math.round(x / STEP)}:${Math.round(y / STEP)}`;
+    const seeded = new Set(
+      useStore.getState().cells.filter((c) => c.id !== id).map((c) => key(c.x, c.y)),
+    );
+    expect(seeded.has(key(added.x, added.y))).toBe(false);
+  });
+
   it("moveCell updates x/y", () => {
     useStore.getState().moveCell("c0", 200, 300);
     const c = useStore.getState().cells.find((c) => c.id === "c0")!;
