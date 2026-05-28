@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed (iter 121)
+- **Shift+Tab from a null selection now jumps to the last cell**
+  (Tab still goes to the first). Both used to pick `cells[0]`,
+  which felt wrong for the "back" direction.
+
 ## v2.5.3 — auto-focus + Run All UX + empty-notebook polish
 
 9 iterations on top of v2.5.2 (111-119). Mostly small UX wins; no
