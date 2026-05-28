@@ -1,5 +1,20 @@
 # Changelog
 
+## [Unreleased]
+
+### Added (iter 91)
+- **Cmd/Ctrl+Enter** runs the selected code cell — alias for
+  Shift+Enter. Both Jupyter idioms accepted (we don't auto-advance,
+  so they behave identically).
+
+### Changed (iter 92-93)
+- **Collapsed Diagram title strip** is now minimal — the kind
+  selector becomes a small static chip (🖍 Doodle / 🧭 Mermaid /
+  📐 Math) and the Edit button hides while collapsed.
+- **Collapsed Whiteboard title strip** hides the entire tool block
+  (pen / highlighter / eraser / 5 colors / 3 backgrounds / undo /
+  clear). Cramming 20+ buttons into 44 px looked terrible.
+
 ## v2.5.0 — file-handling polish + palette niceties
 
 8 iterations on top of v2.4.0 (81-88). Test suite stable at 79
