@@ -96,6 +96,19 @@ export function App() {
         return;
       }
 
+      // Iter 36: Cmd/Ctrl+Shift+Enter — run every code cell sequentially.
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "Enter") {
+        e.preventDefault();
+        state.runAllCells().then((failed) => {
+          if (failed) {
+            const t =
+              useStore.getState().cells.find((c) => c.id === failed)?.title ?? failed;
+            window.alert(`Run All stopped at "${t}" — see its output for the error.`);
+          }
+        });
+        return;
+      }
+
       // Iter 34: Cmd/Ctrl+A — select every cell on the canvas.
       if ((e.metaKey || e.ctrlKey) && (e.key === "a" || e.key === "A")) {
         e.preventDefault();

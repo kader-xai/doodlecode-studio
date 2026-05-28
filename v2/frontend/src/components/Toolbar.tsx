@@ -176,6 +176,24 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
 
           <span className="mx-1 h-6 w-px bg-ink/30 dark:bg-white/30" />
 
+          {/* Iter 36: Run All Cells — sequential execution against the
+           *  persistent kernel. Same as clicking ▶ on every code cell
+           *  in reading order. */}
+          <button
+            onClick={async () => {
+              const failed = await useStore.getState().runAllCells();
+              if (failed) {
+                const t =
+                  useStore.getState().cells.find((c) => c.id === failed)?.title ??
+                  failed;
+                window.alert(`Run All stopped at "${t}" — see its output for the error.`);
+              }
+            }}
+            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-green dark:bg-emerald-700 text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
+            title="Run every code cell top-to-bottom (Cmd/Ctrl+Shift+Enter)"
+          >
+            ▶▶ Run All
+          </button>
           <button
             onClick={() => useStore.getState().setInstallOpen(true)}
             className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-violet dark:bg-[#5f3dc4] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"

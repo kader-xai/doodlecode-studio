@@ -130,6 +130,11 @@ export interface AppState {
       | "distV",
   ) => void;
   runCell: (id: string) => Promise<void>;
+  /** Iter 36: run every code cell in reading order, awaiting each
+   *  one so the persistent kernel sees them sequentially. Stops on
+   *  the first error so the user can investigate. Returns the id of
+   *  the failed cell, or null on success. */
+  runAllCells: () => Promise<string | null>;
 
   // ── file operations ─────────────────────────────────────────────
   newNotebook: () => void;
@@ -661,6 +666,16 @@ export const useStore = create<AppState>((set, get) => {
           },
         }));
       }
+    },
+
+    runAllCells: async () => {
+      const ordered = get().cellsInOrder().filter((c) => c.kind === "code");
+      for (const c of ordered) {
+        await get().runCell(c.id);
+        const r = get().runtimes[c.id]?.result;
+        if (r && r.status === "error") return c.id;
+      }
+      return null;
     },
 
     newNotebook: () => {
