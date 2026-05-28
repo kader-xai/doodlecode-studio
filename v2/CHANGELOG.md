@@ -1,20 +1,29 @@
-# Changelog
+## v2.5.2 — post-delete focus + palette polish
 
-## [Unreleased]
+10 iterations on top of v2.5.1 (101-109). Test suite went 80 → 85.
 
-### Fixed (iter 103-104)
+### Fixed
 - **`🧹 Clear` now also resets the `[n]` execution counter.** Used to
   wipe the per-cell badges but leave `execCounter` ticking, so the
   next run jumped to `[N+1]` even though no prior outputs were on
   screen.
+- **Delete keeps focus nearby.** Both single-cell and group delete
+  used to leave the selection empty. Now they pick the next cell in
+  reading order (or the previous if deleting from the end), so the
+  user lands somewhere useful.
 
-### Refactored (iter 104)
+### Added
+- **Palette pre-highlights the current selection on open** so users
+  don't have to ↑↓ to find their own cell.
+- **Palette auto-scrolls the highlighted row into view** — PgDn /
+  End / Tab in long match lists no longer push focus off-screen.
+
+### Refactored
 - Toolbar's `↻ Kernel` button no longer inlines its own setState; the
   client-side cleanup moved to `store.resetKernelState()` so future
-  callers (palette commands, shortcuts) can share it. +1 vitest case
-  locks the new contract.
+  callers (palette commands, shortcuts) can share it.
 
-### Changed (iter 101-102)
+### Changed
 - `EditableTitle` gains an optional `tooltip` prop; the toolbar
   notebook chip now hints "Double-click to rename notebook" instead
   of the cell-only "Drag to move · Double-click to rename" default.

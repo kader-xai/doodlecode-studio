@@ -8,7 +8,7 @@ export type OutputType = "stdout" | "stderr" | "error" | "done" | "image_png";
  * Surfaced in the help overlay so users can tell what they're on
  * without opening the source.
  */
-export const APP_VERSION = "2.5.1";
+export const APP_VERSION = "2.5.2";
 
 export interface CellOutput {
   type: OutputType;
