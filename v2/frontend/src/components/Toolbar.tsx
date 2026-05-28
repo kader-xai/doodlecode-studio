@@ -299,6 +299,18 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
             </div>
           )}
 
+          {/* Iter 67: multi-select count chip so the user can see at
+           *  a glance how many cells are about to be hit by a bulk
+           *  action (Delete, Cmd+D duplicate, Align, …). */}
+          {selectedIds.length >= 2 && (
+            <span
+              className="font-hand text-sm px-2 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/30 bg-marker-yellow/40 dark:bg-amber-700/40 text-ink dark:text-white shrink-0"
+              title="Selected — Delete / Cmd+D / Align act on the whole group"
+            >
+              ▣ {selectedIds.length} cells selected
+            </span>
+          )}
+
           {/* Iter 45: Link / Unlink — only when exactly two cells are
            *  selected. Single click toggles a sketchy connector
            *  between them; ConnectionsLayer draws the line. */}
