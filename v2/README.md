@@ -1,4 +1,8 @@
-# DoodleCode Studio v2.0
+# DoodleCode Studio
+
+> The current version is tracked in [CHANGELOG.md](CHANGELOG.md) and
+> surfaced in the in-app `?` help overlay. See
+> `backend/app/__init__.py` for the canonical lockstep pin.
 
 A doodle-powered Python notebook + presentation canvas. Code cells with a
 persistent Python kernel, markdown, images, YouTube embeds, live browser
