@@ -7,6 +7,11 @@
   (Tab still goes to the first). Both used to pick `cells[0]`,
   which felt wrong for the "back" direction.
 
+### Fixed (iter 123)
+- **Esc closes the Cmd+K palette as a fallback** when its input has
+  lost focus. The palette's own input.onKeyDown handles Esc when
+  focused; this is the belt-and-braces case if focus drifted.
+
 ## v2.5.3 — auto-focus + Run All UX + empty-notebook polish
 
 9 iterations on top of v2.5.2 (111-119). Mostly small UX wins; no
