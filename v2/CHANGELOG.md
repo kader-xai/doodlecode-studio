@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Tests (iter 148)
+- Coverage for `alignSelected("right")` (aligns right edges) and
+  `alignSelected("centerX")` (centers on bbox midline). Closes the
+  last gaps in the align/distribute test matrix. 94 frontend tests.
+
 ### Tests (iter 147)
 - Lock `nextCell` / `prevCell` reading-order traversal + end-of-list
   clamping. From `null` focus, `nextCell` picks the first cell; both

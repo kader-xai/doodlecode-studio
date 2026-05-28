@@ -309,6 +309,23 @@ describe("store: multi-select + group ops (iter 33-35)", () => {
     expect(a.x).toBe(0); // unchanged
   });
 
+  it("alignSelected('right') aligns right edges (iter 148)", () => {
+    // Seed cells have w=100; rights are 100, 300, 500. R = 500.
+    // Each cell x = R - w = 500 - 100 = 400.
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    useStore.getState().alignSelected("right");
+    const xs = useStore.getState().cells.map((c) => c.x);
+    expect(xs).toEqual([400, 400, 400]);
+  });
+
+  it("alignSelected('centerX') centers on the bbox midline (iter 148)", () => {
+    // Bbox L=0, R=500, cx=250. Each cell x = cx - w/2 = 250 - 50 = 200.
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    useStore.getState().alignSelected("centerX");
+    const xs = useStore.getState().cells.map((c) => c.x);
+    expect(xs).toEqual([200, 200, 200]);
+  });
+
   it("alignSelected('distH') no-ops with only 2 cells (iter 131)", () => {
     useStore.getState().setSelectedIds(["a", "b"]);
     const before = useStore.getState().cells.map((c) => c.x);
