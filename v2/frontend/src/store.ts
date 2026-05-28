@@ -157,6 +157,13 @@ export interface AppState {
   toggleCollapse: (id: string) => void;
   /** Iter 57: flip the collapsed flag on every cell at once. */
   setAllCollapsed: (collapsed: boolean) => void;
+  /** Iter 62: Cmd+K palette visibility. */
+  paletteOpen: boolean;
+  setPaletteOpen: (on: boolean) => void;
+  /** Iter 62: bumped when the palette picks a cell; Canvas listens
+   *  to this counter to pan the viewport to the selected cell. */
+  panToTick: number;
+  panToCell: (id: string) => void;
 
   // ── file operations ─────────────────────────────────────────────
   newNotebook: () => void;
@@ -788,6 +795,12 @@ export const useStore = create<AppState>((set, get) => {
         cells: s.cells.map((c) => (c.collapsed === collapsed ? c : { ...c, collapsed })),
       }));
       autosave();
+    },
+    paletteOpen: false,
+    setPaletteOpen: (on) => set({ paletteOpen: on }),
+    panToTick: 0,
+    panToCell: (id) => {
+      set((s) => ({ selectedId: id, selectedIds: [id], panToTick: s.panToTick + 1 }));
     },
 
     runAllCells: async () => {

@@ -1,0 +1,144 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { DoodleBorder } from "./DoodleBorder";
+import { useStore } from "../store";
+
+/**
+ * Iter 62: Cmd/Ctrl+K palette. Lists every cell by title (with kind
+ * emoji), filters as the user types, and on pick:
+ *   - selects the cell
+ *   - bumps `panToTick` so Canvas pans the viewport to it
+ *
+ * Keyboard:
+ *   - ↑ / ↓ move the highlight, Enter picks, Esc closes.
+ *   - Type to filter (case-insensitive substring on the visible title).
+ */
+const KIND_ICON: Record<string, string> = {
+  code: "🐍",
+  markdown: "📝",
+  media: "🖼",
+  browser: "🌐",
+  whiteboard: "✏️",
+  diagram: "🧭",
+};
+
+export function CellPalette() {
+  const open = useStore((s) => s.paletteOpen);
+  const close = useStore((s) => () => s.setPaletteOpen(false));
+  const cells = useStore((s) => s.cells);
+  const panToCell = useStore((s) => s.panToCell);
+
+  const [q, setQ] = useState("");
+  const [idx, setIdx] = useState(0);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // Reset on each open + focus the input.
+  useEffect(() => {
+    if (open) {
+      setQ("");
+      setIdx(0);
+      // Defer one frame so the input mounts first.
+      const t = setTimeout(() => inputRef.current?.focus(), 0);
+      return () => clearTimeout(t);
+    }
+  }, [open]);
+
+  const matches = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const list = cells.map((c, i) => ({
+      cell: c,
+      label: c.title?.trim() || `(untitled ${c.kind} #${i + 1})`,
+    }));
+    if (!needle) return list;
+    return list.filter((m) => m.label.toLowerCase().includes(needle));
+  }, [cells, q]);
+
+  // Clamp the highlight to the filtered list.
+  useEffect(() => {
+    if (idx >= matches.length) setIdx(Math.max(0, matches.length - 1));
+  }, [matches, idx]);
+
+  if (!open) return null;
+
+  const pick = (id: string) => {
+    panToCell(id);
+    close();
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-[120] bg-black/40 backdrop-blur-sm flex items-start justify-center p-6 pt-24"
+      onClick={close}
+    >
+      <div
+        className="relative w-full max-w-md"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DoodleBorder
+          stroke="var(--doodle-stroke, #2a2a2a)"
+          fill="var(--doodle-help-fill, #fff8e1)"
+          strokeWidth={3}
+          radius={18}
+        />
+        <div className="relative p-3">
+          <input
+            ref={inputRef}
+            type="text"
+            value={q}
+            onChange={(e) => { setQ(e.target.value); setIdx(0); }}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") { e.preventDefault(); close(); return; }
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setIdx((i) => Math.min(matches.length - 1, i + 1));
+                return;
+              }
+              if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setIdx((i) => Math.max(0, i - 1));
+                return;
+              }
+              if (e.key === "Enter") {
+                e.preventDefault();
+                const sel = matches[idx];
+                if (sel) pick(sel.cell.id);
+                return;
+              }
+            }}
+            placeholder="Jump to cell — type to filter…"
+            spellCheck={false}
+            className="w-full px-2 py-1 font-hand text-lg rounded-md border-2 border-ink/40 dark:border-white/30 bg-white/90 dark:bg-[#1a1d23] text-ink dark:text-white outline-none focus:border-[#c2255c]"
+          />
+          <ul className="mt-2 max-h-72 overflow-auto scrollbar-none">
+            {matches.length === 0 && (
+              <li className="font-hand text-base text-ink/60 dark:text-white/60 px-2 py-1">
+                No matching cells.
+              </li>
+            )}
+            {matches.map((m, i) => (
+              <li
+                key={m.cell.id}
+                onClick={() => pick(m.cell.id)}
+                onMouseEnter={() => setIdx(i)}
+                className={
+                  "font-hand text-base px-2 py-1 rounded-md cursor-pointer flex items-center gap-2 " +
+                  (i === idx
+                    ? "bg-marker-yellow/70 dark:bg-amber-700/60 text-ink dark:text-white"
+                    : "text-ink/80 dark:text-white/80 hover:bg-white/50 dark:hover:bg-black/30")
+                }
+              >
+                <span className="text-lg leading-none">{KIND_ICON[m.cell.kind] ?? "•"}</span>
+                <span className="truncate flex-1">{m.label}</span>
+                {m.cell.collapsed && (
+                  <span className="font-mono text-xs text-ink/40 dark:text-white/40">collapsed</span>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 font-hand text-sm text-ink/50 dark:text-white/50 px-2">
+            ↑↓ pick · Enter jumps · Esc closes
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

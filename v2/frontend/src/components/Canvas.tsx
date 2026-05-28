@@ -101,6 +101,23 @@ function CanvasInner() {
 
   const instanceRef = useRef<ReactFlowInstance | null>(null);
 
+  // Iter 62: pan to a cell when the palette picks it. The store
+  // bumps `panToTick` on every pick; this effect centers on the new
+  // selected cell at the current zoom level (animated).
+  const panToTick = useStore((s) => s.panToTick);
+  useEffect(() => {
+    if (panToTick === 0) return; // skip the initial render
+    const st = useStore.getState();
+    const sid = st.selectedId;
+    if (!sid) return;
+    const c = st.cells.find((cc) => cc.id === sid);
+    const inst = instanceRef.current;
+    if (!c || !inst) return;
+    const w = c.w ?? (c.kind === "code" ? 580 : 560);
+    const h = c.h ?? 360;
+    inst.setCenter(c.x + w / 2, c.y + h / 2, { zoom: inst.getZoom(), duration: 350 });
+  }, [panToTick]);
+
   // Iter 52: Cmd/Ctrl+0 resets zoom to 1; Cmd/Ctrl+1 fits the whole
   // canvas. Skipped while the user is typing into a text input.
   useEffect(() => {

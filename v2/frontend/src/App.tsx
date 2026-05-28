@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AmbientLayer } from "./components/AmbientLayer";
 import { CalloutEditor } from "./components/CalloutEditor";
+import { CellPalette } from "./components/CellPalette";
 import { Canvas } from "./components/Canvas";
 import { EmptyNotebookHint } from "./components/EmptyNotebookHint";
 import { InstallModal } from "./components/InstallModal";
@@ -138,6 +139,13 @@ export function App() {
             window.alert(`Run All stopped at "${t}" — see its output for the error.`);
           }
         });
+        return;
+      }
+
+      // Iter 62: Cmd/Ctrl+K — open the cell palette (filter & jump).
+      if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
+        e.preventDefault();
+        state.setPaletteOpen(!state.paletteOpen);
         return;
       }
 
@@ -388,6 +396,7 @@ export function App() {
       <EmptyNotebookHint />
 
       {helpOpen && <ShortcutsHelp onClose={() => setHelpOpen(false)} />}
+      <CellPalette />
       <CalloutEditor />
       <InstallModal />
       <PresenterBar />
