@@ -91,9 +91,9 @@ export function App() {
       // so the browser's "save page" dialog doesn't pop up.
       if ((e.metaKey || e.ctrlKey) && (e.key === "s" || e.key === "S")) {
         e.preventDefault();
-        state.downloadNotebook().catch((err) =>
-          window.alert(`Save failed: ${err}`),
-        );
+        // Iter 84: Shift = Save As (always prompts), no Shift = Save.
+        const save = e.shiftKey ? state.saveNotebookAs() : state.downloadNotebook();
+        save.catch((err) => window.alert(`Save failed: ${err}`));
         return;
       }
 

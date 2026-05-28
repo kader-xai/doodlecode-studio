@@ -169,6 +169,11 @@ export interface AppState {
   newNotebook: () => void;
   loadNotebookFromText: (text: string) => Promise<void>;
   downloadNotebook: () => Promise<void>;
+  /** Iter 84: "Save As" — always prompts for a fresh file location
+   *  via showSaveFilePicker (when available), updates `fileHandle`,
+   *  and writes the current text there. Falls back to a regular
+   *  download when the File System Access API is unavailable. */
+  saveNotebookAs: () => Promise<void>;
   /** Where this notebook is currently bound on disk (File System
    *  Access API). Held in memory only; lost on reload — that's OK,
    *  the browser also forgets the permission grant on reload. */
@@ -902,6 +907,33 @@ export const useStore = create<AppState>((set, get) => {
         }
       }
       const safe = (s.notebookName || "Untitled").replace(/[^A-Za-z0-9_-]+/g, "_");
+      triggerDownload(`${safe}.py`, r.text);
+      set({ savedAt: Date.now() });
+    },
+
+    saveNotebookAs: async () => {
+      const s = get();
+      const r = await saveNotebook({ name: s.notebookName, cells: s.cells });
+      const safe = (s.notebookName || "Untitled").replace(/[^A-Za-z0-9_-]+/g, "_");
+      // File System Access API is only on Chromium-family browsers.
+      const w = (window as unknown as { showSaveFilePicker?: (opts?: unknown) => Promise<FileSystemFileHandle> });
+      if (w.showSaveFilePicker) {
+        try {
+          const handle = await w.showSaveFilePicker({
+            suggestedName: `${safe}.py`,
+            types: [{ description: "DoodleCode notebook", accept: { "text/x-python": [".py"] } }],
+          });
+          const writable = await handle.createWritable();
+          await writable.write(r.text);
+          await writable.close();
+          set({ fileHandle: handle, savedAt: Date.now() });
+          return;
+        } catch (err) {
+          // AbortError means the user cancelled — silent return.
+          if ((err as { name?: string })?.name === "AbortError") return;
+          console.warn("Save As failed, falling back to download:", err);
+        }
+      }
       triggerDownload(`${safe}.py`, r.text);
       set({ savedAt: Date.now() });
     },

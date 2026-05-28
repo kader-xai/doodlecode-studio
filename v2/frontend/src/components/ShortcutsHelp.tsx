@@ -43,6 +43,8 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "Drag empty pane", what: "Lasso-select cells (Select mode)", when: "anywhere" },
   { keys: "← ↑ → ↓", what: "Nudge selected cells (10 px; Shift = 50 px)", when: "anywhere" },
   { keys: "Tab / Shift+Tab", what: "Select next / previous cell", when: "anywhere" },
+  { keys: "Cmd/Ctrl+S", what: "Save (silently writes to bound disk file)", when: "anywhere" },
+  { keys: "Cmd/Ctrl+Shift+S", what: "Save As — pick a new file location", when: "anywhere" },
   { keys: "Esc", what: "Deselect / close overlays", when: "anywhere" },
   { keys: "?", what: "Toggle this help overlay", when: "anywhere" },
 ];
