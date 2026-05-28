@@ -1,38 +1,26 @@
 # Changelog
 
-## [Unreleased]
+## v2.5.5 — Selection-sync hardening
 
-### Fixed (iter 130)
-- **`linkCells` now refuses dangling endpoints.** Without the guard,
-  a stale id (e.g. from a queued action after a delete) would write
-  a one-sided link onto the surviving endpoint that
-  `ConnectionsLayer` cannot resolve. New test covers it.
+5 iterations on top of v2.5.4 (130-134). Round of guards against
+dangling ids and self-references in the link / selection actions,
+locking rule 21e (`selectedId` must reference a real cell) at the
+store boundary. Test suite went 88 → 93 (77 frontend + 16 backend).
 
-### Tests (iter 131)
-- Lock `alignSelected("distH")` no-op behavior with only 2 cells —
-  distribution needs ≥3 anchors. 74 frontend tests now.
+### Fixed
+- **`linkCells` refuses dangling endpoints** (iter 130). Stale ids
+  from a queued post-delete action no longer write one-sided links
+  that `ConnectionsLayer` cannot resolve.
+- **`unlinkCells` refuses self-references** (iter 132). Mirrors the
+  iter 130 guard.
+- **`panToCell` refuses non-existent ids** (iter 133). Stale ids
+  (e.g. a deleted cell surfaced by `runAllCells`) no longer set
+  `selectedId` to a dangling string or waste a `panToTick` bump.
 
-### Tests (iter 134)
-- Lock `firstLine` URL preservation for non-markdown / non-code
-  kinds. A browser cell's `https://…#section` must not have its
-  fragment eaten by the code-comment stripper, and a leading `*`
-  on non-markdown kinds must stay intact. 77 frontend tests now.
-
-### Fixed (iter 133)
-- **`panToCell` now refuses non-existent ids.** Without the guard,
-  a stale id (e.g. `runAllCells` returning a deleted cell id) would
-  set `selectedId` to a dangling string, breaking rule 21e
-  (`selectedId` must reference a real cell) and bumping
-  `panToTick` to no avail. New test covers the path. 76 frontend
-  tests.
-
-### Fixed (iter 132)
-- **`unlinkCells` now refuses self-references** (`from === to`).
-  Without the guard a self-call would walk the cell's own list and
-  drop any link whose target id happened to match the cell's own
-  id — which can't happen today but would silently break if a
-  future refactor relaxed `linkCells`'s self-link guard. New test
-  covers the path. 75 frontend tests.
+### Tests
+- `alignSelected("distH")` no-op with only 2 cells locked (iter 131).
+- `firstLine` preserves URL fragments + leading `*` for non-markdown
+  and non-code kinds (iter 134).
 
 ## v2.5.4 — Esc / Tab fixes + edge-case tests
 
