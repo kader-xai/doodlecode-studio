@@ -812,6 +812,14 @@ export const useStore = create<AppState>((set, get) => {
 
     linkCells: (from, to) => {
       if (!from || !to || from === to) return;
+      // Iter 130: refuse if either endpoint doesn't exist. Without
+      // this guard a stale id (e.g. from a queued action after a
+      // delete) would write a dangling link onto the surviving
+      // endpoint that ConnectionsLayer can't resolve.
+      const s0 = get();
+      const hasFrom = s0.cells.some((c) => c.id === from);
+      const hasTo = s0.cells.some((c) => c.id === to);
+      if (!hasFrom || !hasTo) return;
       set((s) => {
         const cells = s.cells.map((c) => {
           if (c.id === from) {

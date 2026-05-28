@@ -356,6 +356,14 @@ describe("store: cell↔cell links (iter 45)", () => {
     expect(useStore.getState().cells.find((c) => c.id === "a")!.links ?? []).toEqual([]);
   });
 
+  it("linkCells refuses dangling endpoints (iter 130)", () => {
+    useStore.getState().linkCells("a", "ghost");
+    useStore.getState().linkCells("ghost", "b");
+    const cells = useStore.getState().cells;
+    expect(cells.find((c) => c.id === "a")!.links ?? []).toEqual([]);
+    expect(cells.find((c) => c.id === "b")!.links ?? []).toEqual([]);
+  });
+
   it("unlinkCells drops the link from both endpoints", () => {
     useStore.getState().linkCells("a", "b");
     useStore.getState().unlinkCells("a", "b");

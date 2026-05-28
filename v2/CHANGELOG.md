@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed (iter 130)
+- **`linkCells` now refuses dangling endpoints.** Without the guard,
+  a stale id (e.g. from a queued action after a delete) would write
+  a one-sided link onto the surviving endpoint that
+  `ConnectionsLayer` cannot resolve. New test covers it.
+
 ## v2.5.4 — Esc / Tab fixes + edge-case tests
 
 7 iterations on top of v2.5.3 (121-127). Test suite went 85 → 88.
