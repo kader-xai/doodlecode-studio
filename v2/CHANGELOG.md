@@ -1,5 +1,37 @@
 # Changelog
 
+## [Unreleased]
+
+### Added (iter 32-42 batch)
+- **Drag image files onto canvas → Media cell** at the drop point.
+  5 MB cap, `image/*` mime guard, data-URL so the round-trip survives
+  Save → reload.
+- **Multi-select**: lasso-drag on empty pane (Select mode), Shift /
+  Cmd-click to extend. ReactFlow moves the whole group on drag.
+- **Group operations**: Backspace / Delete removes every selected
+  cell; Cmd/Ctrl+D duplicates the group; arrow keys nudge (10 px,
+  Shift = 50 px); Cmd/Ctrl+A selects every cell.
+- **Align + distribute bar** appears in the toolbar when 2+ cells are
+  selected: left / center-X / right / top / middle-Y / bottom plus
+  distribute-H/V (≥3 cells, gaps spread evenly).
+- **▶▶ Run All Cells** button + Cmd/Ctrl+Shift+Enter shortcut runs
+  every code cell top-to-bottom against the persistent kernel and
+  halts at the first error.
+- **🧹 Clear Outputs** + Cmd/Ctrl+Shift+L wipes every output panel
+  without restarting the kernel — variables and imports survive.
+- **Jupyter-style `[n]` execution counter** badge on every code cell;
+  resets to 0 on ↻ Kernel / New notebook.
+- **Elapsed-ms chip** beside the `[n]` badge (`142ms` / `1.42s`).
+- **Red doodle border** when a code cell's last run errored.
+
+### Changed
+- Help overlay (`?`) now documents every new shortcut.
+
+### Tests
+- +8 vitest cases covering `deleteCells`, `alignSelected` (3 modes),
+  `runAllCells` (success + error halt), `clearAllOutputs`. Suite at
+  31 passing.
+
 ## v2.0.0 — initial v2 release
 
 Complete from-scratch rewrite. v1 stays at v1.4.0 on `main`; v2 lives
