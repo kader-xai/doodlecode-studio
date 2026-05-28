@@ -23,6 +23,8 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "B", what: "Toggle interact mode for selected browser cell", when: "browser cell selected" },
   { keys: "▶ button", what: "Run focused code cell", when: "anywhere" },
   { keys: "Shift+Enter", what: "Run the selected code cell (Jupyter-style)", when: "code cell selected" },
+  { keys: "Cmd/Ctrl+0", what: "Reset zoom to 100%", when: "anywhere" },
+  { keys: "Cmd/Ctrl+1", what: "Fit entire canvas in view", when: "anywhere" },
   { keys: "■ Stop", what: "Interrupt running cell (SIGINT)", when: "code cell running" },
   { keys: "🔗 Link", what: "Connect two selected cells with a sketchy line", when: "2 cells selected" },
   { keys: "Cmd/Ctrl+Shift+Enter", what: "Run All code cells in order (▶▶)", when: "anywhere" },

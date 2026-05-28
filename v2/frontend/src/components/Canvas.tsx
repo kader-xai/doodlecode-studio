@@ -101,6 +101,27 @@ function CanvasInner() {
 
   const instanceRef = useRef<ReactFlowInstance | null>(null);
 
+  // Iter 52: Cmd/Ctrl+0 resets zoom to 1; Cmd/Ctrl+1 fits the whole
+  // canvas. Skipped while the user is typing into a text input.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey) return;
+      const tgt = e.target as Element | null;
+      if (tgt?.closest("input, textarea, [contenteditable=true], .monaco-editor")) return;
+      const inst = instanceRef.current;
+      if (!inst) return;
+      if (e.key === "0") {
+        e.preventDefault();
+        inst.zoomTo(1, { duration: 200 });
+      } else if (e.key === "1") {
+        e.preventDefault();
+        inst.fitView({ padding: 0.2, duration: 250 });
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   // Pan-to-focused-cell on presentation focus changes. We center on
   // the **bounding box** of the cell PLUS any callout bubbles to its
   // right, so the slide is balanced left/right whether or not it has
