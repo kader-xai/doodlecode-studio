@@ -139,6 +139,10 @@ export interface AppState {
    *  the first error so the user can investigate. Returns the id of
    *  the failed cell, or null on success. */
   runAllCells: () => Promise<string | null>;
+  /** Iter 38: drop every cell's output panel + [n] badge. Does NOT
+   *  reset the Python kernel — variables and imports survive so the
+   *  next run can pick up where the last one left off. */
+  clearAllOutputs: () => void;
 
   // ── file operations ─────────────────────────────────────────────
   newNotebook: () => void;
@@ -687,6 +691,10 @@ export const useStore = create<AppState>((set, get) => {
           },
         }));
       }
+    },
+
+    clearAllOutputs: () => {
+      set({ runtimes: {} });
     },
 
     runAllCells: async () => {

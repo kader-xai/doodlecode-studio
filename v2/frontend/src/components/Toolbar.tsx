@@ -194,6 +194,19 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
           >
             ▶▶ Run All
           </button>
+          {/* Iter 38: Clear Outputs — drops every output panel + [n]
+           *  badge in one shot. Kernel state untouched. */}
+          <button
+            onClick={() => {
+              if (window.confirm("Clear every cell's output? (Variables in the kernel survive.)")) {
+                useStore.getState().clearAllOutputs();
+              }
+            }}
+            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-peach/70 dark:bg-amber-800 text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
+            title="Clear all outputs (Cmd/Ctrl+Shift+L). Kernel variables stay alive."
+          >
+            🧹 Clear
+          </button>
           <button
             onClick={() => useStore.getState().setInstallOpen(true)}
             className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-violet dark:bg-[#5f3dc4] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"

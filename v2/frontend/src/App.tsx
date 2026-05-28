@@ -96,6 +96,13 @@ export function App() {
         return;
       }
 
+      // Iter 38: Cmd/Ctrl+Shift+L — clear every output panel.
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "l" || e.key === "L")) {
+        e.preventDefault();
+        if (window.confirm("Clear every cell's output?")) state.clearAllOutputs();
+        return;
+      }
+
       // Iter 36: Cmd/Ctrl+Shift+Enter — run every code cell sequentially.
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === "Enter") {
         e.preventDefault();
