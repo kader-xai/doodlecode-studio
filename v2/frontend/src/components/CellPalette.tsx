@@ -12,6 +12,27 @@ import { useStore } from "../store";
  *   - ↑ / ↓ move the highlight, Enter picks, Esc closes.
  *   - Type to filter (case-insensitive substring on the visible title).
  */
+/**
+ * Iter 64: pull a short, readable first-line out of a cell body.
+ * Stripping leading markdown markers (`#`, `-`, `*`) and Python
+ * comment `#` keeps the preview informative on common cells.
+ */
+function firstLine(source: string, kind: string): string {
+  for (const raw of source.split("\n")) {
+    const t = raw.trim();
+    if (!t) continue;
+    let s = t;
+    if (kind === "markdown") {
+      s = s.replace(/^#+\s*/, "").replace(/^[-*]\s+/, "");
+    } else if (kind === "code") {
+      // Strip a comment marker so "# header" becomes "header".
+      s = s.replace(/^#\s*/, "");
+    }
+    return s.length > 60 ? s.slice(0, 57) + "…" : s;
+  }
+  return "";
+}
+
 const KIND_ICON: Record<string, string> = {
   code: "🐍",
   markdown: "📝",
@@ -44,10 +65,18 @@ export function CellPalette() {
 
   const matches = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    const list = cells.map((c, i) => ({
-      cell: c,
-      label: c.title?.trim() || `(untitled ${c.kind} #${i + 1})`,
-    }));
+    const list = cells.map((c, i) => {
+      const hasTitle = !!c.title?.trim();
+      return {
+        cell: c,
+        label: hasTitle ? c.title!.trim() : `(untitled ${c.kind} #${i + 1})`,
+        // Iter 64: when there's no title, surface the first non-
+        // blank line of the source as a dim preview line so the
+        // user has SOMETHING to recognize. Skip when titled (the
+        // title already conveys the cell's purpose).
+        preview: hasTitle ? "" : firstLine(c.source ?? "", c.kind),
+      };
+    });
     if (!needle) return list;
     // Iter 63: also match against the cell's source so the user can
     // jump to a code cell by typing a variable name, or a markdown
@@ -128,16 +157,23 @@ export function CellPalette() {
                 onClick={() => pick(m.cell.id)}
                 onMouseEnter={() => setIdx(i)}
                 className={
-                  "font-hand text-base px-2 py-1 rounded-md cursor-pointer flex items-center gap-2 " +
+                  "font-hand text-base px-2 py-1 rounded-md cursor-pointer flex items-start gap-2 " +
                   (i === idx
                     ? "bg-marker-yellow/70 dark:bg-amber-700/60 text-ink dark:text-white"
                     : "text-ink/80 dark:text-white/80 hover:bg-white/50 dark:hover:bg-black/30")
                 }
               >
-                <span className="text-lg leading-none">{KIND_ICON[m.cell.kind] ?? "•"}</span>
-                <span className="truncate flex-1">{m.label}</span>
+                <span className="text-lg leading-none mt-[2px]">{KIND_ICON[m.cell.kind] ?? "•"}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="truncate">{m.label}</div>
+                  {m.preview && (
+                    <div className="font-mono text-xs truncate text-ink/45 dark:text-white/45">
+                      {m.preview}
+                    </div>
+                  )}
+                </div>
                 {m.cell.collapsed && (
-                  <span className="font-mono text-xs text-ink/40 dark:text-white/40">collapsed</span>
+                  <span className="font-mono text-xs text-ink/40 dark:text-white/40 mt-[2px]">collapsed</span>
                 )}
               </li>
             ))}
