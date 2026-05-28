@@ -220,6 +220,25 @@ describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {
     useStore.getState().clearAllOutputs();
     expect(useStore.getState().execCounter).toBe(0);
   });
+
+  it("resetKernelState drops execCount but keeps result panels (iter 104)", () => {
+    useStore.setState({
+      execCounter: 7,
+      runtimes: {
+        a: { running: false, result: { status: "ok", elapsed_ms: 5, outputs: [] }, execCount: 5 },
+        b: { running: false, result: { status: "error", elapsed_ms: 1, outputs: [] }, execCount: 7 },
+      },
+    });
+    useStore.getState().resetKernelState();
+    const s = useStore.getState();
+    expect(s.execCounter).toBe(0);
+    // [n] badges gone
+    expect(s.runtimes["a"].execCount).toBeUndefined();
+    expect(s.runtimes["b"].execCount).toBeUndefined();
+    // But the result panels (incl. traceback on b) are still there.
+    expect(s.runtimes["a"].result?.status).toBe("ok");
+    expect(s.runtimes["b"].result?.status).toBe("error");
+  });
 });
 
 describe("store: cell↔cell links (iter 45)", () => {

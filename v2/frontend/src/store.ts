@@ -143,6 +143,12 @@ export interface AppState {
    *  reset the Python kernel — variables and imports survive so the
    *  next run can pick up where the last one left off. */
   clearAllOutputs: () => void;
+  /** Iter 104: client-side counterpart to the backend kernel reset.
+   *  Wipes the global exec counter + per-cell [n] badges but keeps
+   *  the last result panels visible (the user might still want to
+   *  read the old traceback). Call this AFTER `resetKernel()` from
+   *  the API has succeeded. */
+  resetKernelState: () => void;
   /** Iter 45: link two cells together. Symmetric — adds `to` into
    *  `from.links` and vice-versa. No-op when the link already exists
    *  or when either id is missing. */
@@ -756,6 +762,20 @@ export const useStore = create<AppState>((set, get) => {
       // next run starts at [1] instead of continuing the old
       // sequence. The user expects a clean slate.
       set({ runtimes: {}, execCounter: 0 });
+    },
+    resetKernelState: () => {
+      // Iter 104: extracted from Toolbar so the contract is
+      // testable. Keeps each cell's last `result` visible (the user
+      // may want to re-read a traceback) but drops `execCount` so
+      // the badges go away — they'd be misleading after a real
+      // kernel restart.
+      set((s) => {
+        const cleared: typeof s.runtimes = {};
+        for (const k of Object.keys(s.runtimes)) {
+          cleared[k] = { ...s.runtimes[k], execCount: undefined };
+        }
+        return { execCounter: 0, runtimes: cleared };
+      });
     },
 
     linkCells: (from, to) => {
