@@ -118,6 +118,24 @@ export function CellPalette() {
     if (idx >= matches.length) setIdx(Math.max(0, matches.length - 1));
   }, [matches, idx]);
 
+  // Iter 72: terse one-line summary of the notebook so the user
+  // sees structure at a glance. Counts links over each pair once.
+  const stats = useMemo(() => {
+    const total = cells.length;
+    const collapsed = cells.filter((c) => c.collapsed).length;
+    const linkPairs = new Set<string>();
+    for (const c of cells) {
+      for (const tid of c.links ?? []) {
+        const k = c.id < tid ? `${c.id}|${tid}` : `${tid}|${c.id}`;
+        linkPairs.add(k);
+      }
+    }
+    const parts = [`${total} cell${total === 1 ? "" : "s"}`];
+    if (collapsed) parts.push(`${collapsed} collapsed`);
+    if (linkPairs.size) parts.push(`${linkPairs.size} link${linkPairs.size === 1 ? "" : "s"}`);
+    return parts.join(" · ");
+  }, [cells]);
+
   if (!open) return null;
 
   const pick = (id: string) => {
@@ -202,9 +220,10 @@ export function CellPalette() {
               </li>
             ))}
           </ul>
-          <p className="mt-2 font-hand text-sm text-ink/50 dark:text-white/50 px-2">
-            ↑↓ pick · Enter jumps · Esc closes
-          </p>
+          <div className="mt-2 px-2 flex items-center justify-between gap-2 font-hand text-sm text-ink/50 dark:text-white/50">
+            <span>↑↓ pick · Enter jumps · Esc closes</span>
+            <span className="text-xs">{stats}</span>
+          </div>
         </div>
       </div>
     </div>
