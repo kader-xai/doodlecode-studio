@@ -27,6 +27,7 @@ export function MarkdownCell({ data, selected }: NodeProps<{ cellId: string }>) 
   const setSource = useStore((s) => s.setSource);
   const setTitle = useStore((s) => s.setTitle);
   const setSelected = useStore((s) => s.setSelected);
+  const toggleCollapse = useStore((s) => s.toggleCollapse);
   const theme = useStore((s) => s.theme);
   const renameTick = useStore((s) => s.renameTick[cellId] ?? 0);
 
@@ -95,6 +96,18 @@ export function MarkdownCell({ data, selected }: NodeProps<{ cellId: string }>) 
           {/* Title row — no `nodrag` so the title acts as a drag handle.
            *  Only the Edit button below carries `nodrag`. */}
           <div className="flex items-center justify-between mb-2 px-1 gap-2">
+            {/* Iter 55: collapse chevron — mirrors CodeCell. Hides
+             *  the rendered preview / textarea when collapsed. */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); toggleCollapse(cellId); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="font-mono text-sm w-5 h-5 leading-none rounded border-2 border-ink/30 dark:border-white/30 bg-white/60 dark:bg-black/40 text-ink/70 dark:text-white/70 hover:bg-marker-yellow/50 dark:hover:bg-amber-700/30 transition nodrag shrink-0"
+              title={cell.collapsed ? "Expand cell" : "Collapse cell"}
+            >
+              {cell.collapsed ? "▸" : "▾"}
+            </button>
             <EditableTitle
               value={cell.title}
               onCommit={(t) => setTitle(cellId, t)}
@@ -120,8 +133,8 @@ export function MarkdownCell({ data, selected }: NodeProps<{ cellId: string }>) 
             </button>
           </div>
 
-          {/* Body */}
-          {editing ? (
+          {/* Iter 55: hide body when collapsed. Title strip stays. */}
+          {cell.collapsed ? null : editing ? (
             <textarea
               ref={taRef}
               value={draft}
