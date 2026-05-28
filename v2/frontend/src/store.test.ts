@@ -317,6 +317,36 @@ describe("store: duplicate semantics (iter 60)", () => {
   });
 });
 
+describe("store: rule 21e selection sync (iter 78)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [{ id: "c0", kind: "code", source: "", x: 0, y: 0 }],
+      runtimes: {},
+      selectedId: null,
+      selectedIds: [],
+    });
+  });
+
+  it("addCell sets both selectedId and selectedIds", () => {
+    const id = useStore.getState().addCell();
+    expect(useStore.getState().selectedId).toBe(id);
+    expect(useStore.getState().selectedIds).toEqual([id]);
+  });
+
+  it("duplicateCell sets both", () => {
+    const dup = useStore.getState().duplicateCell("c0")!;
+    expect(useStore.getState().selectedId).toBe(dup);
+    expect(useStore.getState().selectedIds).toEqual([dup]);
+  });
+
+  it("focusCell sets both (null clears)", () => {
+    useStore.getState().focusCell("c0");
+    expect(useStore.getState().selectedIds).toEqual(["c0"]);
+    useStore.getState().focusCell(null);
+    expect(useStore.getState().selectedIds).toEqual([]);
+  });
+});
+
 describe("store: setSelectedIds keeps primary in sync (iter 76)", () => {
   beforeEach(() => {
     useStore.setState({

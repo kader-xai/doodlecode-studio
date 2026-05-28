@@ -393,7 +393,8 @@ export const useStore = create<AppState>((set, get) => {
       // they happened to be panned.
       if (on && !s.focusedCellId) {
         const first = s.cellsInOrder()[0];
-        if (first) set({ presenting: true, focusedCellId: first.id, selectedId: first.id });
+        // Iter 78: keep selectedId ⊂ selectedIds (rule 21e).
+        if (first) set({ presenting: true, focusedCellId: first.id, selectedId: first.id, selectedIds: [first.id] });
         else set({ presenting: true });
       } else {
         set({ presenting: on });
@@ -407,7 +408,9 @@ export const useStore = create<AppState>((set, get) => {
         }));
       }
     },
-    focusCell: (id) => set({ focusedCellId: id, selectedId: id }),
+    focusCell: (id) =>
+      // Iter 78: rule 21e — primary mirrors into selectedIds.
+      set({ focusedCellId: id, selectedId: id, selectedIds: id ? [id] : [] }),
     cellsInOrder: () => {
       // Sort by row (y bucketed) first, then x. Bucket width tolerates
       // small vertical jitter so two cells "on the same row" stay
@@ -425,14 +428,16 @@ export const useStore = create<AppState>((set, get) => {
       if (!ordered.length) return;
       const idx = ordered.findIndex((c) => c.id === get().focusedCellId);
       const next = idx < 0 ? ordered[0] : ordered[Math.min(ordered.length - 1, idx + 1)];
-      set({ focusedCellId: next.id, selectedId: next.id });
+      // Iter 78: rule 21e.
+      set({ focusedCellId: next.id, selectedId: next.id, selectedIds: [next.id] });
     },
     prevCell: () => {
       const ordered = get().cellsInOrder();
       if (!ordered.length) return;
       const idx = ordered.findIndex((c) => c.id === get().focusedCellId);
       const prev = idx <= 0 ? ordered[0] : ordered[idx - 1];
-      set({ focusedCellId: prev.id, selectedId: prev.id });
+      // Iter 78: rule 21e.
+      set({ focusedCellId: prev.id, selectedId: prev.id, selectedIds: [prev.id] });
     },
 
     presenterTool: "none",
@@ -500,7 +505,8 @@ export const useStore = create<AppState>((set, get) => {
         y,
         ...partial,
       };
-      set((s) => ({ cells: [...s.cells, next], selectedId: id }));
+      // Iter 78: rule 21e — primary mirrors into selectedIds.
+      set((s) => ({ cells: [...s.cells, next], selectedId: id, selectedIds: [id] }));
       autosave();
       return id;
     },
@@ -598,7 +604,8 @@ export const useStore = create<AppState>((set, get) => {
         // on the duplicate doesn't mutate the source's bubble.
         callouts: src.callouts ? src.callouts.map((co) => ({ ...co })) : undefined,
       };
-      set((s) => ({ cells: [...s.cells, dup], selectedId: dupId }));
+      // Iter 78: rule 21e.
+      set((s) => ({ cells: [...s.cells, dup], selectedId: dupId, selectedIds: [dupId] }));
       autosave();
       return dupId;
     },
