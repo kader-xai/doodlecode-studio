@@ -195,37 +195,55 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
               forceEdit={forceEditTitle}
               className="font-hand text-base truncate text-ink dark:text-white flex-1 min-w-0"
             />
-            <select
-              value={cell.diagram_kind ?? "doodle"}
-              onChange={(e) => { e.stopPropagation(); setDiagramKind(cellId, e.target.value); }}
-              onKeyDown={(e) => e.stopPropagation()}
-              onPointerDown={(e) => e.stopPropagation()}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={(e) => e.stopPropagation()}
-              title="Diagram style"
-              className="nodrag font-hand text-sm px-1.5 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/30 bg-white/90 dark:bg-[#262a31] text-ink dark:text-white shrink-0"
-            >
-              <option value="doodle">🖍 Doodle</option>
-              <option value="mermaid">🧭 Mermaid</option>
-              <option value="math">📐 Math</option>
-            </select>
-            <button
-              type="button"
-              // `preventDefault` on mousedown keeps the textarea focused
-              // so its onBlur doesn't fire BEFORE our click handler runs.
-              // `nodrag` lets ReactFlow ignore this button's pointerdown.
-              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (editing) commitAndClose();
-                else enterEdit();
-              }}
-              className="nodrag font-hand text-sm px-2 py-0.5 rounded-md border-2 border-ink dark:border-white/70 bg-white/90 dark:bg-[#262a31] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition shrink-0"
-              title={editing ? "Stop editing (Esc)" : "Edit diagram source"}
-            >
-              {editing ? "✓ Done" : "✏️ Edit"}
-            </button>
+            {/* Iter 92: when collapsed, swap the kind selector for a
+             *  compact static chip so the title strip stays clean. */}
+            {cell.collapsed ? (
+              <span
+                className="font-hand text-sm px-1.5 py-0.5 rounded-md border-2 border-ink/30 dark:border-white/30 bg-white/60 dark:bg-black/40 text-ink/70 dark:text-white/70 shrink-0"
+                title={`Diagram kind — ${cell.diagram_kind ?? "doodle"}`}
+              >
+                {cell.diagram_kind === "mermaid"
+                  ? "🧭 Mermaid"
+                  : cell.diagram_kind === "math"
+                  ? "📐 Math"
+                  : "🖍 Doodle"}
+              </span>
+            ) : (
+              <select
+                value={cell.diagram_kind ?? "doodle"}
+                onChange={(e) => { e.stopPropagation(); setDiagramKind(cellId, e.target.value); }}
+                onKeyDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => e.stopPropagation()}
+                title="Diagram style"
+                className="nodrag font-hand text-sm px-1.5 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/30 bg-white/90 dark:bg-[#262a31] text-ink dark:text-white shrink-0"
+              >
+                <option value="doodle">🖍 Doodle</option>
+                <option value="mermaid">🧭 Mermaid</option>
+                <option value="math">📐 Math</option>
+              </select>
+            )}
+            {/* Iter 92: hide Edit when collapsed (the body it'd open is hidden). */}
+            {!cell.collapsed && (
+              <button
+                type="button"
+                // `preventDefault` on mousedown keeps the textarea focused
+                // so its onBlur doesn't fire BEFORE our click handler runs.
+                // `nodrag` lets ReactFlow ignore this button's pointerdown.
+                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (editing) commitAndClose();
+                  else enterEdit();
+                }}
+                className="nodrag font-hand text-sm px-2 py-0.5 rounded-md border-2 border-ink dark:border-white/70 bg-white/90 dark:bg-[#262a31] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition shrink-0"
+                title={editing ? "Stop editing (Esc)" : "Edit diagram source"}
+              >
+                {editing ? "✓ Done" : "✏️ Edit"}
+              </button>
+            )}
           </div>
 
           {/* Body — hidden when collapsed (iter 56). */}
