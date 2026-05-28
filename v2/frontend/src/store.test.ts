@@ -622,6 +622,18 @@ describe("store: collapse (iter 53/57)", () => {
     useStore.getState().setAllCollapsed(false);
     expect(useStore.getState().cells.every((c) => !c.collapsed)).toBe(true);
   });
+
+  it("setAllCollapsed preserves object identity for already-matching cells (iter 142)", () => {
+    // Cell 'b' starts collapsed; a + c don't. After setAllCollapsed(true),
+    // only a and c should be new object references. 'b' must stay the
+    // same reference so React's downstream memo / shallow-compare
+    // doesn't repaint cells that didn't actually change.
+    const before = useStore.getState().cells;
+    const bBefore = before.find((c) => c.id === "b")!;
+    useStore.getState().setAllCollapsed(true);
+    const bAfter = useStore.getState().cells.find((c) => c.id === "b")!;
+    expect(bAfter).toBe(bBefore);
+  });
 });
 
 describe("store: palette (iter 62/63)", () => {

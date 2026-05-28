@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Tests (iter 142)
+- Lock `setAllCollapsed` object-identity preservation: already-
+  matching cells keep their reference so React memo / shallow
+  compare doesn't repaint rows whose `collapsed` flag didn't
+  actually change. 86 frontend tests.
+
 ### Tests (iter 141)
 - Lock `addWhiteboardCell` + `addDiagramCell` seed shape: whiteboard
   source is parseable JSON with `strokes: []` and a `bg` field;
