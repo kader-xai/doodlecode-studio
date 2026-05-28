@@ -168,6 +168,14 @@ describe("store: multi-select + group ops (iter 33-35)", () => {
     const a = useStore.getState().cells.find((c) => c.id === "a")!;
     expect(a.x).toBe(0); // unchanged
   });
+
+  it("alignSelected('distH') no-ops with only 2 cells (iter 131)", () => {
+    useStore.getState().setSelectedIds(["a", "b"]);
+    const before = useStore.getState().cells.map((c) => c.x);
+    useStore.getState().alignSelected("distH");
+    const after = useStore.getState().cells.map((c) => c.x);
+    expect(after).toEqual(before); // distribution needs ≥3 anchors
+  });
 });
 
 describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {

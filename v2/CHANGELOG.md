@@ -8,6 +8,10 @@
   a one-sided link onto the surviving endpoint that
   `ConnectionsLayer` cannot resolve. New test covers it.
 
+### Tests (iter 131)
+- Lock `alignSelected("distH")` no-op behavior with only 2 cells —
+  distribution needs ≥3 anchors. 74 frontend tests now.
+
 ## v2.5.4 — Esc / Tab fixes + edge-case tests
 
 7 iterations on top of v2.5.3 (121-127). Test suite went 85 → 88.
