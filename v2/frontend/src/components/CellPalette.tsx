@@ -146,12 +146,12 @@ export function CellPalette() {
             onChange={(e) => { setQ(e.target.value); setIdx(0); }}
             onKeyDown={(e) => {
               if (e.key === "Escape") { e.preventDefault(); close(); return; }
-              if (e.key === "ArrowDown") {
+              if (e.key === "ArrowDown" || (e.key === "Tab" && !e.shiftKey)) {
                 e.preventDefault();
                 setIdx((i) => Math.min(matches.length - 1, i + 1));
                 return;
               }
-              if (e.key === "ArrowUp") {
+              if (e.key === "ArrowUp" || (e.key === "Tab" && e.shiftKey)) {
                 e.preventDefault();
                 setIdx((i) => Math.max(0, i - 1));
                 return;
@@ -223,7 +223,7 @@ export function CellPalette() {
             ))}
           </ul>
           <div className="mt-2 px-2 flex items-center justify-between gap-2 font-hand text-sm text-ink/50 dark:text-white/50">
-            <span>↑↓ / Home / End / PgUp / PgDn · Enter · Esc</span>
+            <span>↑↓ · Tab / Shift+Tab · Home/End · Enter · Esc</span>
             <span className="text-xs">{stats}</span>
           </div>
         </div>
