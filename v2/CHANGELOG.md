@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Tests (iter 139)
+- Lock `addBrowserCell` URL normalization: bare hosts get an
+  `https://` prefix, explicit `http://` is preserved, whitespace
+  returns `null`, and the cell's title defaults to the host. 83
+  frontend tests.
+
 ### Tests (iter 138)
 - Lock `renderMarkdown` italic vs bold disambiguation: `*foo*`
   renders as `<em>`, `**foo**` renders as `<strong>` and does NOT

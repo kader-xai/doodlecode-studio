@@ -105,6 +105,25 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().addMediaCell("   ")).toBeNull();
   });
 
+  it("addBrowserCell prepends https:// + derives title from host (iter 139)", () => {
+    const id = useStore.getState().addBrowserCell("example.com/about");
+    expect(id).not.toBeNull();
+    const c = useStore.getState().cells.find((x) => x.id === id)!;
+    expect(c.kind).toBe("browser");
+    expect(c.source).toBe("https://example.com/about");
+    expect(c.title).toBe("example.com");
+  });
+
+  it("addBrowserCell keeps an explicit http:// prefix (iter 139)", () => {
+    const id = useStore.getState().addBrowserCell("http://localhost:3000");
+    const c = useStore.getState().cells.find((x) => x.id === id)!;
+    expect(c.source).toBe("http://localhost:3000");
+  });
+
+  it("addBrowserCell returns null for whitespace (iter 139)", () => {
+    expect(useStore.getState().addBrowserCell("   ")).toBeNull();
+  });
+
   it("setExplain populates callouts[0]", () => {
     useStore.getState().setExplain("c0", "hello bubble");
     const c = useStore.getState().cells.find((c) => c.id === "c0")!;
