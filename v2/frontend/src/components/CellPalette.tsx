@@ -158,7 +158,19 @@ export function CellPalette() {
             value={q}
             onChange={(e) => { setQ(e.target.value); setIdx(0); }}
             onKeyDown={(e) => {
-              if (e.key === "Escape") { e.preventDefault(); close(); return; }
+              if (e.key === "Escape") {
+                // Iter 125: stop the event from reaching the App's
+                // window-level Esc cascade — without this it would
+                // also deselect the cell the user had selected
+                // before opening the palette. React's
+                // stopPropagation only stops the synthetic event;
+                // we need stopImmediatePropagation on the native
+                // event to also stop the window listener.
+                e.preventDefault();
+                e.nativeEvent.stopImmediatePropagation();
+                close();
+                return;
+              }
               if (e.key === "ArrowDown" || (e.key === "Tab" && !e.shiftKey)) {
                 e.preventDefault();
                 setIdx((i) => Math.min(matches.length - 1, i + 1));
