@@ -218,6 +218,24 @@ interface PersistedShape {
   cells: Cell[];
 }
 
+/**
+ * Iter 118: pick a survivor near the deleted cell's original index,
+ * shared between `deleteCell` (iter 108) and `deleteCells` (iter 109)
+ * so the math stays in lockstep if it changes again. Returns the id
+ * of the cell that should become the new primary selection, or null
+ * if the notebook is now empty.
+ */
+function nextSelectionAfterDelete(
+  prev: Cell[],
+  remaining: Cell[],
+  deletedPrimaryId: string,
+): string | null {
+  if (remaining.length === 0) return null;
+  const idxOriginal = prev.findIndex((c) => c.id === deletedPrimaryId);
+  const pick = remaining[Math.min(idxOriginal, remaining.length - 1)];
+  return pick?.id ?? null;
+}
+
 function loadPersisted(): PersistedShape | null {
   if (typeof window === "undefined") return null;
   try {
@@ -630,22 +648,11 @@ export const useStore = create<AppState>((set, get) => {
             c.links?.includes(id) ? { ...c, links: c.links.filter((x) => x !== id) } : c,
           );
         const { [id]: _drop, ...runtimes } = s.runtimes;
-        // Iter 108: when the deleted cell was the primary selection,
-        // pick a successor in reading order so the user can keep
-        // working from where they were instead of an empty selection.
+        // Iter 108/118: pick the next survivor in reading order when
+        // the deleted cell was the primary selection.
         let selectedId = s.selectedId;
         if (selectedId === id) {
-          if (cells.length === 0) {
-            selectedId = null;
-          } else {
-            const idxOriginal = s.cells.findIndex((c) => c.id === id);
-            // Pick the cell that was at the same index in the
-            // pre-delete array (which is now occupied by the next
-            // sibling), or the last cell when we deleted from the
-            // end.
-            const next = cells[Math.min(idxOriginal, cells.length - 1)];
-            selectedId = next?.id ?? null;
-          }
+          selectedId = nextSelectionAfterDelete(s.cells, cells, id);
         }
         const selectedIds = s.selectedIds.filter((sid) => sid !== id);
         // Mirror the new primary into selectedIds if it would
@@ -732,17 +739,10 @@ export const useStore = create<AppState>((set, get) => {
         const cells = s.cells.filter((c) => !drop.has(c.id));
         const runtimes = { ...s.runtimes };
         for (const id of ids) delete runtimes[id];
-        // Iter 109: mirror iter 108 — instead of clearing to null
-        // when the primary was deleted, pick a nearby survivor.
+        // Iter 109/118: mirror iter 108 via the shared helper.
         let selectedId = s.selectedId;
         if (selectedId && drop.has(selectedId)) {
-          if (cells.length === 0) {
-            selectedId = null;
-          } else {
-            const idxOriginal = s.cells.findIndex((c) => c.id === selectedId);
-            const next = cells[Math.min(idxOriginal, cells.length - 1)];
-            selectedId = next?.id ?? null;
-          }
+          selectedId = nextSelectionAfterDelete(s.cells, cells, selectedId);
         }
         let selectedIds = s.selectedIds.filter((sid) => !drop.has(sid));
         if (selectedIds.length === 0 && selectedId) selectedIds = [selectedId];
