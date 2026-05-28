@@ -888,10 +888,10 @@ export const useStore = create<AppState>((set, get) => {
         await get().runCell(c.id);
         const r = get().runtimes[c.id]?.result;
         if (r && r.status === "error") {
-          // Iter 114: select the failed cell so its red iter-40
-          // border is visible and the toolbar's edit/delete surface
-          // targets it immediately.
-          set({ selectedId: c.id, selectedIds: [c.id] });
+          // Iter 114/115: select AND pan to the failed cell so the
+          // red iter-40 border is visible even if it was off-screen.
+          // panToCell does both (selection + panToTick bump).
+          get().panToCell(c.id);
           return c.id;
         }
       }

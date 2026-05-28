@@ -216,6 +216,8 @@ describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {
     // border is in the user's face.
     expect(useStore.getState().selectedId).toBe("b");
     expect(useStore.getState().selectedIds).toEqual(["b"]);
+    // Iter 115: panToTick bumps so Canvas centers on the failed cell.
+    expect(useStore.getState().panToTick).toBeGreaterThan(0);
   });
 
   it("clearAllOutputs wipes runtimes without touching cells", () => {
