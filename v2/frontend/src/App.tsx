@@ -397,9 +397,10 @@ export function App() {
         const cells = state.cells;
         if (!cells.length) return;
         const idx = cells.findIndex((c) => c.id === sid);
+        // Iter 121: from null selection, Tab → first, Shift+Tab → last.
         const next =
           idx < 0
-            ? cells[0]
+            ? (e.shiftKey ? cells[cells.length - 1] : cells[0])
             : cells[(idx + (e.shiftKey ? -1 : 1) + cells.length) % cells.length];
         state.setSelected(next.id);
         return;
