@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed (iter 152)
+- **Auto-link new cells to the previous bottom cell.** Together with
+  the iter 151 column flow, pressing **New** now extends a visible
+  symmetric link from the previous cell down to the new one. Skipped
+  for `media` cells (drag-drop image dumps shouldn't all chain) and
+  when the caller passes an explicit `links` array.
+
 ### Changed (iter 151)
 - **Auto-arrange: new cells now stack in a vertical column** below
   the bottom-most existing cell instead of stepping diagonally from

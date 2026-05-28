@@ -47,6 +47,31 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().cells.length).toBe(before);
   });
 
+  it("addCell auto-links to the previous bottom cell (iter 152)", () => {
+    useStore.setState({
+      cells: [
+        { id: "top",    kind: "code", source: "", x: 200, y: 100, h: 300 },
+        { id: "bottom", kind: "code", source: "", x: 200, y: 500, h: 300 },
+      ],
+    });
+    const id = useStore.getState().addCell();
+    const cells = useStore.getState().cells;
+    const added = cells.find((c) => c.id === id)!;
+    const bottom = cells.find((c) => c.id === "bottom")!;
+    // Symmetric link (rule 21c).
+    expect(added.links).toEqual(["bottom"]);
+    expect(bottom.links).toEqual([id]);
+  });
+
+  it("addMediaCell does NOT auto-link (iter 152)", () => {
+    useStore.setState({
+      cells: [{ id: "top", kind: "code", source: "", x: 0, y: 0, h: 300 }],
+    });
+    const id = useStore.getState().addMediaCell("https://example.com/img.png");
+    const cell = useStore.getState().cells.find((c) => c.id === id)!;
+    expect(cell.links ?? []).toEqual([]);
+  });
+
   it("addCell stacks new cells in a vertical column below the last (iter 151)", () => {
     // Seed two cells, one above the other.
     useStore.setState({

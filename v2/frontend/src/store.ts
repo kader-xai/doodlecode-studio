@@ -569,7 +569,8 @@ export const useStore = create<AppState>((set, get) => {
     },
     addCell: (partial = {}) => {
       const id = newId();
-      const { x, y } = spawnPosition(get().cells);
+      const existing = get().cells;
+      const { x, y } = spawnPosition(existing);
       const next: Cell = {
         id,
         kind: "code",
@@ -580,7 +581,38 @@ export const useStore = create<AppState>((set, get) => {
         ...partial,
       };
       // Iter 78: rule 21e — primary mirrors into selectedIds.
-      set((s) => ({ cells: [...s.cells, next], selectedId: id, selectedIds: [id] }));
+      // Iter 152: auto-link the new cell to the previous bottom-most
+      // cell in reading order. Together with the iter 151 column
+      // layout this means New always extends a visible chain. Skip
+      // if `partial.links` is explicitly set (caller wants control)
+      // or if the new cell is `media` (drag-drop image dumps
+      // shouldn't all chain to the last cell).
+      const isMedia = next.kind === "media";
+      const wantsChain = !partial.links && !isMedia && existing.length > 0;
+      let prevId: string | null = null;
+      if (wantsChain) {
+        const BUCKET = 40;
+        const ordered = [...existing].sort((a, b) => {
+          const ay = Math.round(a.y / BUCKET);
+          const by = Math.round(b.y / BUCKET);
+          if (ay !== by) return ay - by;
+          return a.x - b.x;
+        });
+        prevId = ordered[ordered.length - 1].id;
+        next.links = [prevId];
+      }
+      set((s) => {
+        // Mirror the new link onto the previous cell so the graph
+        // stays symmetric (rule 21c).
+        const cells = prevId
+          ? [...s.cells.map((c) =>
+              c.id === prevId
+                ? { ...c, links: c.links?.includes(id) ? c.links : [...(c.links ?? []), id] }
+                : c,
+            ), next]
+          : [...s.cells, next];
+        return { cells, selectedId: id, selectedIds: [id] };
+      });
       autosave();
       return id;
     },
