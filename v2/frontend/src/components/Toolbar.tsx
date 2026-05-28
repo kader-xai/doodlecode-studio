@@ -32,6 +32,10 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
   const selectedId = useStore((s) => s.selectedId);
   const selectedIds = useStore((s) => s.selectedIds);
   const alignSelected = useStore((s) => s.alignSelected);
+  const setAllCollapsed = useStore((s) => s.setAllCollapsed);
+  const allCollapsed = useStore(
+    (s) => s.cells.length > 0 && s.cells.every((c) => c.collapsed),
+  );
   const toggleLinkSelected = useStore((s) => s.toggleLinkSelected);
   const selectedPairLinked = useStore((s) => {
     if (s.selectedIds.length !== 2) return false;
@@ -213,6 +217,16 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
             title="Clear all outputs (Cmd/Ctrl+Shift+L). Kernel variables stay alive."
           >
             🧹 Clear
+          </button>
+          {/* Iter 75: Collapse-all / Expand-all toggle. Label flips
+           *  based on the current state so a single button covers
+           *  both Cmd/Ctrl+Shift+[ and ]. */}
+          <button
+            onClick={() => setAllCollapsed(!allCollapsed)}
+            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-white/80 dark:bg-[#1f2228] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
+            title={allCollapsed ? "Expand every cell (Cmd/Ctrl+Shift+])" : "Collapse every cell (Cmd/Ctrl+Shift+[)"}
+          >
+            {allCollapsed ? "▸ All" : "▾ All"}
           </button>
           <button
             onClick={() => useStore.getState().setInstallOpen(true)}
