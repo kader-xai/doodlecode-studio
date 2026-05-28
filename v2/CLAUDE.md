@@ -194,8 +194,11 @@ v2/
 28. **CI-equivalent must pass before commit**: `cd v2/frontend && npx
     tsc -b --noEmit && npm run build && npm test`, and `cd v2/backend
     && .venv/bin/python -m pytest tests/ -q`.
-29. **Versions in lockstep**: `backend/app/__init__.py:__version__`
-    and `frontend/package.json:"version"` are bumped together.
+29. **Versions in lockstep**: `backend/app/__init__.py:__version__`,
+    `frontend/package.json:"version"`, AND
+    `frontend/src/types.ts:APP_VERSION` are bumped together. The
+    third pin (iter 98) is the one surfaced in the help overlay
+    footer, so if it drifts the user sees the wrong version.
 30. **One logical change per commit.** Refactors live in their own
     commit, separately from feature work.
 31. **README + CLAUDE.md updated in the same commit** that changes
