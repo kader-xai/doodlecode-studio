@@ -12,6 +12,12 @@
 - Lock `alignSelected("distH")` no-op behavior with only 2 cells —
   distribution needs ≥3 anchors. 74 frontend tests now.
 
+### Tests (iter 134)
+- Lock `firstLine` URL preservation for non-markdown / non-code
+  kinds. A browser cell's `https://…#section` must not have its
+  fragment eaten by the code-comment stripper, and a leading `*`
+  on non-markdown kinds must stay intact. 77 frontend tests now.
+
 ### Fixed (iter 133)
 - **`panToCell` now refuses non-existent ids.** Without the guard,
   a stale id (e.g. `runAllCells` returning a deleted cell id) would

@@ -29,6 +29,15 @@ describe("firstLine", () => {
     expect(out.endsWith("…")).toBe(true);
     expect(out.length).toBe(58); // 57 chars + ellipsis
   });
+
+  it("preserves URLs for non-markdown/non-code kinds (iter 134)", () => {
+    // Browser/media sources are URLs — neither the markdown bullet
+    // stripper nor the python comment stripper should fire. A URL
+    // fragment '#section' must survive verbatim.
+    expect(firstLine("https://example.com/page#section", "browser"))
+      .toBe("https://example.com/page#section");
+    expect(firstLine("*not-a-bullet", "browser")).toBe("*not-a-bullet");
+  });
 });
 
 describe("hostOf", () => {
