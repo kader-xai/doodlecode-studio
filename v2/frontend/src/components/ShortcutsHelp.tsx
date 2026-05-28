@@ -26,6 +26,7 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "Cmd/Ctrl+0", what: "Reset zoom to 100%", when: "anywhere" },
   { keys: "Cmd/Ctrl+1", what: "Fit entire canvas in view", when: "anywhere" },
   { keys: "Cmd/Ctrl+K", what: "Open cell palette — filter & jump to any cell", when: "anywhere" },
+  { keys: "Cmd/Ctrl+\\", what: "Toggle dark / light theme", when: "anywhere" },
   { keys: "▾ / ▸ chevron", what: "Collapse / expand a single cell", when: "anywhere" },
   { keys: "Cmd/Ctrl+/", what: "Toggle collapse on selected cell", when: "cell selected" },
   { keys: "Cmd/Ctrl+Shift+[", what: "Collapse every cell", when: "anywhere" },

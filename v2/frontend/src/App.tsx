@@ -97,6 +97,13 @@ export function App() {
         return;
       }
 
+      // Iter 83: Cmd/Ctrl+\ toggles dark/light theme.
+      if ((e.metaKey || e.ctrlKey) && e.key === "\\") {
+        e.preventDefault();
+        state.toggleTheme();
+        return;
+      }
+
       // Iter 71: Cmd/Ctrl+/ toggles collapse on the selected cell.
       // No-op without a selection. Works on every cell kind that has
       // a chevron (Code / Markdown / Diagram / Browser / Whiteboard).
