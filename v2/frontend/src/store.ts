@@ -116,6 +116,19 @@ export interface AppState {
   deleteCell: (id: string) => void;
   /** Iter 33: delete every cell in the list in one shot. */
   deleteCells: (ids: string[]) => void;
+  /** Iter 35: align / distribute the multi-selected cells.
+   *  No-op when fewer than 2 cells are selected (distribute needs 3). */
+  alignSelected: (
+    mode:
+      | "left"
+      | "centerX"
+      | "right"
+      | "top"
+      | "middleY"
+      | "bottom"
+      | "distH"
+      | "distV",
+  ) => void;
   runCell: (id: string) => Promise<void>;
 
   // ── file operations ─────────────────────────────────────────────
@@ -543,6 +556,75 @@ export const useStore = create<AppState>((set, get) => {
         const selectedIds = s.selectedIds.filter((sid) => sid !== id);
         return { cells, runtimes, selectedId, selectedIds };
       });
+      autosave();
+    },
+    alignSelected: (mode) => {
+      const s = get();
+      const ids = s.selectedIds;
+      if (ids.length < 2) return;
+      const idSet = new Set(ids);
+      // Approx dimensions when w/h aren't set yet — matches the
+      // CELL_WIDTH_FALLBACK in Canvas.tsx.
+      const widthOf = (c: Cell) =>
+        c.w ?? (c.kind === "code" ? 580 : c.kind === "markdown" ? 560 : 560);
+      const heightOf = (c: Cell) => c.h ?? 360;
+      const picked = s.cells.filter((c) => idSet.has(c.id));
+      if (picked.length < 2) return;
+
+      const lefts = picked.map((c) => c.x);
+      const rights = picked.map((c) => c.x + widthOf(c));
+      const tops = picked.map((c) => c.y);
+      const bottoms = picked.map((c) => c.y + heightOf(c));
+      const L = Math.min(...lefts);
+      const R = Math.max(...rights);
+      const T = Math.min(...tops);
+      const B = Math.max(...bottoms);
+      const cx = (L + R) / 2;
+      const cy = (T + B) / 2;
+
+      const updates = new Map<string, { x: number; y: number }>();
+
+      if (mode === "left") {
+        for (const c of picked) updates.set(c.id, { x: L, y: c.y });
+      } else if (mode === "right") {
+        for (const c of picked) updates.set(c.id, { x: R - widthOf(c), y: c.y });
+      } else if (mode === "centerX") {
+        for (const c of picked) updates.set(c.id, { x: cx - widthOf(c) / 2, y: c.y });
+      } else if (mode === "top") {
+        for (const c of picked) updates.set(c.id, { x: c.x, y: T });
+      } else if (mode === "bottom") {
+        for (const c of picked) updates.set(c.id, { x: c.x, y: B - heightOf(c) });
+      } else if (mode === "middleY") {
+        for (const c of picked) updates.set(c.id, { x: c.x, y: cy - heightOf(c) / 2 });
+      } else if (mode === "distH" && picked.length >= 3) {
+        const sorted = [...picked].sort((a, b) => a.x - b.x);
+        const totalW = sorted.reduce((sum, c) => sum + widthOf(c), 0);
+        const span = R - L;
+        const gap = (span - totalW) / (sorted.length - 1);
+        let cursor = L;
+        for (const c of sorted) {
+          updates.set(c.id, { x: cursor, y: c.y });
+          cursor += widthOf(c) + gap;
+        }
+      } else if (mode === "distV" && picked.length >= 3) {
+        const sorted = [...picked].sort((a, b) => a.y - b.y);
+        const totalH = sorted.reduce((sum, c) => sum + heightOf(c), 0);
+        const span = B - T;
+        const gap = (span - totalH) / (sorted.length - 1);
+        let cursor = T;
+        for (const c of sorted) {
+          updates.set(c.id, { x: c.x, y: cursor });
+          cursor += heightOf(c) + gap;
+        }
+      } else {
+        return; // distH/distV with <3 cells
+      }
+
+      set((st) => ({
+        cells: st.cells.map((c) =>
+          updates.has(c.id) ? { ...c, ...updates.get(c.id)! } : c,
+        ),
+      }));
       autosave();
     },
     deleteCells: (ids) => {

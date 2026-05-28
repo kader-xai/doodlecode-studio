@@ -30,6 +30,8 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
   const openCalloutEditor = useStore((s) => s.openCalloutEditor);
   const resizeCell = useStore((s) => s.resizeCell);
   const selectedId = useStore((s) => s.selectedId);
+  const selectedIds = useStore((s) => s.selectedIds);
+  const alignSelected = useStore((s) => s.alignSelected);
   const selectedTitle = useStore((s) =>
     s.cells.find((c) => c.id === s.selectedId)?.title ?? null,
   );
@@ -211,6 +213,43 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
           >
             🗑 Delete
           </button>
+
+          {/* Iter 35: Align + distribute bar — only when 2+ cells are
+           *  multi-selected. Hidden in single-selection so it doesn't
+           *  clutter the toolbar. */}
+          {selectedIds.length >= 2 && (
+            <div
+              className="ml-1 flex items-center gap-0.5 rounded-md border-2 border-ink/30 dark:border-white/30 p-0.5 bg-white/60 dark:bg-black/30"
+              title={`Align ${selectedIds.length} cells`}
+            >
+              <span className="font-hand text-xs px-1 text-ink/60 dark:text-white/60">
+                Align
+              </span>
+              {([
+                { k: "left", icon: "⇤", t: "Align left edges" },
+                { k: "centerX", icon: "↔", t: "Center horizontally" },
+                { k: "right", icon: "⇥", t: "Align right edges" },
+                { k: "top", icon: "⇡", t: "Align top edges" },
+                { k: "middleY", icon: "↕", t: "Center vertically" },
+                { k: "bottom", icon: "⇣", t: "Align bottom edges" },
+                { k: "distH", icon: "⇿", t: "Distribute horizontally (≥3)" },
+                { k: "distV", icon: "⇕", t: "Distribute vertically (≥3)" },
+              ] as const).map((b) => (
+                <button
+                  key={b.k}
+                  type="button"
+                  onClick={() => alignSelected(b.k)}
+                  disabled={
+                    (b.k === "distH" || b.k === "distV") && selectedIds.length < 3
+                  }
+                  title={b.t}
+                  className="font-hand text-base leading-none px-1.5 py-0.5 rounded border-2 border-ink/30 dark:border-white/30 bg-white/80 dark:bg-[#1f2228] text-ink dark:text-white hover:bg-marker-yellow/60 dark:hover:bg-amber-700/40 transition disabled:opacity-30 disabled:cursor-not-allowed"
+                >
+                  {b.icon}
+                </button>
+              ))}
+            </div>
+          )}
 
           {selectedId && (
             <>
