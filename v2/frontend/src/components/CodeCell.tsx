@@ -47,8 +47,16 @@ export function CodeCell({ data, selected }: NodeProps<{ cellId: string }>) {
   // Selection ring uses the doodle pink, dialed back when not selected
   // so the card has a subtle resting outline instead of jumping
   // visually on click.
-  const ringColor = selected ? "#c2255c" : "var(--doodle-stroke, #2a2a2a)";
-  const ringWidth = selected ? 3.5 : 2.5;
+  // Iter 40: when the last run errored, the resting outline goes red
+  // so the bad cell is obvious in a sea of green-ran ones. Selection
+  // still wins (pink) when the user actively focuses the cell.
+  const errored = runtime?.result?.status === "error";
+  const ringColor = selected
+    ? "#c2255c"
+    : errored
+    ? "#e03131"
+    : "var(--doodle-stroke, #2a2a2a)";
+  const ringWidth = selected ? 3.5 : errored ? 3 : 2.5;
 
   return (
     <div
