@@ -22,9 +22,15 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "💬 / C", what: "Add or edit a callout on the selected cell", when: "cell selected" },
   { keys: "B", what: "Toggle interact mode for selected browser cell", when: "browser cell selected" },
   { keys: "▶ button", what: "Run focused code cell", when: "anywhere" },
-  { keys: "Backspace / Delete", what: "Delete the selected cell", when: "anywhere" },
+  { keys: "Cmd/Ctrl+Shift+Enter", what: "Run All code cells in order (▶▶)", when: "anywhere" },
+  { keys: "Cmd/Ctrl+Shift+L", what: "Clear every cell's output (kernel survives)", when: "anywhere" },
+  { keys: "Backspace / Delete", what: "Delete selected cell(s) — works on groups", when: "anywhere" },
   { keys: "F2", what: "Rename the selected cell's title", when: "anywhere" },
-  { keys: "Cmd/Ctrl+D", what: "Duplicate the selected cell", when: "anywhere" },
+  { keys: "Cmd/Ctrl+D", what: "Duplicate selected cell(s) — works on groups", when: "anywhere" },
+  { keys: "Cmd/Ctrl+A", what: "Select every cell on the canvas", when: "anywhere" },
+  { keys: "Shift / Cmd-click", what: "Add a cell to the current selection", when: "anywhere" },
+  { keys: "Drag empty pane", what: "Lasso-select cells (Select mode)", when: "anywhere" },
+  { keys: "← ↑ → ↓", what: "Nudge selected cells (10 px; Shift = 50 px)", when: "anywhere" },
   { keys: "Tab / Shift+Tab", what: "Select next / previous cell", when: "anywhere" },
   { keys: "Esc", what: "Deselect / close overlays", when: "anywhere" },
   { keys: "?", what: "Toggle this help overlay", when: "anywhere" },
@@ -76,7 +82,9 @@ export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
           </table>
           <p className="font-hand text-base mt-3 text-ink/70 dark:text-white/70">
             Tip — double-click a cell's title to rename it inline. Click an empty
-            spot on the canvas (or press Esc) to deselect.
+            spot on the canvas (or press Esc) to deselect. With 2+ cells selected
+            an Align bar appears in the toolbar for left/center/right/top/middle/
+            bottom + distribute-H/V.
           </p>
         </div>
       </div>
