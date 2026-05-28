@@ -732,8 +732,20 @@ export const useStore = create<AppState>((set, get) => {
         const cells = s.cells.filter((c) => !drop.has(c.id));
         const runtimes = { ...s.runtimes };
         for (const id of ids) delete runtimes[id];
-        const selectedId = s.selectedId && drop.has(s.selectedId) ? null : s.selectedId;
-        const selectedIds = s.selectedIds.filter((sid) => !drop.has(sid));
+        // Iter 109: mirror iter 108 — instead of clearing to null
+        // when the primary was deleted, pick a nearby survivor.
+        let selectedId = s.selectedId;
+        if (selectedId && drop.has(selectedId)) {
+          if (cells.length === 0) {
+            selectedId = null;
+          } else {
+            const idxOriginal = s.cells.findIndex((c) => c.id === selectedId);
+            const next = cells[Math.min(idxOriginal, cells.length - 1)];
+            selectedId = next?.id ?? null;
+          }
+        }
+        let selectedIds = s.selectedIds.filter((sid) => !drop.has(sid));
+        if (selectedIds.length === 0 && selectedId) selectedIds = [selectedId];
         return { cells, runtimes, selectedId, selectedIds };
       });
       autosave();

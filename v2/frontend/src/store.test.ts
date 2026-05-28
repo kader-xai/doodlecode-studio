@@ -121,11 +121,21 @@ describe("store: multi-select + group ops (iter 33-35)", () => {
     });
   });
 
-  it("deleteCells removes a whole group at once", () => {
+  it("deleteCells removes a whole group + focuses survivor (iter 109)", () => {
     useStore.getState().setSelectedIds(["a", "c"]);
     useStore.getState().deleteCells(["a", "c"]);
     const ids = useStore.getState().cells.map((c) => c.id);
     expect(ids).toEqual(["b"]);
+    // Survivor "b" becomes the new selection (was null pre-iter-109).
+    expect(useStore.getState().selectedId).toBe("b");
+    expect(useStore.getState().selectedIds).toEqual(["b"]);
+  });
+
+  it("deleteCells on every cell leaves selection empty (iter 109)", () => {
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    useStore.getState().deleteCells(["a", "b", "c"]);
+    expect(useStore.getState().cells).toEqual([]);
+    expect(useStore.getState().selectedId).toBeNull();
     expect(useStore.getState().selectedIds).toEqual([]);
   });
 
