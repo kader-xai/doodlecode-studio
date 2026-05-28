@@ -37,6 +37,9 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
   const allCollapsed = useStore(
     (s) => s.cells.length > 0 && s.cells.every((c) => c.collapsed),
   );
+  // Iter 116: gate buttons that act on cells when there are none.
+  const hasCells = useStore((s) => s.cells.length > 0);
+  const hasCodeCells = useStore((s) => s.cells.some((c) => c.kind === "code"));
   const toggleLinkSelected = useStore((s) => s.toggleLinkSelected);
   const selectedPairLinked = useStore((s) => {
     if (s.selectedIds.length !== 2) return false;
@@ -202,8 +205,9 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
                 window.alert(`Run All stopped at "${t}" — see its output for the error.`);
               }
             }}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-green dark:bg-emerald-700 text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Run every code cell top-to-bottom (Cmd/Ctrl+Shift+Enter)"
+            disabled={!hasCodeCells}
+            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-green dark:bg-emerald-700 text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition disabled:opacity-40 disabled:cursor-not-allowed"
+            title={hasCodeCells ? "Run every code cell top-to-bottom (Cmd/Ctrl+Shift+Enter)" : "No code cells to run"}
           >
             ▶▶ Run All
           </button>
@@ -215,8 +219,9 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
                 useStore.getState().clearAllOutputs();
               }
             }}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-peach/70 dark:bg-amber-800 text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Clear all outputs (Cmd/Ctrl+Shift+L). Kernel variables stay alive."
+            disabled={!hasCodeCells}
+            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-peach/70 dark:bg-amber-800 text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition disabled:opacity-40 disabled:cursor-not-allowed"
+            title={hasCodeCells ? "Clear all outputs (Cmd/Ctrl+Shift+L). Kernel variables stay alive." : "No outputs to clear"}
           >
             🧹 Clear
           </button>
@@ -225,8 +230,9 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
            *  both Cmd/Ctrl+Shift+[ and ]. */}
           <button
             onClick={() => setAllCollapsed(!allCollapsed)}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-white/80 dark:bg-[#1f2228] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title={allCollapsed ? "Expand every cell (Cmd/Ctrl+Shift+])" : "Collapse every cell (Cmd/Ctrl+Shift+[)"}
+            disabled={!hasCells}
+            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-white/80 dark:bg-[#1f2228] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition disabled:opacity-40 disabled:cursor-not-allowed"
+            title={hasCells ? (allCollapsed ? "Expand every cell (Cmd/Ctrl+Shift+])" : "Collapse every cell (Cmd/Ctrl+Shift+[)") : "No cells to collapse"}
           >
             {allCollapsed ? "▸ All" : "▾ All"}
           </button>
