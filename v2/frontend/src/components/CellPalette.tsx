@@ -56,16 +56,20 @@ export function CellPalette() {
   const [idx, setIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
-  // Reset on each open + focus the input.
+  // Reset on each open + focus the input. Iter 106: when a cell is
+  // currently selected, start the highlight on its row so the user
+  // doesn't have to ↑↓ to find what they already had.
   useEffect(() => {
     if (open) {
       setQ("");
-      setIdx(0);
+      const sid = useStore.getState().selectedId;
+      const startIdx = sid ? Math.max(0, cells.findIndex((c) => c.id === sid)) : 0;
+      setIdx(startIdx);
       // Defer one frame so the input mounts first.
       const t = setTimeout(() => inputRef.current?.focus(), 0);
       return () => clearTimeout(t);
     }
-  }, [open]);
+  }, [open, cells]);
 
   const matches = useMemo(() => {
     const needle = q.trim().toLowerCase();
