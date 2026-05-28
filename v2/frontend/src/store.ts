@@ -752,7 +752,10 @@ export const useStore = create<AppState>((set, get) => {
     },
 
     clearAllOutputs: () => {
-      set({ runtimes: {} });
+      // Iter 103: also reset the global execution counter so the
+      // next run starts at [1] instead of continuing the old
+      // sequence. The user expects a clean slate.
+      set({ runtimes: {}, execCounter: 0 });
     },
 
     linkCells: (from, to) => {

@@ -214,6 +214,12 @@ describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {
     expect(useStore.getState().runtimes).toEqual({});
     expect(useStore.getState().cells.length).toBe(3); // cells untouched
   });
+
+  it("clearAllOutputs also resets execCounter (iter 103)", () => {
+    useStore.setState({ execCounter: 12 });
+    useStore.getState().clearAllOutputs();
+    expect(useStore.getState().execCounter).toBe(0);
+  });
 });
 
 describe("store: cell↔cell links (iter 45)", () => {
