@@ -49,7 +49,15 @@ export function CellPalette() {
       label: c.title?.trim() || `(untitled ${c.kind} #${i + 1})`,
     }));
     if (!needle) return list;
-    return list.filter((m) => m.label.toLowerCase().includes(needle));
+    // Iter 63: also match against the cell's source so the user can
+    // jump to a code cell by typing a variable name, or a markdown
+    // cell by a phrase inside it. Title still wins ties because we
+    // check it first.
+    return list.filter((m) => {
+      if (m.label.toLowerCase().includes(needle)) return true;
+      const body = (m.cell.source ?? "").toLowerCase();
+      return body.includes(needle);
+    });
   }, [cells, q]);
 
   // Clamp the highlight to the filtered list.
@@ -104,7 +112,7 @@ export function CellPalette() {
                 return;
               }
             }}
-            placeholder="Jump to cell — type to filter…"
+            placeholder="Jump to cell — match title or body…"
             spellCheck={false}
             className="w-full px-2 py-1 font-hand text-lg rounded-md border-2 border-ink/40 dark:border-white/30 bg-white/90 dark:bg-[#1a1d23] text-ink dark:text-white outline-none focus:border-[#c2255c]"
           />

@@ -350,6 +350,45 @@ describe("store: collapse (iter 53/57)", () => {
   });
 });
 
+describe("store: palette (iter 62/63)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "", x: 0, y: 0 },
+        { id: "b", kind: "code", source: "", x: 100, y: 100 },
+      ],
+      runtimes: {},
+      selectedId: null,
+      selectedIds: [],
+      paletteOpen: false,
+      panToTick: 0,
+    });
+  });
+
+  it("setPaletteOpen toggles visibility", () => {
+    useStore.getState().setPaletteOpen(true);
+    expect(useStore.getState().paletteOpen).toBe(true);
+    useStore.getState().setPaletteOpen(false);
+    expect(useStore.getState().paletteOpen).toBe(false);
+  });
+
+  it("panToCell selects the target and bumps panToTick", () => {
+    const before = useStore.getState().panToTick;
+    useStore.getState().panToCell("b");
+    const s = useStore.getState();
+    expect(s.selectedId).toBe("b");
+    expect(s.selectedIds).toEqual(["b"]);
+    expect(s.panToTick).toBe(before + 1);
+  });
+
+  it("panToCell can be called repeatedly — each bump differs", () => {
+    useStore.getState().panToCell("a");
+    const after1 = useStore.getState().panToTick;
+    useStore.getState().panToCell("a"); // same id, but tick should still bump
+    expect(useStore.getState().panToTick).toBe(after1 + 1);
+  });
+});
+
 describe("store: cellsInOrder", () => {
   it("sorts top-to-bottom then left-to-right", () => {
     useStore.setState({
