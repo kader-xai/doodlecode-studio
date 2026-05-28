@@ -1,19 +1,34 @@
 # Changelog
 
-## [Unreleased]
+## v2.5.1 — collapse polish + safety + version chip
 
-### Added (iter 91)
+9 iterations on top of v2.5.0 (91-99). Mostly cleanup; no new
+features that change the file format. Test suite stable at 79.
+
+### Added
 - **Cmd/Ctrl+Enter** runs the selected code cell — alias for
   Shift+Enter. Both Jupyter idioms accepted (we don't auto-advance,
   so they behave identically).
+- **App version footer in help overlay** ("DoodleCode Studio v2.5.1"
+  bottom-right) so users can tell what they're on without opening
+  the source. Sourced from the new `APP_VERSION` constant — kept in
+  lockstep with backend `__version__` and `package.json` per the
+  expanded CLAUDE rule 29.
 
-### Changed (iter 92-93)
-- **Collapsed Diagram title strip** is now minimal — the kind
-  selector becomes a small static chip (🖍 Doodle / 🧭 Mermaid /
-  📐 Math) and the Edit button hides while collapsed.
-- **Collapsed Whiteboard title strip** hides the entire tool block
+### Changed
+- **Collapsed Diagram title strip** — the kind selector becomes a
+  small static chip (🖍 Doodle / 🧭 Mermaid / 📐 Math) and the Edit
+  button hides while collapsed.
+- **Collapsed Markdown title strip** — Edit button hides too.
+- **Collapsed Whiteboard title strip** — hides the entire tool block
   (pen / highlighter / eraser / 5 colors / 3 backgrounds / undo /
   clear). Cramming 20+ buttons into 44 px looked terrible.
+
+### Fixed
+- **Drag-dropped `.py` files capped at 10 MB** to prevent a stalled
+  FileReader on broken inputs.
+- **Toolbar notebook chip uses text cursor**, not the move cursor
+  inherited from EditableTitle's drag-handle styling.
 
 ## v2.5.0 — file-handling polish + palette niceties
 
