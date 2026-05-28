@@ -57,6 +57,7 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
   const setTitle = useStore((s) => s.setTitle);
   const setDiagramKind = useStore((s) => s.setDiagramKind);
   const setSelected = useStore((s) => s.setSelected);
+  const toggleCollapse = useStore((s) => s.toggleCollapse);
   const dark = useStore((s) => s.theme === "dark");
   const renameTick = useStore((s) => s.renameTick[cellId] ?? 0);
 
@@ -172,6 +173,17 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
            *  selector + Edit button below carry `nodrag` so they
            *  still receive clicks. */}
           <div className="flex items-center gap-2 px-2 py-1 border-b-2 border-ink/30 dark:border-white/30 bg-white/80 dark:bg-[#1f2228]">
+            {/* Iter 56: collapse chevron. */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); toggleCollapse(cellId); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="font-mono text-sm w-5 h-5 leading-none rounded border-2 border-ink/30 dark:border-white/30 bg-white/60 dark:bg-black/40 text-ink/70 dark:text-white/70 hover:bg-marker-yellow/50 dark:hover:bg-amber-700/30 transition nodrag shrink-0"
+              title={cell.collapsed ? "Expand cell" : "Collapse cell"}
+            >
+              {cell.collapsed ? "▸" : "▾"}
+            </button>
             <EditableTitle
               value={cell.title}
               onCommit={(t) => setTitle(cellId, t)}
@@ -211,7 +223,8 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
             </button>
           </div>
 
-          {/* Body */}
+          {/* Body — hidden when collapsed (iter 56). */}
+          {!cell.collapsed && (
           <div className="relative flex-1 overflow-auto nodrag nowheel bg-white dark:bg-[#1a1d23]">
             {editing ? (
               <textarea
@@ -286,6 +299,7 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
               </div>
             )}
           </div>
+          )}
         </div>
 
         <ResizeHandle cellId={cellId} baseWidth={w} baseHeight={h} />

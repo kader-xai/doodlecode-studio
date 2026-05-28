@@ -51,6 +51,7 @@ export function BrowserCell({ data, selected }: NodeProps<{ cellId: string }>) {
   const setSource = useStore((s) => s.setSource);
   const setTitle = useStore((s) => s.setTitle);
   const setSelected = useStore((s) => s.setSelected);
+  const toggleCollapse = useStore((s) => s.toggleCollapse);
   const interactiveBrowserId = useStore((s) => s.interactiveBrowserId);
   const setInteractiveBrowser = useStore((s) => s.setInteractiveBrowser);
   const renameTick = useStore((s) => s.renameTick[cellId] ?? 0);
@@ -144,7 +145,8 @@ export function BrowserCell({ data, selected }: NodeProps<{ cellId: string }>) {
         <DoodleBorder stroke={ringColor} fill="#ffffff" strokeWidth={ringWidth} radius={14} />
 
         <div className="absolute inset-1 flex flex-col overflow-hidden rounded-lg bg-white dark:bg-[#262a31]">
-          {/* URL bar */}
+          {/* URL bar — hidden when collapsed (iter 56). */}
+          {!cell.collapsed && (
           <div className="flex items-center gap-1 px-1.5 py-1 border-b-2 border-ink/30 dark:border-white/30 bg-white/80 dark:bg-[#1f2228] nodrag">
             <NavBtn label="◀" title="Back" onClick={goBack} disabled={!backRef.current.length} />
             <NavBtn label="▶" title="Forward" onClick={goForward} disabled={!forwardRef.current.length} />
@@ -189,10 +191,22 @@ export function BrowserCell({ data, selected }: NodeProps<{ cellId: string }>) {
               🛡
             </button>
           </div>
+          )}
 
           {/* Title strip — drag-handle (no `nodrag`). The Exit button
            *  carries its own nodrag so clicks pass through. */}
           <div className="px-2 py-0.5 flex items-center justify-between gap-2 border-b border-ink/10 dark:border-white/10">
+            {/* Iter 56: collapse chevron. */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); toggleCollapse(cellId); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="font-mono text-sm w-5 h-5 leading-none rounded border-2 border-ink/30 dark:border-white/30 bg-white/60 dark:bg-black/40 text-ink/70 dark:text-white/70 hover:bg-marker-yellow/50 dark:hover:bg-amber-700/30 transition nodrag shrink-0"
+              title={cell.collapsed ? "Expand cell" : "Collapse cell"}
+            >
+              {cell.collapsed ? "▸" : "▾"}
+            </button>
             <EditableTitle
               value={cell.title}
               onCommit={(t) => setTitle(cellId, t)}
@@ -214,7 +228,8 @@ export function BrowserCell({ data, selected }: NodeProps<{ cellId: string }>) {
             )}
           </div>
 
-          {/* Iframe + interact-mode overlay */}
+          {/* Iframe + interact-mode overlay — hidden when collapsed (iter 56). */}
+          {!cell.collapsed && (
           <div className="relative flex-1 overflow-hidden">
             <iframe
               key={refreshKey}
@@ -249,6 +264,7 @@ export function BrowserCell({ data, selected }: NodeProps<{ cellId: string }>) {
               </div>
             )}
           </div>
+          )}
         </div>
 
         <ResizeHandle cellId={cellId} baseWidth={w} baseHeight={h} />
