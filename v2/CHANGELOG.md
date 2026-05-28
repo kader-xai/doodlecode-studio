@@ -1,38 +1,46 @@
 # Changelog
 
-## [Unreleased]
+## v2.3.0 — Cmd+K palette + collapse polish
 
-### Added (iter 60-64)
+10 iterations on top of 2.2.0 (60-69). Test suite stays at 46
+frontend + 16 backend = 62 tests.
+
+### Added
 - **Cmd/Ctrl+K cell palette.** Modal that lists every cell by title
   with a kind icon. Type to filter (title AND source body), ↑↓ to
   highlight, Enter to pick. Picking selects the cell and pans the
-  canvas to it (animated, at the current zoom). Untitled cells show
-  a dim preview drawn from the first non-blank source line, with
-  leading markdown / Python-comment markers stripped.
-- **Source-aware filtering.** The palette filter also matches the
-  body of each cell, not just the title — find a code cell by a
-  variable name in it, or a markdown cell by a phrase.
+  canvas to it. Untitled cells show a dim preview drawn from the
+  first non-blank source line (markdown / Python-comment markers
+  stripped). Matching characters are highlighted in pink.
+- **Source-aware filtering.** Palette filter matches the body of each
+  cell, not just the title — find a code cell by a variable name.
+- **Collapse on Whiteboard cells** (the fifth and final cell type).
+  5/5 editable cell types now support collapse.
+- **Selection-count chip in toolbar.** When 2+ cells are selected
+  the toolbar shows "▣ N cells selected" so the user can confirm
+  the group before bulk actions (Delete, Cmd+D, Align, Link).
+- **Collapsed Browser cells show a host chip** (`🌐 example.com`)
+  next to the title so users can tell collapsed browsers apart.
 
 ### Fixed
 - **Duplicate semantics.** `duplicateCell` no longer carries the
   source cell's outgoing links (they'd be asymmetric — target cells
-  wouldn't know about the duplicate). The copy also gets its own
-  deep-cloned callouts so editing one bubble doesn't mutate the
-  source.
-- **Collapsed Diagram + Browser cells actually shrink.** Iter 56
-  hid their bodies but left the outer height at `cell.h`, so a
-  collapsed browser cell still claimed ~480 px of empty space.
-  Outer height drops to ~44 px when collapsed.
-
-### Tests
-- +5 vitest cases for `duplicateCell` semantics, `setPaletteOpen`,
-  `panToCell` (+ repeat-bump). Suite now 46 frontend tests.
+  wouldn't know about the duplicate). The copy gets its own deep-
+  cloned callouts so editing one bubble doesn't mutate the source.
+- **Collapsed Diagram + Browser actually shrink.** Iter 56 hid the
+  body but the outer wrapper still claimed `cell.h` pixels of empty
+  space. Outer now drops to ~44 px (just the title strip) when
+  `cell.collapsed` is true.
 
 ### Docs
 - v2/README.md keyboard table refreshed for v2.1.0 / v2.2.0 — 16
-  new shortcuts documented; file-format example shows `@link_to`
-  and `@collapsed`; optional-directives section calls out which
-  release introduced each.
+  new shortcuts documented; file-format example shows `@link_to` and
+  `@collapsed`; optional-directives section calls out each directive's
+  release of introduction.
+
+### Tests
+- +5 vitest cases for `duplicateCell` semantics, `setPaletteOpen`,
+  `panToCell` (+ repeat-bump). Suite at 46 frontend tests.
 
 ## v2.2.0 — collapse system + zoom + Jupyter-style shortcuts
 
