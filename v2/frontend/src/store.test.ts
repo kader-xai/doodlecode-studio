@@ -212,6 +212,10 @@ describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {
     const failed = await useStore.getState().runAllCells();
     expect(failed).toBe("b");
     expect(useStore.getState().runtimes["c"]).toBeUndefined();
+    // Iter 114: failed cell becomes the selection so the red iter-40
+    // border is in the user's face.
+    expect(useStore.getState().selectedId).toBe("b");
+    expect(useStore.getState().selectedIds).toEqual(["b"]);
   });
 
   it("clearAllOutputs wipes runtimes without touching cells", () => {

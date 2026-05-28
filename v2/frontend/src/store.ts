@@ -887,7 +887,13 @@ export const useStore = create<AppState>((set, get) => {
       for (const c of ordered) {
         await get().runCell(c.id);
         const r = get().runtimes[c.id]?.result;
-        if (r && r.status === "error") return c.id;
+        if (r && r.status === "error") {
+          // Iter 114: select the failed cell so its red iter-40
+          // border is visible and the toolbar's edit/delete surface
+          // targets it immediately.
+          set({ selectedId: c.id, selectedIds: [c.id] });
+          return c.id;
+        }
       }
       return null;
     },
