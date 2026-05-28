@@ -348,13 +348,34 @@ function CanvasInner() {
       e.dataTransfer.dropEffect = "copy";
     }
   }, []);
+  const loadNotebookFromText = useStore((s) => s.loadNotebookFromText);
+  const setNotebookName = useStore((s) => s.setNotebookName);
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       const f = e.dataTransfer.files?.[0];
       if (!f) return;
       e.preventDefault();
+      // Iter 81: .py drop opens the file as a notebook. Confirm
+      // before clobbering the current canvas (matches the File →
+      // Open flow's affordance).
+      if (f.name.endsWith(".py")) {
+        if (!window.confirm(`Open "${f.name}" as a notebook? Current canvas will be replaced.`)) {
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          loadNotebookFromText(String(reader.result))
+            .then(() => {
+              const name = f.name.replace(/\.py$/, "");
+              if (name) setNotebookName(name);
+            })
+            .catch((err) => window.alert(`Could not open: ${err}`));
+        };
+        reader.readAsText(f);
+        return;
+      }
       if (!f.type.startsWith("image/")) {
-        window.alert(`Only image files are supported (got ${f.type || "unknown"})`);
+        window.alert(`Only image files and .py notebooks are supported (got ${f.type || f.name})`);
         return;
       }
       if (f.size > 5 * 1024 * 1024) {
@@ -375,7 +396,7 @@ function CanvasInner() {
       };
       reader.readAsDataURL(f);
     },
-    [rf, addCell],
+    [rf, addCell, loadNotebookFromText, setNotebookName],
   );
 
   return (
