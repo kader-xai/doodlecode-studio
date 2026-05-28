@@ -1,6 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## v2.5.0 — file-handling polish + palette niceties
+
+8 iterations on top of v2.4.0 (81-88). Test suite stable at 79
+(16 backend + 63 frontend).
 
 ### Added (iter 81-88)
 - **Drag-drop `.py` file** onto the canvas opens it as a notebook
