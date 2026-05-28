@@ -1,6 +1,9 @@
 # Changelog
 
-## [Unreleased]
+## v2.5.3 — auto-focus + Run All UX + empty-notebook polish
+
+9 iterations on top of v2.5.2 (111-119). Mostly small UX wins; no
+new file-format fields.
 
 ### Fixed (iter 111-112)
 - **First cell is auto-focused after `File → New` / `File → Open` /
