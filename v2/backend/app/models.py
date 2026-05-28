@@ -75,6 +75,9 @@ class CellPayload(BaseModel):
     # Iter 45: outgoing cell→cell links. Each entry is a target cell id.
     # Persisted via `# @link_to: <id>` directives (one per link).
     links: list[str] = []
+    # Iter 54: collapsed-to-title UI state. Persisted via
+    # `# @collapsed: true` (omitted when False — keeps files clean).
+    collapsed: bool = False
 
 
 class NotebookPayload(BaseModel):

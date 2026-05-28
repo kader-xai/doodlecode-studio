@@ -822,6 +822,8 @@ export const useStore = create<AppState>((set, get) => {
             callouts,
             // Iter 45: outgoing cell-to-cell links.
             links: (c as Cell).links ?? [],
+            // Iter 54: collapsed UI state from `# @collapsed:`.
+            collapsed: (c as Cell).collapsed ?? false,
           };
         }),
         runtimes: {},

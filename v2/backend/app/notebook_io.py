@@ -61,6 +61,10 @@ def serialize(nb: NotebookPayload) -> str:
         # Iter 45: cell→cell links emit one directive per target.
         for target in c.links:
             out.append(f"# @link_to: {target}")
+        # Iter 54: collapsed-to-title UI state. Emit only when True so
+        # newly-created files don't grow a noisy `# @collapsed: false`.
+        if c.collapsed:
+            out.append("# @collapsed: true")
         # Callouts. The first one needs no marker (writes
         # `# @explain:` / `# @image:` straight into the directive
         # block). Subsequent ones are introduced by `# @callout`.
@@ -121,6 +125,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
         title: str | None = None
         diagram_kind: str | None = None
         links: list[str] = []
+        collapsed: bool = False
         callouts: list[CalloutPayload] = []
         # `current` points at the callout being edited. Starts implicit
         # at index 0 so an `# @explain:` before any `# @callout` marker
@@ -157,6 +162,8 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 t = val.strip()
                 if t:
                     links.append(t)
+            elif key == "collapsed":
+                collapsed = val.strip().lower() in ("true", "1", "yes")
             # Unknown directives silently ignored — keeps forward-compat.
             i += 1
 
@@ -189,6 +196,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 explain=explain,
                 callouts=callouts,
                 links=links,
+                collapsed=collapsed,
             )
         )
 

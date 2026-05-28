@@ -137,6 +137,36 @@ def test_old_files_without_link_to_still_parse():
     assert nb.cells[0].title == "Hello"
 
 
+def test_collapsed_round_trips():
+    """Iter 54: cell.collapsed=True emits `# @collapsed: true` and
+    parses back. Default False stays default (no directive)."""
+    nb = NotebookPayload(name="C", cells=[
+        CellPayload(id="a", kind="code", source="x = 1", collapsed=True),
+        CellPayload(id="b", kind="code", source="y = 2"),  # default = False
+    ])
+    text = notebook_io.serialize(nb)
+    assert "# @collapsed: true" in text
+    # Only one occurrence — the default-False cell stays clean.
+    assert text.count("# @collapsed") == 1
+
+    out = _roundtrip(nb)
+    assert out.cells[0].collapsed is True
+    assert out.cells[1].collapsed is False
+
+
+def test_old_files_without_collapsed_default_false():
+    text = (
+        "# doodlecode format-version: 3\n"
+        "# notebook: Old\n"
+        "\n"
+        "# %% kind=code id=c0 x=0 y=0\n"
+        "\n"
+        "x = 1\n"
+    )
+    nb, _ = notebook_io.parse(text)
+    assert nb.cells[0].collapsed is False
+
+
 def test_empty_link_target_is_ignored():
     """A `# @link_to:` directive with no value should not add an
     empty-string entry — keeps the array clean."""
