@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Tests (iter 141)
+- Lock `addWhiteboardCell` + `addDiagramCell` seed shape: whiteboard
+  source is parseable JSON with `strokes: []` and a `bg` field;
+  diagram defaults to `diagram_kind: "doodle"`. Drawing and render
+  code rely on both invariants. 85 frontend tests.
+
 ### Tests (iter 140)
 - Lock `addCell` partial-override behavior: a partial with `kind`
   overrides the default `"code"`, x/y still come from

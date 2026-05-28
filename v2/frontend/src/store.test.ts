@@ -124,6 +124,23 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().addBrowserCell("   ")).toBeNull();
   });
 
+  it("addWhiteboardCell + addDiagramCell return well-formed cells (iter 141)", () => {
+    const wbId = useStore.getState().addWhiteboardCell();
+    const wb = useStore.getState().cells.find((c) => c.id === wbId)!;
+    expect(wb.kind).toBe("whiteboard");
+    // Whiteboard source must be parseable JSON with a strokes array
+    // and a bg field — drawing code relies on both.
+    const parsed = JSON.parse(wb.source);
+    expect(Array.isArray(parsed.strokes)).toBe(true);
+    expect(parsed.strokes.length).toBe(0);
+    expect(typeof parsed.bg).toBe("string");
+
+    const dgId = useStore.getState().addDiagramCell();
+    const dg = useStore.getState().cells.find((c) => c.id === dgId)!;
+    expect(dg.kind).toBe("diagram");
+    expect(dg.diagram_kind).toBe("doodle");
+  });
+
   it("addCell partial overrides defaults but auto-fills missing fields (iter 140)", () => {
     // Partial { kind: 'markdown' } should override the default
     // 'code' kind without forcing the caller to repeat the
