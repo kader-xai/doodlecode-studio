@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## v2.5.4 — Esc / Tab fixes + edge-case tests
+
+7 iterations on top of v2.5.3 (121-127). Test suite went 85 → 88.
 
 ### Fixed (iter 121)
 - **Shift+Tab from a null selection now jumps to the last cell**
@@ -11,6 +13,21 @@
 - **Esc closes the Cmd+K palette as a fallback** when its input has
   lost focus. The palette's own input.onKeyDown handles Esc when
   focused; this is the belt-and-braces case if focus drifted.
+
+### Fixed (iter 125)
+- **Esc-from-palette no longer also clears the cell selection** —
+  React's synthetic-event stopPropagation didn't stop the underlying
+  native event from reaching the window-level App handler. Switched
+  to `nativeEvent.stopImmediatePropagation()` so the App cascade
+  doesn't fall through to `setSelected(null)` when the palette
+  already handled the Esc.
+
+### Tests (iter 126-127)
+- +2 vitest cases for `runAllCells` on empty / markdown-only
+  notebooks (lock the no-code branches surfaced by iter 116's
+  toolbar guard).
+- +1 vitest case for `unlinkCells` on a never-linked pair (no-op).
+- Suite: 16 backend + 72 frontend = 88 total.
 
 ## v2.5.3 — auto-focus + Run All UX + empty-notebook polish
 
