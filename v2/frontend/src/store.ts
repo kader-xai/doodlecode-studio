@@ -926,7 +926,15 @@ export const useStore = create<AppState>((set, get) => {
           const writable = await handle.createWritable();
           await writable.write(r.text);
           await writable.close();
-          set({ fileHandle: handle, savedAt: Date.now() });
+          // Iter 87: sync notebookName from the picked file name so
+          // the toolbar reflects what's actually on disk. Strip the
+          // .py extension; ignore an empty handle.name just in case.
+          const picked = handle.name?.replace(/\.py$/, "");
+          set({
+            fileHandle: handle,
+            savedAt: Date.now(),
+            ...(picked ? { notebookName: picked } : {}),
+          });
           return;
         } catch (err) {
           // AbortError means the user cancelled — silent return.
