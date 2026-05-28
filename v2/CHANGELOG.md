@@ -1,5 +1,28 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed (iter 103-104)
+- **`🧹 Clear` now also resets the `[n]` execution counter.** Used to
+  wipe the per-cell badges but leave `execCounter` ticking, so the
+  next run jumped to `[N+1]` even though no prior outputs were on
+  screen.
+
+### Refactored (iter 104)
+- Toolbar's `↻ Kernel` button no longer inlines its own setState; the
+  client-side cleanup moved to `store.resetKernelState()` so future
+  callers (palette commands, shortcuts) can share it. +1 vitest case
+  locks the new contract.
+
+### Changed (iter 101-102)
+- `EditableTitle` gains an optional `tooltip` prop; the toolbar
+  notebook chip now hints "Double-click to rename notebook" instead
+  of the cell-only "Drag to move · Double-click to rename" default.
+- `v2/README.md` title dropped the stale `v2.0` pin — version is
+  surfaced in the CHANGELOG, the in-app `?` overlay, and
+  `__init__.py`. Saves having to remember to edit the header on
+  every release.
+
 ## v2.5.1 — collapse polish + safety + version chip
 
 9 iterations on top of v2.5.0 (91-99). Mostly cleanup; no new
