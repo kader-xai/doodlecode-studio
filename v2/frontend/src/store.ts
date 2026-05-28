@@ -893,13 +893,16 @@ export const useStore = create<AppState>((set, get) => {
     },
 
     newNotebook: () => {
+      // Iter 112: mirror iter 111 — the seed cell becomes the new
+      // primary selection so keyboard shortcuts work immediately on
+      // a freshly minted notebook.
       set({
         notebookName: "Untitled",
         cells: [{ ...SEED_CELL, id: "c0" }],
         runtimes: {},
         execCounter: 0,
-        selectedId: null,
-        selectedIds: [],
+        selectedId: "c0",
+        selectedIds: ["c0"],
       });
       autosave();
     },
