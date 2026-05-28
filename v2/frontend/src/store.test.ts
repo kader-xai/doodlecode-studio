@@ -177,6 +177,20 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().cells.find((c) => c.id === "c0")!.callouts).toEqual([]);
   });
 
+  it("setCallouts filters out empty entries but keeps image-only ones (iter 144)", () => {
+    useStore.getState().setCallouts("c0", [
+      { text: "keep me" },
+      { text: "  " }, // whitespace-only, no image → dropped
+      { text: "", image: "data:image/png;base64,abc" }, // image-only → kept
+      { text: "" }, // wholly empty → dropped
+    ]);
+    const c = useStore.getState().cells.find((x) => x.id === "c0")!;
+    expect(c.callouts).toEqual([
+      { text: "keep me" },
+      { text: "", image: "data:image/png;base64,abc" },
+    ]);
+  });
+
   it("setExplain preserves callouts[1+] when replacing callouts[0] (iter 143)", () => {
     // Seed two callouts; setExplain only touches the first.
     useStore.getState().setCallouts("c0", [

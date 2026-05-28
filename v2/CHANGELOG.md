@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Tests (iter 144)
+- Lock `setCallouts` filter rules: whitespace-only text entries are
+  dropped, image-only entries (no text) are kept, fully-empty
+  entries are dropped. The CalloutEditor's "remove" affordance
+  relies on this. 89 frontend tests.
+
 ### Tests (iter 143)
 - Lock two `setExplain` invariants: whitespace-only text clears
   the callouts (same as `null`), and replacing `callouts[0]` does
