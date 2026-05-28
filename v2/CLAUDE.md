@@ -132,6 +132,22 @@ v2/
     only the outgoing side were tracked we'd leak references on
     delete.
 
+21e. **`selectedId` must always be a member of `selectedIds`, or
+    `null`.** Any writer of `selectedIds` (lasso, shift-click, Cmd+A,
+    palette pick, deleteCell prune…) must reconcile the primary:
+    keep it if still in the new set, fall back to `ids[0]`, set
+    `null` when the set is empty. Otherwise the toolbar surfaces
+    bound to `selectedId` (Delete, Callout, size presets) keep
+    pointing at a cell the user already deselected — visible bug.
+
+21f. **`duplicateCell` drops outgoing links and deep-clones
+    callouts.** Spread-cloning a cell carries `links` to the
+    duplicate, but the target cells don't know about the new id —
+    the link graph goes asymmetric. The spread also shares the
+    `callouts` array reference; editing a bubble on the copy would
+    mutate the source. Fix: `links: []` and
+    `callouts: src.callouts?.map(co => ({...co}))`.
+
 21d. **`DoodleBorder` must render at the parent's real W×H, not a
     100×100 stretched viewBox.** The original implementation used
     `viewBox="0 0 100 100"` + `preserveAspectRatio="none"`, which
