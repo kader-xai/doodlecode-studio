@@ -387,6 +387,7 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
             // (meant for draggable cells) — the toolbar chip isn't
             // draggable, so a text cursor is the correct hint.
             className="font-hand text-lg text-ink/70 dark:text-white/70 !cursor-text"
+            tooltip="Double-click to rename notebook"
           />
           <span className="text-ink/40 dark:text-white/40 select-none">·</span>
           <span className="select-none">{savedLabel}</span>

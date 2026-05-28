@@ -18,6 +18,7 @@ export function EditableTitle({
   placeholder = "Untitled",
   forceEdit = false,
   onEditEnd,
+  tooltip = "Drag to move · Double-click to rename",
 }: {
   value: string | undefined;
   onCommit: (next: string) => void;
@@ -25,6 +26,10 @@ export function EditableTitle({
   placeholder?: string;
   forceEdit?: boolean;
   onEditEnd?: () => void;
+  /** Iter 101: hover tooltip. Default reflects cell-title usage
+   *  (the cell is a drag handle). Override for non-draggable use
+   *  sites like the toolbar notebook chip. */
+  tooltip?: string;
 }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(value ?? "");
@@ -68,7 +73,7 @@ export function EditableTitle({
           setDraft(value ?? "");
           setEditing(true);
         }}
-        title="Drag to move · Double-click to rename"
+        title={tooltip}
       >
         {value || <span className="opacity-50">{placeholder}</span>}
       </span>
