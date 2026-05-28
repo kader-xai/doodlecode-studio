@@ -156,6 +156,28 @@ export function CellPalette() {
                 setIdx((i) => Math.max(0, i - 1));
                 return;
               }
+              // Iter 79: Home / End / PageUp / PageDown for fast
+              // navigation in big notebooks. PageUp/Down jump by 5.
+              if (e.key === "Home") {
+                e.preventDefault();
+                setIdx(0);
+                return;
+              }
+              if (e.key === "End") {
+                e.preventDefault();
+                setIdx(Math.max(0, matches.length - 1));
+                return;
+              }
+              if (e.key === "PageDown") {
+                e.preventDefault();
+                setIdx((i) => Math.min(matches.length - 1, i + 5));
+                return;
+              }
+              if (e.key === "PageUp") {
+                e.preventDefault();
+                setIdx((i) => Math.max(0, i - 5));
+                return;
+              }
               if (e.key === "Enter") {
                 e.preventDefault();
                 const sel = matches[idx];
@@ -201,7 +223,7 @@ export function CellPalette() {
             ))}
           </ul>
           <div className="mt-2 px-2 flex items-center justify-between gap-2 font-hand text-sm text-ink/50 dark:text-white/50">
-            <span>↑↓ pick · Enter jumps · Esc closes</span>
+            <span>↑↓ / Home / End / PgUp / PgDn · Enter · Esc</span>
             <span className="text-xs">{stats}</span>
           </div>
         </div>
