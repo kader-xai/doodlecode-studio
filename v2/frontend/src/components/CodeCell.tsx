@@ -97,6 +97,19 @@ export function CodeCell({ data, selected }: NodeProps<{ cellId: string }>) {
                 [{runtime.execCount}]
               </span>
             )}
+            {/* Iter 41: elapsed-ms chip — backend always returns this
+             *  for code cells. Hidden while running (the value is
+             *  stale until the new run lands). */}
+            {!runtime?.running && runtime?.result?.elapsed_ms !== undefined && (
+              <span
+                className="font-mono text-xs px-1.5 py-0.5 rounded border-2 select-none shrink-0 border-ink/30 dark:border-white/30 bg-white/40 dark:bg-black/30 text-ink/60 dark:text-white/60"
+                title="Time this cell took to execute"
+              >
+                {runtime.result.elapsed_ms < 1000
+                  ? `${runtime.result.elapsed_ms}ms`
+                  : `${(runtime.result.elapsed_ms / 1000).toFixed(2)}s`}
+              </span>
+            )}
             <EditableTitle
               value={cell.title}
               onCommit={(t) => setTitle(cellId, t)}
