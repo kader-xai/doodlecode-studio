@@ -4,6 +4,7 @@ import { Handle, NodeProps, Position } from "reactflow";
 import { DoodleBorder } from "./DoodleBorder";
 import { EditableTitle } from "./EditableTitle";
 import { Outputs } from "./Outputs";
+import { interruptKernel } from "../api";
 import { useStore } from "../store";
 
 const CARD_WIDTH = 580;
@@ -116,15 +117,30 @@ export function CodeCell({ data, selected }: NodeProps<{ cellId: string }>) {
               forceEdit={forceEdit}
               className="font-hand text-2xl truncate text-ink dark:text-white flex-1 min-w-0"
             />
+            {/* Iter 44: while running the Run button becomes a Stop
+             *  button that SIGINTs the kernel. The runner catches
+             *  KeyboardInterrupt → normal "error" response; the
+             *  kernel survives. */}
             <button
-              onClick={(e) => { e.stopPropagation(); runCell(cellId); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (runtime?.running) {
+                  interruptKernel().catch(() => {});
+                } else {
+                  runCell(cellId);
+                }
+              }}
               onPointerDown={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
-              disabled={runtime?.running}
-              className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-mint dark:bg-[#2b8a3e] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition disabled:opacity-50 nodrag"
-              title="Run this cell"
+              className={
+                "font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition nodrag " +
+                (runtime?.running
+                  ? "bg-marker-pink dark:bg-[#a61e4d]"
+                  : "bg-marker-mint dark:bg-[#2b8a3e]")
+              }
+              title={runtime?.running ? "Stop — interrupt with Ctrl+C" : "Run this cell"}
             >
-              {runtime?.running ? "…" : "▶ Run"}
+              {runtime?.running ? "■ Stop" : "▶ Run"}
             </button>
           </div>
 

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import os
+import signal
 import subprocess
 import sys
 import threading
@@ -58,6 +59,26 @@ class KernelSession:
                 except Exception:
                     pass
             self._proc = None
+
+    def interrupt(self) -> bool:
+        """Send SIGINT to the running kernel — equivalent to Ctrl+C
+        landing inside the user's `exec()`. The runner catches
+        BaseException so we get a normal "error" response back and
+        the kernel survives.
+
+        Read `self._proc` once without acquiring the lock — `execute`
+        holds the lock for the entire duration of a run and we'd
+        deadlock if we tried to take it. Returns True iff a signal
+        was actually sent.
+        """
+        proc = self._proc
+        if not proc or proc.poll() is not None:
+            return False
+        try:
+            os.kill(proc.pid, signal.SIGINT)
+            return True
+        except (ProcessLookupError, PermissionError, OSError):
+            return False
 
     # ── execute ────────────────────────────────────────────────────
 

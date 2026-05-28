@@ -52,6 +52,15 @@ export async function resetKernel(): Promise<void> {
   if (!r.ok) throw new Error(`POST /api/kernel/reset → HTTP ${r.status}`);
 }
 
+/** Iter 44: SIGINT the running kernel — like Ctrl+C inside the
+ *  user's exec(). Returns true iff a signal was actually delivered. */
+export async function interruptKernel(): Promise<boolean> {
+  const r = await fetch("/api/kernel/interrupt", { method: "POST" });
+  if (!r.ok) throw new Error(`POST /api/kernel/interrupt → HTTP ${r.status}`);
+  const j = (await r.json()) as { ok: boolean };
+  return j.ok;
+}
+
 export interface InstallResponse {
   ok: boolean;
   elapsed_ms: number;

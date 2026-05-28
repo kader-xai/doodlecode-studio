@@ -12,7 +12,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import __version__
-from .executor import execute as run_python, reset as reset_kernel
+from .executor import execute as run_python, interrupt as interrupt_kernel, reset as reset_kernel
 from . import notebook_io
 from .models import (
     ExecuteRequest,
@@ -70,6 +70,14 @@ def kernel_reset() -> dict:
     the toolbar's ↻ Kernel button to wipe leftover globals/imports."""
     reset_kernel()
     return {"ok": True}
+
+
+@app.post("/api/kernel/interrupt")
+def kernel_interrupt() -> dict:
+    """Iter 44: SIGINT the running kernel — equivalent to Ctrl+C
+    inside the user's exec(). The runner catches BaseException so
+    the kernel survives and a normal "error" response comes back."""
+    return {"ok": interrupt_kernel()}
 
 
 @app.post("/api/install", response_model=InstallResponse)

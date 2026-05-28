@@ -17,3 +17,9 @@ def execute(req: ExecuteRequest) -> ExecuteResponse:
 
 def reset() -> None:
     get_session().reset()
+
+
+def interrupt() -> bool:
+    """Iter 44: SIGINT the running kernel. Returns True iff a signal
+    was actually delivered."""
+    return get_session().interrupt()
