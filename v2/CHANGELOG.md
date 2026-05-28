@@ -1,24 +1,41 @@
 # Changelog
 
-## [Unreleased]
+## v2.4.0 — selection-sync correctness + palette polish
 
-### Added (iter 71-73)
-- **Cmd/Ctrl+/ toggles collapse on the selected cell** — paired with
-  the iter 62 Cmd+K palette workflow: jump to a cell, collapse it,
-  jump to the next, no mouse trip needed.
-- **Palette stats footer.** The bottom of the Cmd+K modal now shows
-  `N cells · K collapsed · L links` next to the keyboard hint so the
-  user sees notebook structure at a glance every time they open it.
-  Link count dedupes symmetric pairs.
+10 iterations (71-79) on top of v2.3.0. Heavy on test coverage (+17
+cases). Net: 16 backend + 63 frontend = 79 tests.
+
+### Added
+- **Cmd/Ctrl+/ toggles collapse on the selected cell.** Pairs with
+  Cmd+K palette workflow: jump → collapse → next, no mouse needed.
+- **▾ All / ▸ All toolbar toggle.** Single button that runs the
+  collapse-all / expand-all bulk action — makes the iter 57 shortcut
+  discoverable.
+- **Palette stats footer.** `N cells · K collapsed · L links` shown
+  whenever the palette is open (link count dedupes symmetric pairs).
+- **Palette navigation keys.** Home / End / PageUp / PageDown for
+  fast scrolling in big notebooks.
+
+### Fixed
+- **`setSelectedIds` now keeps `selectedId` in sync** with the new
+  set. Previously `setSelectedIds([])` left `selectedId` pointing at
+  a deselected cell, so the toolbar's Delete / Callout / size-preset
+  surfaces stayed bound to it. Captured as CLAUDE.md rule 21e.
+- **5 other selection writers were broken the same way** —
+  `addCell`, `duplicateCell`, `focusCell`, `nextCell`, `prevCell` +
+  the presenting auto-focus path. All now write `selectedIds` in
+  lockstep.
+- **Duplicate semantics rule** captured as CLAUDE.md 21f (drop
+  outgoing links, deep-clone callouts — fix from iter 60).
 
 ### Refactored
-- `firstLine` and `hostOf` moved out of `CellPalette` / `BrowserCell`
-  into a new `src/lib/cellPreview.ts` so they're unit-testable.
+- `firstLine` and `hostOf` extracted to `src/lib/cellPreview.ts` so
+  they're testable without rendering components.
 
 ### Tests
-- +11 vitest cases for `firstLine` (md/code/blank/truncate) and
-  `hostOf` (www-strip / fallback / blank / port). Suite at
-  16 backend + 57 frontend = 73 total.
+- +17 vitest cases: `firstLine` (md/code/blank/truncate), `hostOf`
+  (www / fallback / port / blank), `setSelectedIds` sync (3 branches),
+  rule 21e enforcement (addCell / duplicate / focusCell).
 
 ## v2.3.0 — Cmd+K palette + collapse polish
 
