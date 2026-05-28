@@ -3,6 +3,7 @@ import { useStore } from "../store";
 import { resetKernel } from "../api";
 import { AmbientPicker } from "./AmbientPicker";
 import { FileMenu } from "./FileMenu";
+import { EditableTitle } from "./EditableTitle";
 import { ThemeToggle } from "./ThemeToggle";
 
 /**
@@ -51,6 +52,7 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
     return !!(cell?.callouts && cell.callouts.length > 0);
   });
   const notebookName = useStore((s) => s.notebookName);
+  const setNotebookName = useStore((s) => s.setNotebookName);
   const savedAt = useStore((s) => s.savedAt);
 
   // Refresh the "saved Xs ago" label every second.
@@ -371,10 +373,20 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
             </>
           )}
         </div>
-        <div className="font-hand text-lg ml-1 text-ink/70 dark:text-white/70 select-none flex items-center gap-2 flex-wrap">
-          <span>{notebookName}</span>
-          <span className="text-ink/40 dark:text-white/40">·</span>
-          <span>{savedLabel}</span>
+        <div className="font-hand text-lg ml-1 text-ink/70 dark:text-white/70 flex items-center gap-2 flex-wrap">
+          {/* Iter 86: double-click the notebook name to rename inline.
+           *  Commits to setNotebookName so Cmd+S writes the new name. */}
+          <EditableTitle
+            value={notebookName}
+            onCommit={(t) => {
+              const clean = t.trim();
+              if (clean) setNotebookName(clean);
+            }}
+            placeholder="Untitled"
+            className="font-hand text-lg text-ink/70 dark:text-white/70"
+          />
+          <span className="text-ink/40 dark:text-white/40 select-none">·</span>
+          <span className="select-none">{savedLabel}</span>
         </div>
       </div>
 
