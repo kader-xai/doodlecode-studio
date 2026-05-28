@@ -220,6 +220,29 @@ describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {
     expect(useStore.getState().panToTick).toBeGreaterThan(0);
   });
 
+  it("runAllCells on an empty notebook returns null (iter 126)", async () => {
+    useStore.setState({ cells: [], runtimes: {}, execCounter: 0 });
+    const failed = await useStore.getState().runAllCells();
+    expect(failed).toBeNull();
+    expect(useStore.getState().runtimes).toEqual({});
+    expect(useStore.getState().execCounter).toBe(0);
+  });
+
+  it("runAllCells on a markdown-only notebook returns null (iter 126)", async () => {
+    useStore.setState({
+      cells: [
+        { id: "m1", kind: "markdown", source: "# hi",  x: 0, y: 0 },
+        { id: "m2", kind: "markdown", source: "## hi", x: 0, y: 100 },
+      ],
+      runtimes: {},
+      execCounter: 0,
+    });
+    const failed = await useStore.getState().runAllCells();
+    expect(failed).toBeNull();
+    // No markdown cell got a runtime entry.
+    expect(useStore.getState().runtimes).toEqual({});
+  });
+
   it("clearAllOutputs wipes runtimes without touching cells", () => {
     useStore.setState({
       runtimes: {
