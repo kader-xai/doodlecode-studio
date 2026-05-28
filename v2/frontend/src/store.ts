@@ -938,6 +938,11 @@ export const useStore = create<AppState>((set, get) => {
         selectedId: null,
         selectedIds: [],
       });
+      // Iter 111: auto-focus the first cell after load so keyboard
+      // shortcuts (Cmd+K, Cmd+/, Shift+Enter) work immediately —
+      // without it, the user has to click first.
+      const first = get().cellsInOrder()[0];
+      if (first) set({ selectedId: first.id, selectedIds: [first.id] });
       autosave();
     },
 
