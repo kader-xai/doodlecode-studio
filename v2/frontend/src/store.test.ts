@@ -216,6 +216,75 @@ describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {
   });
 });
 
+describe("store: cell↔cell links (iter 45)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code",     source: "", x: 0,   y: 0   },
+        { id: "b", kind: "markdown", source: "", x: 200, y: 0   },
+        { id: "c", kind: "browser",  source: "", x: 400, y: 0   },
+      ],
+      runtimes: {},
+      selectedId: null,
+      selectedIds: [],
+    });
+  });
+
+  it("linkCells writes the link on BOTH endpoints", () => {
+    useStore.getState().linkCells("a", "b");
+    const cells = useStore.getState().cells;
+    expect(cells.find((c) => c.id === "a")!.links).toEqual(["b"]);
+    expect(cells.find((c) => c.id === "b")!.links).toEqual(["a"]);
+    expect(cells.find((c) => c.id === "c")!.links ?? []).toEqual([]);
+  });
+
+  it("linkCells is idempotent — calling twice does not duplicate", () => {
+    useStore.getState().linkCells("a", "b");
+    useStore.getState().linkCells("a", "b");
+    const cellA = useStore.getState().cells.find((c) => c.id === "a")!;
+    expect(cellA.links).toEqual(["b"]);
+  });
+
+  it("linkCells refuses self-links", () => {
+    useStore.getState().linkCells("a", "a");
+    expect(useStore.getState().cells.find((c) => c.id === "a")!.links ?? []).toEqual([]);
+  });
+
+  it("unlinkCells drops the link from both endpoints", () => {
+    useStore.getState().linkCells("a", "b");
+    useStore.getState().unlinkCells("a", "b");
+    const cells = useStore.getState().cells;
+    expect(cells.find((c) => c.id === "a")!.links).toEqual([]);
+    expect(cells.find((c) => c.id === "b")!.links).toEqual([]);
+  });
+
+  it("toggleLinkSelected creates then removes a link with exactly 2 selected", () => {
+    useStore.getState().setSelectedIds(["a", "c"]);
+    expect(useStore.getState().toggleLinkSelected()).toBe(true);
+    expect(useStore.getState().cells.find((c) => c.id === "a")!.links).toEqual(["c"]);
+    expect(useStore.getState().toggleLinkSelected()).toBe(false);
+    expect(useStore.getState().cells.find((c) => c.id === "a")!.links).toEqual([]);
+  });
+
+  it("toggleLinkSelected is a no-op with !=2 selected", () => {
+    useStore.getState().setSelectedIds(["a"]);
+    expect(useStore.getState().toggleLinkSelected()).toBe(false);
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    expect(useStore.getState().toggleLinkSelected()).toBe(false);
+    expect(useStore.getState().cells.find((c) => c.id === "a")!.links ?? []).toEqual([]);
+  });
+
+  it("deleteCell prunes dangling links from survivors", () => {
+    useStore.getState().linkCells("a", "b");
+    useStore.getState().linkCells("b", "c");
+    useStore.getState().deleteCell("b");
+    const cells = useStore.getState().cells;
+    expect(cells.map((c) => c.id)).toEqual(["a", "c"]);
+    expect(cells.find((c) => c.id === "a")!.links).toEqual([]);
+    expect(cells.find((c) => c.id === "c")!.links).toEqual([]);
+  });
+});
+
 describe("store: cellsInOrder", () => {
   it("sorts top-to-bottom then left-to-right", () => {
     useStore.setState({
