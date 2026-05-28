@@ -123,6 +123,16 @@ v2/
 21. **`/api/proxy` SSRF guard.** Resolve the hostname and refuse any
     private / loopback / link-local / multicast / reserved / metadata
     address. 8 MB cap, 15 s timeout, GET only, http/https only.
+21b. **Never trust ReactFlow's `<EdgeRenderer>` for overlays we
+    derive ourselves.** ReactFlow drops edges whose source/target
+    nodes don't have measured handle bounds (see `getNodeData`
+    in `@reactflow/core`). When `nodes` is driven by local
+    `useState` instead of ReactFlow's `setNodes` pipeline, our
+    synthetic pseudo-nodes (callouts, future link-edges) never get
+    measured and every edge is silently filtered. Use a custom
+    SVG layer inside the ReactFlow viewport instead —
+    `ConnectionsLayer.tsx` is the reference. Subscribe to
+    `useViewport()` so pan + zoom carry the lines.
 
 ## Code rules
 

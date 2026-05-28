@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ReactFlow, {
   Background,
   BackgroundVariant,
   Controls,
-  Edge,
   Node,
   NodeChange,
   NodeTypes,
   ReactFlowInstance,
+  ReactFlowProvider,
   applyNodeChanges,
 } from "reactflow";
 import "reactflow/dist/style.css";
@@ -15,6 +15,7 @@ import "reactflow/dist/style.css";
 import { BrowserCell } from "./BrowserCell";
 import { CalloutBubble } from "./CalloutBubble";
 import { CodeCell } from "./CodeCell";
+import { ConnectionsLayer } from "./ConnectionsLayer";
 import { DiagramCell } from "./DiagramCell";
 import { MarkdownCell } from "./MarkdownCell";
 import { MediaCell } from "./MediaCell";
@@ -62,6 +63,17 @@ const BUBBLE_W = 280;
  * cause re-renders during drag and visually drop frames.
  */
 export function Canvas() {
+  // ReactFlowProvider gives useReactFlow + the internal store access
+  // to children. Without it, controlled-mode edge sync can get stuck
+  // (we saw `<g class="react-flow__edges">` rendered but empty).
+  return (
+    <ReactFlowProvider>
+      <CanvasInner />
+    </ReactFlowProvider>
+  );
+}
+
+function CanvasInner() {
   const cells = useStore((s) => s.cells);
   const selectedId = useStore((s) => s.selectedId);
   const moveCell = useStore((s) => s.moveCell);
@@ -142,14 +154,13 @@ export function Canvas() {
     const x = parentX + cellW + CALLOUT_GAP;
     const STACK_DY = 200; // approximate; each bubble is ~180-200px tall
     return list.map((_, idx) => ({
-      id: `${c.id}::callout::${idx}`,
+      id: `${c.id}--callout-${idx}`,
       type: "callout",
       position: { x, y: parentY + idx * STACK_DY },
       data: calloutDataFor(c.id, idx),
       selected: false,
       style: STYLE,
       draggable: false,
-      selectable: false,
     }));
   };
 
@@ -225,32 +236,13 @@ export function Canvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cells, selectedId, STYLE, presenting, focusedCellId]);
 
-  // Dashed connector — one per (cell, callout index). Only the first
-  // bubble connects to the cell directly; later bubbles connect to
-  // the previous bubble so the chain reads top-to-bottom.
-  const edges: Edge[] = useMemo(() => {
-    const out: Edge[] = [];
-    for (const c of cells) {
-      const list = c.callouts ?? [];
-      list.forEach((_, idx) => {
-        const target = `${c.id}::callout::${idx}`;
-        const source = idx === 0 ? c.id : `${c.id}::callout::${idx - 1}`;
-        out.push({
-          id: `e:${c.id}:${idx}`,
-          source,
-          target,
-          // `doodle-edge-flow` is defined in index.css — it overrides
-          // the dasharray to a dot pattern and animates the offset so
-          // the dots flow from cell toward callout.
-          className: "doodle-edge-flow",
-          style: { stroke: dark ? "#aaa" : "#555", strokeWidth: 2.5 },
-          animated: false,
-          interactionWidth: 0,
-        });
-      });
-    }
-    return out;
-  }, [cells, dark]);
+  // We used to derive ReactFlow edges from cell.callouts here, but
+  // ReactFlow silently dropped every one of them because its
+  // EdgeRenderer filters edges whose source/target nodes don't have
+  // measured handle bounds — a measurement that never landed for our
+  // synthetic callout pseudo-nodes. The dashed connectors are now
+  // drawn by `<ConnectionsLayer />` below, which sidesteps the whole
+  // ReactFlow edge pipeline.
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -268,7 +260,7 @@ export function Canvas() {
           if (ch.type === "position" && ch.dragging === false) {
             // Skip synthetic callout pseudo-nodes — their position is
             // derived from the parent cell each render.
-            if (ch.id.includes("::callout::")) continue;
+            if (ch.id.includes("--callout-")) continue;
             const node = next.find((n) => n.id === ch.id);
             if (node) moveCell(node.id, node.position.x, node.position.y);
           }
@@ -288,7 +280,7 @@ export function Canvas() {
       <ReactFlow
         nodes={nodes}
         nodeTypes={nodeTypes}
-        edges={edges}
+        edges={[]}
         onInit={(inst) => { instanceRef.current = inst; }}
         onNodesChange={onNodesChange}
         onPaneClick={() => setSelected(null)}
@@ -311,6 +303,10 @@ export function Canvas() {
           size={1.5}
           color={dark ? "#3a3f47" : "#d4c89a"}
         />
+        {/* Our own animated dashed connectors between cells and
+         *  callouts. Mounted inside ReactFlow so it picks up the
+         *  viewport (pan + zoom) via useViewport. */}
+        <ConnectionsLayer />
         {!presenting && (
           <Controls
             showInteractive={false}

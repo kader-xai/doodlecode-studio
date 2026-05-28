@@ -34,14 +34,14 @@ html.ink-highlighter, html.ink-highlighter * {
   cursor: crosshair !important;
 }
 
-/* Flowing dashed connector — used on cell ↔ callout edges so the
- * dashes appear to march from the source toward the target. The
- * dash pattern below renders as evenly-spaced round dots (1px dash
- * + 10px gap with `round` linecap). Lowering `--flow-period` makes
- * the dots move faster. */
-.doodle-edge-flow .react-flow__edge-path {
-  stroke-dasharray: 1 10 !important;
-  stroke-linecap: round;
+/* Flowing dashed connector — applied to our custom SVG lines in
+ * ConnectionsLayer. (We previously used ReactFlow edges + a
+ * `doodle-edge-flow` class on `.react-flow__edge-path`, but
+ * ReactFlow silently rejects edges whose synthetic source/target
+ * nodes haven't been measured by its internal resize observer.
+ * Drawing the connectors ourselves keeps the geometry under our
+ * own control and the animation reliable.) */
+.doodle-connector {
   animation: doodle-dash-flow var(--flow-period, 1s) linear infinite;
 }
 @keyframes doodle-dash-flow {

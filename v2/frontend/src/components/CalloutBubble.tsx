@@ -1,4 +1,4 @@
-import { NodeProps } from "reactflow";
+import { Handle, NodeProps, Position } from "reactflow";
 import { DoodleBorder } from "./DoodleBorder";
 import { useStore } from "../store";
 
@@ -30,6 +30,13 @@ export function CalloutBubble({ data }: NodeProps<{ cellId: string; index: numbe
       onDoubleClick={(e) => { e.stopPropagation(); openEditor(cellId); }}
       title="Double-click to edit callouts"
     >
+      {/* Hidden ReactFlow handles. Without these, ReactFlow's
+       *  EdgeRenderer rejects any edge with this node as a target
+       *  (it checks `targetIsValid` which requires measured handle
+       *  bounds). Visually hidden — we just need the DOM elements
+       *  so the internal store records valid handle rects. */}
+      <Handle type="target" position={Position.Left}  className="!opacity-0 !pointer-events-none" />
+      <Handle type="source" position={Position.Right} className="!opacity-0 !pointer-events-none" />
       <div className="relative p-3 pt-2">
         <DoodleBorder
           stroke="var(--doodle-stroke, #2a2a2a)"
