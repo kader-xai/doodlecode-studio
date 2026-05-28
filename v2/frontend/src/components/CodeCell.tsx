@@ -24,6 +24,7 @@ export function CodeCell({ data, selected }: NodeProps<{ cellId: string }>) {
   const setTitle = useStore((s) => s.setTitle);
   const runCell = useStore((s) => s.runCell);
   const setSelected = useStore((s) => s.setSelected);
+  const toggleCollapse = useStore((s) => s.toggleCollapse);
   const theme = useStore((s) => s.theme);
   const renameTick = useStore((s) => s.renameTick[cellId] ?? 0);
 
@@ -82,6 +83,19 @@ export function CodeCell({ data, selected }: NodeProps<{ cellId: string }>) {
            *  when editing) so they keep working without locking the
            *  whole row from moving the cell. */}
           <div className="flex items-center justify-between mb-2 px-1 gap-2">
+            {/* Iter 53: collapse chevron. Click toggles the editor +
+             *  output panel visibility. Sits left of [n] so it's the
+             *  first thing in the title strip. */}
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); toggleCollapse(cellId); }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="font-mono text-sm w-5 h-5 leading-none rounded border-2 border-ink/30 dark:border-white/30 bg-white/60 dark:bg-black/40 text-ink/70 dark:text-white/70 hover:bg-marker-yellow/50 dark:hover:bg-amber-700/30 transition nodrag shrink-0"
+              title={cell.collapsed ? "Expand cell" : "Collapse cell"}
+            >
+              {cell.collapsed ? "▸" : "▾"}
+            </button>
             {/* Iter 37: Jupyter-style execution counter. Shows once
              *  the cell has run at least once; gray while running so
              *  the user knows the old number is stale. */}
@@ -144,37 +158,44 @@ export function CodeCell({ data, selected }: NodeProps<{ cellId: string }>) {
             </button>
           </div>
 
-          {/* Editor — nodrag/nowheel so ReactFlow doesn't hijack scroll/drag */}
-          <div className="rounded-lg overflow-hidden border-2 border-ink/70 dark:border-white/40 nowheel nodrag">
-            <Editor
-              height={editorHeight}
-              defaultLanguage="python"
-              value={cell.source}
-              onChange={(v) => setSource(cellId, v ?? "")}
-              theme={theme === "dark" ? "vs-dark" : "light"}
-              options={{
-                minimap: { enabled: false },
-                fontFamily: "JetBrains Mono, ui-monospace, monospace",
-                fontSize: 13,
-                scrollBeyondLastLine: false,
-                wordWrap: "on",
-                padding: { top: 8, bottom: 8 },
-                mouseWheelZoom: false,
-                lineNumbersMinChars: 3,
-              }}
-            />
-          </div>
+          {/* Iter 53: hide the editor + output panel when collapsed.
+           *  The title strip stays so the user can still see / select
+           *  / run the cell. */}
+          {!cell.collapsed && (
+            <>
+              {/* Editor — nodrag/nowheel so ReactFlow doesn't hijack scroll/drag */}
+              <div className="rounded-lg overflow-hidden border-2 border-ink/70 dark:border-white/40 nowheel nodrag">
+                <Editor
+                  height={editorHeight}
+                  defaultLanguage="python"
+                  value={cell.source}
+                  onChange={(v) => setSource(cellId, v ?? "")}
+                  theme={theme === "dark" ? "vs-dark" : "light"}
+                  options={{
+                    minimap: { enabled: false },
+                    fontFamily: "JetBrains Mono, ui-monospace, monospace",
+                    fontSize: 13,
+                    scrollBeyondLastLine: false,
+                    wordWrap: "on",
+                    padding: { top: 8, bottom: 8 },
+                    mouseWheelZoom: false,
+                    lineNumbersMinChars: 3,
+                  }}
+                />
+              </div>
 
-          {/* Outputs */}
-          {(runtime?.running || runtime?.result) && (
-            <div className="mt-2 nodrag nowheel">
-              {runtime.running && !runtime.result && (
-                <div className="font-hand text-lg text-ink/70 dark:text-white/70 px-1">
-                  ↳ running…
+              {/* Outputs */}
+              {(runtime?.running || runtime?.result) && (
+                <div className="mt-2 nodrag nowheel">
+                  {runtime.running && !runtime.result && (
+                    <div className="font-hand text-lg text-ink/70 dark:text-white/70 px-1">
+                      ↳ running…
+                    </div>
+                  )}
+                  <Outputs result={runtime.result} />
                 </div>
               )}
-              <Outputs result={runtime.result} />
-            </div>
+            </>
           )}
         </div>
       </div>

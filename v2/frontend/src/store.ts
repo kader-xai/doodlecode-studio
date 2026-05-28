@@ -153,6 +153,8 @@ export interface AppState {
    *  toggle the link between them. Returns true when a link now
    *  exists, false when it was just removed. */
   toggleLinkSelected: () => boolean;
+  /** Iter 53: toggle a cell's collapsed-to-title state. */
+  toggleCollapse: (id: string) => void;
 
   // ── file operations ─────────────────────────────────────────────
   newNotebook: () => void;
@@ -763,6 +765,14 @@ export const useStore = create<AppState>((set, get) => {
       }
       s.linkCells(a, b);
       return true;
+    },
+    toggleCollapse: (id) => {
+      set((s) => ({
+        cells: s.cells.map((c) =>
+          c.id === id ? { ...c, collapsed: !c.collapsed } : c,
+        ),
+      }));
+      autosave();
     },
 
     runAllCells: async () => {

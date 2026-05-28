@@ -38,6 +38,11 @@ export interface Cell {
    *  (distinct from the dashed callout chains). Survives round-trip
    *  through the .py file via `# @link_to:` directives. */
   links?: string[];
+  /** Iter 53: when true the cell collapses to just its title strip;
+   *  the editor/output panel is hidden. UI-only for now — the field
+   *  is in the store (and therefore the localStorage autosave) but
+   *  isn't yet serialized into the .py file. */
+  collapsed?: boolean;
 }
 
 export interface Callout {
