@@ -93,3 +93,62 @@ def test_newline_in_explain_round_trips():
     ])
     out = _roundtrip(nb)
     assert out.cells[0].callouts[0].text == "line one\nline two"
+
+
+# ── Iter 49: cell↔cell link round-trip ─────────────────────────────
+
+
+def test_links_round_trip():
+    """A cell with outgoing links emits `# @link_to:` directives and
+    parses back with the same list."""
+    nb = NotebookPayload(name="L", cells=[
+        CellPayload(id="a", kind="code",     source="x = 1", x=0,   y=0,   links=["b", "c"]),
+        CellPayload(id="b", kind="markdown", source="# B",   x=200, y=0,   links=["a"]),
+        CellPayload(id="c", kind="browser",  source="https://example.com", x=400, y=0),
+    ])
+    text = notebook_io.serialize(nb)
+    # Directives appear in the serialized text.
+    assert "# @link_to: b" in text
+    assert "# @link_to: c" in text
+    assert "# @link_to: a" in text
+
+    out = _roundtrip(nb)
+    assert out.cells[0].links == ["b", "c"]
+    assert out.cells[1].links == ["a"]
+    assert out.cells[2].links == []
+
+
+def test_old_files_without_link_to_still_parse():
+    """Iter 45 added @link_to; v3 files written before that have no
+    such directive. Parser should treat missing links as empty."""
+    text = (
+        "# doodlecode format-version: 3\n"
+        "# notebook: Legacy\n"
+        "\n"
+        "# %% kind=code id=c0 x=0.0 y=0.0\n"
+        "# @title: Hello\n"
+        "\n"
+        "print('hi')\n"
+    )
+    nb, _ = notebook_io.parse(text)
+    assert len(nb.cells) == 1
+    assert nb.cells[0].id == "c0"
+    assert nb.cells[0].links == []
+    assert nb.cells[0].title == "Hello"
+
+
+def test_empty_link_target_is_ignored():
+    """A `# @link_to:` directive with no value should not add an
+    empty-string entry — keeps the array clean."""
+    text = (
+        "# doodlecode format-version: 3\n"
+        "# notebook: T\n"
+        "\n"
+        "# %% kind=code id=c0 x=0 y=0\n"
+        "# @link_to: \n"
+        "# @link_to: b\n"
+        "\n"
+        "x = 1\n"
+    )
+    nb, _ = notebook_io.parse(text)
+    assert nb.cells[0].links == ["b"]
