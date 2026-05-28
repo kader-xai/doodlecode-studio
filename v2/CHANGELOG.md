@@ -1,5 +1,34 @@
 # Changelog
 
+## v2.2.0 — collapse system + zoom + Jupyter-style shortcuts
+
+7 iterations on top of 2.1.0 (51-57). Test suite now 16 backend + 41
+frontend = 57 total.
+
+### Added
+- **Collapse / expand cells.** Every editable cell type (Code,
+  Markdown, Diagram, Browser) gets a small ▾/▸ chevron in its title
+  strip. Click to hide the body and shrink to just the title row.
+  Round-trips through the `.py` via an additive `# @collapsed: true`
+  directive (omitted when False so files stay clean).
+- **Bulk collapse / expand.** Cmd/Ctrl+Shift+`[` collapses every
+  cell, Cmd/Ctrl+Shift+`]` expands. Big notebooks become a
+  scannable list of titles.
+- **Zoom shortcuts.** Cmd/Ctrl+0 resets to 100%, Cmd/Ctrl+1 fits
+  every cell in view (animated). Both skip while typing in editors.
+- **Shift+Enter runs the selected code cell** — Jupyter convention.
+- New `store.setAllCollapsed(bool)` action.
+
+### File format
+- New optional `# @collapsed: true` directive on a cell. Files saved
+  before this release have no directive and parse with
+  `collapsed = false`. Files saved by 2.2.0 still parse cleanly in
+  2.1.0 (the unknown directive is ignored).
+
+### Tests
+- +3 vitest cases for collapse (single + bulk).
+- +2 pytest cases for `@collapsed` round-trip + back-compat.
+
 ## v2.1.0 — multi-select, group ops, cell↔cell connections
 
 19 iterations of UX work on top of the 2.0.0 base. Highlights below;
