@@ -1,5 +1,22 @@
 # Changelog
 
+## [Unreleased]
+
+### Added (iter 81-84)
+- **Drag-drop `.py` file** onto the canvas opens it as a notebook
+  (after a confirm prompt). Filename becomes the new notebook name.
+  Image drag-drop still works for `image/*` files (iter 32).
+- **Save As** — Cmd/Ctrl+Shift+S now prompts via
+  `showSaveFilePicker` to pick a new file location, then binds the
+  returned handle for subsequent silent Cmd+S writes. Falls back to
+  a plain download on browsers without the File System Access API.
+- **Cmd/Ctrl+\\** toggles dark / light theme without leaving the
+  keyboard.
+
+### Docs
+- `v2/README.md` gains a "Drag & drop" section covering the two
+  drop affordances (image → Media cell at drop point; `.py` → open).
+
 ## v2.4.0 — selection-sync correctness + palette polish
 
 10 iterations (71-79) on top of v2.3.0. Heavy on test coverage (+17
