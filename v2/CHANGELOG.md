@@ -32,6 +32,32 @@
   `runAllCells` (success + error halt), `clearAllOutputs`. Suite at
   31 passing.
 
+### Added (iter 44-47 batch)
+- **■ Stop button** while a code cell is running. SIGINTs the kernel
+  subprocess — equivalent to Ctrl+C inside the user's `exec()`. The
+  runner catches KeyboardInterrupt → normal error response, kernel
+  survives. New `POST /api/kernel/interrupt` endpoint.
+- **🔗 Cell ↔ cell connections.** Select exactly two cells, click 🔗
+  Link in the toolbar — a sketchy solid line appears between them
+  (any pair: code↔text, browser↔diagram, etc.). Visually distinct
+  from the dashed dot-flow that connects cells to callouts. Round-
+  trips through the .py via additive `# @link_to:` directives; old
+  files unaffected. Deleting a cell prunes dangling references.
+- **Symmetric link store.** `linkCells(a, b)` writes the link on
+  both endpoints so deletion of either end stays consistent.
+
+### Changed
+- **DoodleBorder rewrite.** Wide cells (browser 720×480, media
+  480×320) no longer stretch the wobble pattern. ResizeObserver now
+  reads the parent's real W×H; viewBox is 1:1 so corners stay round
+  and jitter stays proportional across long edges. Anchor points are
+  resampled every ~64 px so long sides actually wobble.
+
+### Tests
+- +7 vitest cases for `linkCells` (symmetric + idempotent + no-self),
+  `unlinkCells`, `toggleLinkSelected` (toggle + no-op cases), and
+  `deleteCell` link-pruning. Suite at 38 passing.
+
 ## v2.0.0 — initial v2 release
 
 Complete from-scratch rewrite. v1 stays at v1.4.0 on `main`; v2 lives
