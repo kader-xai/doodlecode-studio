@@ -96,6 +96,38 @@ export function App() {
         return;
       }
 
+      // Iter 34: Cmd/Ctrl+A — select every cell on the canvas.
+      if ((e.metaKey || e.ctrlKey) && (e.key === "a" || e.key === "A")) {
+        e.preventDefault();
+        state.setSelectedIds(state.cells.map((c) => c.id));
+        return;
+      }
+
+      // Iter 34: arrow keys nudge the selected group (10px, Shift = 50px).
+      if (
+        (e.key === "ArrowLeft" ||
+          e.key === "ArrowRight" ||
+          e.key === "ArrowUp" ||
+          e.key === "ArrowDown") &&
+        !state.presenting &&
+        !e.metaKey &&
+        !e.ctrlKey &&
+        !e.altKey
+      ) {
+        const ids = state.selectedIds.length ? state.selectedIds : sid ? [sid] : [];
+        if (!ids.length) return;
+        e.preventDefault();
+        const step = e.shiftKey ? 50 : 10;
+        const dx =
+          e.key === "ArrowLeft" ? -step : e.key === "ArrowRight" ? step : 0;
+        const dy = e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
+        const idSet = new Set(ids);
+        for (const c of state.cells) {
+          if (idSet.has(c.id)) state.moveCell(c.id, c.x + dx, c.y + dy);
+        }
+        return;
+      }
+
       // ── Presentation shortcuts ───────────────────────────────
       if (e.key === "F5" || (e.shiftKey && (e.key === "P" || e.key === "p"))) {
         e.preventDefault();
@@ -253,9 +285,16 @@ export function App() {
         return;
       }
       if ((e.key === "d" || e.key === "D") && (e.metaKey || e.ctrlKey)) {
-        if (!sid) return;
+        // Iter 34: duplicate the entire group when multi-selected.
+        const ids = state.selectedIds.length ? state.selectedIds : sid ? [sid] : [];
+        if (!ids.length) return;
         e.preventDefault();
-        state.duplicateCell(sid);
+        const newIds: string[] = [];
+        for (const id of ids) {
+          const dup = state.duplicateCell(id);
+          if (dup) newIds.push(dup);
+        }
+        if (newIds.length) useStore.getState().setSelectedIds(newIds);
         return;
       }
       if (e.key === "n" || e.key === "N") {
