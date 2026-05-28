@@ -77,8 +77,10 @@ export function Canvas() {
 function CanvasInner() {
   const cells = useStore((s) => s.cells);
   const selectedId = useStore((s) => s.selectedId);
+  const selectedIds = useStore((s) => s.selectedIds);
   const moveCell = useStore((s) => s.moveCell);
   const setSelected = useStore((s) => s.setSelected);
+  const setSelectedIds = useStore((s) => s.setSelectedIds);
   const addCell = useStore((s) => s.addCell);
   const dark = useStore((s) => s.theme === "dark");
   const presenting = useStore((s) => s.presenting);
@@ -172,6 +174,7 @@ function CanvasInner() {
 
   /** Build the full node list, including derived callout bubbles. */
   const buildNodes = (): Node[] => {
+    const selSet = new Set(selectedIds.length ? selectedIds : selectedId ? [selectedId] : []);
     const out: Node[] = [];
     for (const c of cells) {
       out.push({
@@ -179,7 +182,7 @@ function CanvasInner() {
         type: c.kind,
         position: { x: c.x, y: c.y },
         data: dataFor(c.id),
-        selected: c.id === selectedId,
+        selected: selSet.has(c.id),
         style: STYLE,
         draggable: true,
       });
@@ -191,6 +194,9 @@ function CanvasInner() {
   const [nodes, setNodes] = useState<Node[]>(() => buildNodes());
 
   useEffect(() => {
+    const selSet = new Set(
+      selectedIds.length ? selectedIds : selectedId ? [selectedId] : [],
+    );
     setNodes((prev) => {
       const byId = new Map(prev.map((n) => [n.id, n]));
       const out: Node[] = [];
@@ -198,7 +204,7 @@ function CanvasInner() {
         const existing = byId.get(c.id);
         const samePos =
           existing && existing.position.x === c.x && existing.position.y === c.y;
-        const sameSel = existing && existing.selected === (c.id === selectedId);
+        const sameSel = existing && existing.selected === selSet.has(c.id);
         const sameType = existing && existing.type === c.kind;
         // During presentation, give non-focused cells reduced
         // opacity so the audience's eye lands on the active slide.
@@ -222,7 +228,7 @@ function CanvasInner() {
             type: c.kind,
             position: samePos ? existing!.position : { x: c.x, y: c.y },
             data: dataFor(c.id),
-            selected: c.id === selectedId,
+            selected: selSet.has(c.id),
             style: cellStyle,
             draggable: true,
           });
@@ -240,7 +246,7 @@ function CanvasInner() {
       if (!live.has(k)) dataCacheRef.current.delete(k);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cells, selectedId, STYLE, presenting, focusedCellId]);
+  }, [cells, selectedId, selectedIds, STYLE, presenting, focusedCellId]);
 
   // We used to derive ReactFlow edges from cell.callouts here, but
   // ReactFlow silently dropped every one of them because its
@@ -271,14 +277,28 @@ function CanvasInner() {
             if (node) moveCell(node.id, node.position.x, node.position.y);
           }
           if (ch.type === "select") {
+            // Ignore synthetic callout pseudo-nodes — they're never selectable.
+            if (ch.id.includes("--callout-")) continue;
             if (ch.selected) setSelected(ch.id);
             else if (useStore.getState().selectedId === ch.id) setSelected(null);
           }
         }
+        // Iter 33: sync the full selection set after every change so
+        // marquee + shift-click multi-selection drive group-delete and
+        // visual highlight. `selectedId` is still the last-clicked
+        // primary (toolbar / callout target).
+        const selectedIds = next
+          .filter((n) => n.selected && !n.id.includes("--callout-"))
+          .map((n) => n.id);
+        const prev = useStore.getState().selectedIds;
+        const same =
+          prev.length === selectedIds.length &&
+          prev.every((id, i) => id === selectedIds[i]);
+        if (!same) setSelectedIds(selectedIds);
         return next;
       });
     },
-    [moveCell, setSelected],
+    [moveCell, setSelected, setSelectedIds],
   );
 
   // Iter 32: drag image files from desktop → instant Media cell.
@@ -333,6 +353,11 @@ function CanvasInner() {
         elementsSelectable
         nodesDraggable={nodesDraggable}
         panOnDrag={panOnDrag}
+        // Iter 33: drag on empty pane in Select mode draws a lasso
+        // that multi-selects every cell it crosses. Shift-click adds
+        // cells to the selection. In Hand mode the drag pans instead.
+        selectionOnDrag={mode === "select"}
+        multiSelectionKeyCode={["Shift", "Meta"]}
         panOnScroll
         zoomOnPinch
         zoomOnScroll={false}

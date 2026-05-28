@@ -37,6 +37,13 @@ export interface AppState {
   cells: Cell[];
   runtimes: Record<string, CellRuntime>;
   selectedId: string | null;
+  /** Iter 33: full selection set. `selectedId` is the "primary"
+   *  (last-clicked) cell — toolbar / callout / focus continue to act
+   *  on it. `selectedIds` is the marquee/shift-click superset and
+   *  drives group-move and group-delete. When length === 1 the two
+   *  agree; when empty, no cell is selected. */
+  selectedIds: string[];
+  setSelectedIds: (ids: string[]) => void;
   /** Per-cell "force rename" tick. Bumping this triggers an
    *  EditableTitle to enter edit mode (used by F2 keyboard handler). */
   renameTick: Record<string, number>;
@@ -107,6 +114,8 @@ export interface AppState {
   interactiveBrowserId: string | null;
   setInteractiveBrowser: (id: string | null) => void;
   deleteCell: (id: string) => void;
+  /** Iter 33: delete every cell in the list in one shot. */
+  deleteCells: (ids: string[]) => void;
   runCell: (id: string) => Promise<void>;
 
   // ── file operations ─────────────────────────────────────────────
@@ -264,6 +273,8 @@ export const useStore = create<AppState>((set, get) => {
     cells: seedCells,
     runtimes: {},
     selectedId: null,
+    selectedIds: [],
+    setSelectedIds: (ids) => set({ selectedIds: ids }),
     renameTick: {},
     requestRename: (id) => {
       set((s) => ({ renameTick: { ...s.renameTick, [id]: (s.renameTick[id] ?? 0) + 1 } }));
@@ -411,7 +422,8 @@ export const useStore = create<AppState>((set, get) => {
       });
       autosave();
     },
-    setSelected: (id) => set({ selectedId: id }),
+    setSelected: (id) =>
+      set({ selectedId: id, selectedIds: id ? [id] : [] }),
     moveCell: (id, x, y) => {
       set((s) => ({ cells: s.cells.map((c) => (c.id === id ? { ...c, x, y } : c)) }));
       autosave();
@@ -528,7 +540,21 @@ export const useStore = create<AppState>((set, get) => {
         const cells = s.cells.filter((c) => c.id !== id);
         const { [id]: _drop, ...runtimes } = s.runtimes;
         const selectedId = s.selectedId === id ? null : s.selectedId;
-        return { cells, runtimes, selectedId };
+        const selectedIds = s.selectedIds.filter((sid) => sid !== id);
+        return { cells, runtimes, selectedId, selectedIds };
+      });
+      autosave();
+    },
+    deleteCells: (ids) => {
+      if (!ids.length) return;
+      const drop = new Set(ids);
+      set((s) => {
+        const cells = s.cells.filter((c) => !drop.has(c.id));
+        const runtimes = { ...s.runtimes };
+        for (const id of ids) delete runtimes[id];
+        const selectedId = s.selectedId && drop.has(s.selectedId) ? null : s.selectedId;
+        const selectedIds = s.selectedIds.filter((sid) => !drop.has(sid));
+        return { cells, runtimes, selectedId, selectedIds };
       });
       autosave();
     },
@@ -561,6 +587,7 @@ export const useStore = create<AppState>((set, get) => {
         cells: [{ ...SEED_CELL, id: "c0" }],
         runtimes: {},
         selectedId: null,
+        selectedIds: [],
       });
       autosave();
     },
@@ -592,6 +619,7 @@ export const useStore = create<AppState>((set, get) => {
         }),
         runtimes: {},
         selectedId: null,
+        selectedIds: [],
       });
       autosave();
     },

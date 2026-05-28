@@ -232,10 +232,18 @@ export function App() {
         return;
       }
       if (e.key === "Backspace" || e.key === "Delete") {
-        if (!sid) return;
+        // Iter 33: when the user has multi-selected, delete the
+        // whole group in one shot. Fall back to single-cell delete
+        // when only the primary is selected.
+        const ids = state.selectedIds.length ? state.selectedIds : sid ? [sid] : [];
+        if (!ids.length) return;
         e.preventDefault();
-        const title = state.cells.find((c) => c.id === sid)?.title ?? sid;
-        if (window.confirm(`Delete "${title}"?`)) state.deleteCell(sid);
+        if (ids.length === 1) {
+          const title = state.cells.find((c) => c.id === ids[0])?.title ?? ids[0];
+          if (window.confirm(`Delete "${title}"?`)) state.deleteCell(ids[0]);
+        } else {
+          if (window.confirm(`Delete ${ids.length} cells?`)) state.deleteCells(ids);
+        }
         return;
       }
       if (e.key === "F2") {
