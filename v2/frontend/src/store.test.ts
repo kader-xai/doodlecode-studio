@@ -124,6 +124,23 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().addBrowserCell("   ")).toBeNull();
   });
 
+  it("addCell partial overrides defaults but auto-fills missing fields (iter 140)", () => {
+    // Partial { kind: 'markdown' } should override the default
+    // 'code' kind without forcing the caller to repeat the
+    // generated id, position, or source.
+    const id = useStore.getState().addCell({ kind: "markdown", title: "Doc" });
+    const c = useStore.getState().cells.find((x) => x.id === id)!;
+    expect(c.kind).toBe("markdown");
+    expect(c.title).toBe("Doc");
+    // x/y come from spawnPosition, not the partial — assert they
+    // were assigned to numbers, not left undefined.
+    expect(typeof c.x).toBe("number");
+    expect(typeof c.y).toBe("number");
+    // Selection mirrors the new id per rule 21e.
+    expect(useStore.getState().selectedId).toBe(id);
+    expect(useStore.getState().selectedIds).toEqual([id]);
+  });
+
   it("setExplain populates callouts[0]", () => {
     useStore.getState().setExplain("c0", "hello bubble");
     const c = useStore.getState().cells.find((c) => c.id === "c0")!;

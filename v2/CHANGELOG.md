@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Tests (iter 140)
+- Lock `addCell` partial-override behavior: a partial with `kind`
+  overrides the default `"code"`, x/y still come from
+  `spawnPosition`, and the new id mirrors into both `selectedId`
+  and `selectedIds` per rule 21e. 84 frontend tests.
+
 ### Tests (iter 139)
 - Lock `addBrowserCell` URL normalization: bare hosts get an
   `https://` prefix, explicit `http://` is preserved, whitespace
