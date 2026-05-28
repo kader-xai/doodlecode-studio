@@ -1,5 +1,25 @@
 # Changelog
 
+## [Unreleased]
+
+### Added (iter 71-73)
+- **Cmd/Ctrl+/ toggles collapse on the selected cell** — paired with
+  the iter 62 Cmd+K palette workflow: jump to a cell, collapse it,
+  jump to the next, no mouse trip needed.
+- **Palette stats footer.** The bottom of the Cmd+K modal now shows
+  `N cells · K collapsed · L links` next to the keyboard hint so the
+  user sees notebook structure at a glance every time they open it.
+  Link count dedupes symmetric pairs.
+
+### Refactored
+- `firstLine` and `hostOf` moved out of `CellPalette` / `BrowserCell`
+  into a new `src/lib/cellPreview.ts` so they're unit-testable.
+
+### Tests
+- +11 vitest cases for `firstLine` (md/code/blank/truncate) and
+  `hostOf` (www-strip / fallback / blank / port). Suite at
+  16 backend + 57 frontend = 73 total.
+
 ## v2.3.0 — Cmd+K palette + collapse polish
 
 10 iterations on top of 2.2.0 (60-69). Test suite stays at 46
