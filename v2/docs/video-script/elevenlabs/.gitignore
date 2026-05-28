@@ -1,0 +1,4 @@
+.venv/
+sections/
+*.mp3
+*.wav
