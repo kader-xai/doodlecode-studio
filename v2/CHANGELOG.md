@@ -24,6 +24,12 @@
   empty (or has no code cells). Avoids "clicked but nothing
   happened" confusion.
 
+### Refactored (iter 118)
+- The "next selection after delete" math was duplicated between
+  `deleteCell` (iter 108) and `deleteCells` (iter 109). Pulled into
+  a shared `nextSelectionAfterDelete` helper so the heuristic only
+  lives in one place.
+
 ## v2.5.2 — post-delete focus + palette polish
 
 10 iterations on top of v2.5.1 (101-109). Test suite went 80 → 85.
