@@ -58,9 +58,24 @@ and type `matplotlib`.
 | V / H                     | Select tool / Hand (pan) tool             |
 | N / T / M / W / D / G     | Add code / text / media / browser / draw / diagram |
 | F2                        | Rename selected cell                      |
-| Cmd/Ctrl+D                | Duplicate selected cell                   |
-| Backspace / Delete        | Delete selected cell or callout           |
+| Cmd/Ctrl+D                | Duplicate selected cell(s) — works on groups |
+| Backspace / Delete        | Delete selected cell(s) — works on groups |
 | C                         | Open callout editor for selected cell     |
+| Cmd/Ctrl+A                | Select every cell on the canvas           |
+| Shift / Cmd-click cell    | Add to current selection                  |
+| Drag empty pane (Select)  | Lasso-select multiple cells               |
+| ← ↑ → ↓                   | Nudge selected cells (10 px; Shift = 50 px) |
+| 🔗 toolbar (2 selected)   | Connect / disconnect two cells            |
+| Align bar (2+ selected)   | Left / center / right / top / mid / bot · distribute |
+| ▾ / ▸ chevron in title    | Collapse / expand a single cell           |
+| Cmd/Ctrl+Shift+[          | Collapse every cell                       |
+| Cmd/Ctrl+Shift+]          | Expand every cell                         |
+| Shift+Enter               | Run the selected code cell                |
+| Cmd/Ctrl+Shift+Enter      | Run All code cells (▶▶)                   |
+| Cmd/Ctrl+Shift+L          | Clear every output (kernel survives)      |
+| ■ Stop (while running)    | Interrupt the kernel (SIGINT / Ctrl+C)    |
+| Cmd/Ctrl+0                | Reset zoom to 100%                        |
+| Cmd/Ctrl+1                | Fit entire canvas in view                 |
 | Tab / Shift+Tab           | Cycle selection                           |
 | Esc                       | Deselect · close overlays · exit modes    |
 | Cmd/Ctrl+S                | Save (silently if bound to disk)          |
@@ -87,11 +102,13 @@ One `.py` file per notebook. Cells are separated by `# %%` headers.
 # %% kind=code id=c0 x=80 y=80 w=580 h=300
 # @title: Hello, Python
 # @explain: This is a callout bubble
+# @link_to: d0
 print("hi")
 
 # %% kind=diagram id=d0 x=720 y=80 w=560 h=420
 # @title: Flow + chart
 # @diagram_kind: doodle
+# @collapsed: true
 flowchart
 A --> B
 B --> C
@@ -101,6 +118,13 @@ A: 6
 B: 8
 C: 10
 ```
+
+Optional directives (additive — old files keep loading):
+
+- `# @callout` — start a new bubble (multi-callout support)
+- `# @image: data:image/png;base64,…` — embed an image in the current bubble
+- `# @link_to: <id>` — draw a sketchy line to another cell (v2.1.0+)
+- `# @collapsed: true` — render only the title strip (v2.2.0+)
 
 Old `# @explain:` files load as `callouts[0]` automatically — files
 written by any prior version still open.
