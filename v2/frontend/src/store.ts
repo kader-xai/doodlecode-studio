@@ -630,9 +630,29 @@ export const useStore = create<AppState>((set, get) => {
             c.links?.includes(id) ? { ...c, links: c.links.filter((x) => x !== id) } : c,
           );
         const { [id]: _drop, ...runtimes } = s.runtimes;
-        const selectedId = s.selectedId === id ? null : s.selectedId;
+        // Iter 108: when the deleted cell was the primary selection,
+        // pick a successor in reading order so the user can keep
+        // working from where they were instead of an empty selection.
+        let selectedId = s.selectedId;
+        if (selectedId === id) {
+          if (cells.length === 0) {
+            selectedId = null;
+          } else {
+            const idxOriginal = s.cells.findIndex((c) => c.id === id);
+            // Pick the cell that was at the same index in the
+            // pre-delete array (which is now occupied by the next
+            // sibling), or the last cell when we deleted from the
+            // end.
+            const next = cells[Math.min(idxOriginal, cells.length - 1)];
+            selectedId = next?.id ?? null;
+          }
+        }
         const selectedIds = s.selectedIds.filter((sid) => sid !== id);
-        return { cells, runtimes, selectedId, selectedIds };
+        // Mirror the new primary into selectedIds if it would
+        // otherwise be empty (keeps rule 21e intact).
+        const finalSelectedIds =
+          selectedIds.length === 0 && selectedId ? [selectedId] : selectedIds;
+        return { cells, runtimes, selectedId, selectedIds: finalSelectedIds };
       });
       autosave();
     },

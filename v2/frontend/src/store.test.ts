@@ -221,6 +221,48 @@ describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {
     expect(useStore.getState().execCounter).toBe(0);
   });
 
+  it("deleteCell focuses the next sibling when the deleted cell was primary (iter 108)", () => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "", x: 0, y: 0 },
+        { id: "b", kind: "code", source: "", x: 0, y: 100 },
+        { id: "c", kind: "code", source: "", x: 0, y: 200 },
+      ],
+      runtimes: {},
+      selectedId: "b",
+      selectedIds: ["b"],
+    });
+    useStore.getState().deleteCell("b");
+    expect(useStore.getState().selectedId).toBe("c");
+    expect(useStore.getState().selectedIds).toEqual(["c"]);
+  });
+
+  it("deleteCell focuses the new last cell when deleting from the end (iter 108)", () => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "", x: 0, y: 0 },
+        { id: "b", kind: "code", source: "", x: 0, y: 100 },
+      ],
+      runtimes: {},
+      selectedId: "b",
+      selectedIds: ["b"],
+    });
+    useStore.getState().deleteCell("b");
+    expect(useStore.getState().selectedId).toBe("a");
+  });
+
+  it("deleteCell on an empty notebook clears selection (iter 108)", () => {
+    useStore.setState({
+      cells: [{ id: "lonely", kind: "code", source: "", x: 0, y: 0 }],
+      runtimes: {},
+      selectedId: "lonely",
+      selectedIds: ["lonely"],
+    });
+    useStore.getState().deleteCell("lonely");
+    expect(useStore.getState().selectedId).toBeNull();
+    expect(useStore.getState().selectedIds).toEqual([]);
+  });
+
   it("resetKernelState drops execCount but keeps result panels (iter 104)", () => {
     useStore.setState({
       execCounter: 7,
