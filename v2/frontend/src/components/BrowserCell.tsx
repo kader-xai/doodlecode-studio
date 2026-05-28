@@ -27,6 +27,22 @@ function wrapProxied(url: string): string {
   return PROXY_PREFIX + encodeURIComponent(url);
 }
 
+/** Iter 69: extract the hostname for a small chip on collapsed browser
+ *  cells. Strips the leading `www.` so the chip is shorter, and falls
+ *  back to the raw source when URL parsing fails. */
+function hostOf(source: string): string {
+  const url = source.replace(/^doodle:\/\/proxy\?u=/, (m) => {
+    try { return decodeURIComponent(source.slice(m.length)); }
+    catch { return ""; }
+  });
+  try {
+    const u = new URL(url);
+    return u.host.replace(/^www\./, "");
+  } catch {
+    return source.replace(/^https?:\/\//, "").split("/")[0] || "(blank)";
+  }
+}
+
 /**
  * Browser cell — iframe with URL bar + Back/Forward/Refresh.
  *
@@ -216,6 +232,17 @@ export function BrowserCell({ data, selected }: NodeProps<{ cellId: string }>) {
               className="font-hand text-base truncate text-ink dark:text-white flex-1 min-w-0"
               placeholder="(untitled site)"
             />
+            {/* Iter 69: when collapsed, the URL bar is hidden — show a
+             *  small host chip so the user can still tell which site
+             *  this cell is. */}
+            {cell.collapsed && (
+              <span
+                className="font-mono text-xs px-1.5 py-0.5 rounded border-2 border-ink/30 dark:border-white/30 bg-white/60 dark:bg-black/40 text-ink/60 dark:text-white/60 shrink-0 max-w-[180px] truncate"
+                title={cell.source}
+              >
+                🌐 {hostOf(cell.source)}
+              </span>
+            )}
             {interactive && (
               <button
                 type="button"
