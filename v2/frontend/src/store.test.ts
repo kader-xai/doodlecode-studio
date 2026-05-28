@@ -285,6 +285,38 @@ describe("store: cell↔cell links (iter 45)", () => {
   });
 });
 
+describe("store: duplicate semantics (iter 60)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [
+        { id: "src", kind: "code", source: "x = 1", x: 0, y: 0,
+          callouts: [{ text: "hello" }], links: ["other"] },
+        { id: "other", kind: "code", source: "", x: 200, y: 0, links: ["src"] },
+      ],
+      runtimes: {},
+      selectedId: null,
+      selectedIds: [],
+    });
+  });
+
+  it("duplicateCell drops outgoing links so the graph stays symmetric", () => {
+    const dupId = useStore.getState().duplicateCell("src")!;
+    const dup = useStore.getState().cells.find((c) => c.id === dupId)!;
+    expect(dup.links).toEqual([]);
+  });
+
+  it("duplicateCell deep-clones callouts so editing the copy doesn't mutate the source", () => {
+    const dupId = useStore.getState().duplicateCell("src")!;
+    const dup = useStore.getState().cells.find((c) => c.id === dupId)!;
+    const src = useStore.getState().cells.find((c) => c.id === "src")!;
+    expect(dup.callouts).toEqual([{ text: "hello" }]);
+    // Different array identity.
+    expect(dup.callouts).not.toBe(src.callouts);
+    // Different element identity.
+    expect(dup.callouts![0]).not.toBe(src.callouts![0]);
+  });
+});
+
 describe("store: collapse (iter 53/57)", () => {
   beforeEach(() => {
     useStore.setState({

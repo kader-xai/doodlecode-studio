@@ -571,6 +571,13 @@ export const useStore = create<AppState>((set, get) => {
         x: src.x + 40,
         y: src.y + 40,
         title: src.title ? `${src.title} (copy)` : "Copy",
+        // Iter 60: drop outgoing links — otherwise the copy would
+        // inherit edges asymmetrically (target cells wouldn't know
+        // about the duplicate). User can re-link explicitly via 🔗.
+        links: [],
+        // Iter 60: deep-clone the callouts array so editing a bubble
+        // on the duplicate doesn't mutate the source's bubble.
+        callouts: src.callouts ? src.callouts.map((co) => ({ ...co })) : undefined,
       };
       set((s) => ({ cells: [...s.cells, dup], selectedId: dupId }));
       autosave();
