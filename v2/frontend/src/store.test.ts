@@ -1,5 +1,22 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useStore } from "./store";
+
+/**
+ * Mock the API layer so runAllCells doesn't actually hit the backend.
+ * Each call resolves to a unique stdout payload so we can assert
+ * order. setting status="error" lets us prove the loop bails early.
+ */
+vi.mock("./api", async () => {
+  const real = await vi.importActual<typeof import("./api")>("./api");
+  return {
+    ...real,
+    executeCode: vi.fn(async (source: string) => ({
+      status: source.includes("BOOM") ? "error" : "ok",
+      elapsed_ms: 1,
+      outputs: [{ type: "stdout", text: source }],
+    })),
+  };
+});
 
 /**
  * Store smoke tests — verify CRUD invariants. We re-seed the cells
@@ -87,6 +104,115 @@ describe("store: cell CRUD", () => {
     expect(back.x).toBe(500);
     expect(back.y).toBe(700);
     expect(useStore.getState().originalPositions).toBeNull();
+  });
+});
+
+describe("store: multi-select + group ops (iter 33-35)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "", x: 0,   y: 0,   w: 100, h: 100 },
+        { id: "b", kind: "code", source: "", x: 200, y: 50,  w: 100, h: 100 },
+        { id: "c", kind: "code", source: "", x: 400, y: 100, w: 100, h: 100 },
+      ],
+      runtimes: {},
+      selectedId: null,
+      selectedIds: [],
+    });
+  });
+
+  it("deleteCells removes a whole group at once", () => {
+    useStore.getState().setSelectedIds(["a", "c"]);
+    useStore.getState().deleteCells(["a", "c"]);
+    const ids = useStore.getState().cells.map((c) => c.id);
+    expect(ids).toEqual(["b"]);
+    expect(useStore.getState().selectedIds).toEqual([]);
+  });
+
+  it("alignSelected('left') aligns x to the leftmost", () => {
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    useStore.getState().alignSelected("left");
+    const xs = useStore.getState().cells.map((c) => c.x);
+    expect(xs).toEqual([0, 0, 0]);
+  });
+
+  it("alignSelected('top') aligns y to the topmost", () => {
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    useStore.getState().alignSelected("top");
+    const ys = useStore.getState().cells.map((c) => c.y);
+    expect(ys).toEqual([0, 0, 0]);
+  });
+
+  it("alignSelected('distH') spreads ≥3 cells with equal gaps", () => {
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    useStore.getState().alignSelected("distH");
+    // Bounding box left=0, right=500. Total w=300, span=500, gap=100.
+    // a stays at 0; b at 100+100=200; c at 200+100+100=400.
+    const xs = useStore.getState().cells.map((c) => c.x);
+    expect(xs).toEqual([0, 200, 400]);
+  });
+
+  it("alignSelected no-ops with fewer than 2 selected", () => {
+    useStore.getState().setSelectedIds(["a"]);
+    useStore.getState().alignSelected("left");
+    const a = useStore.getState().cells.find((c) => c.id === "a")!;
+    expect(a.x).toBe(0); // unchanged
+  });
+});
+
+describe("store: runAllCells + clearAllOutputs (iter 36-38)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code",     source: "ONE", x: 0, y: 0 },
+        { id: "m", kind: "markdown", source: "## skip me", x: 0, y: 100 },
+        { id: "b", kind: "code",     source: "TWO", x: 0, y: 200 },
+      ],
+      runtimes: {},
+      execCounter: 0,
+      selectedId: null,
+      selectedIds: [],
+    });
+  });
+
+  it("runAllCells runs every code cell, skipping non-code, returns null on success", async () => {
+    const failed = await useStore.getState().runAllCells();
+    expect(failed).toBeNull();
+    const ra = useStore.getState().runtimes["a"];
+    const rb = useStore.getState().runtimes["b"];
+    expect(ra?.result?.status).toBe("ok");
+    expect(rb?.result?.status).toBe("ok");
+    expect(useStore.getState().runtimes["m"]).toBeUndefined();
+    // execCounter is bumped twice — once per code cell.
+    expect(useStore.getState().execCounter).toBe(2);
+    expect(ra?.execCount).toBe(1);
+    expect(rb?.execCount).toBe(2);
+  });
+
+  it("runAllCells halts at the first error and returns the failed id", async () => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "fine",      x: 0, y: 0 },
+        { id: "b", kind: "code", source: "BOOM",      x: 0, y: 100 },
+        { id: "c", kind: "code", source: "neverruns", x: 0, y: 200 },
+      ],
+      runtimes: {},
+      execCounter: 0,
+    });
+    const failed = await useStore.getState().runAllCells();
+    expect(failed).toBe("b");
+    expect(useStore.getState().runtimes["c"]).toBeUndefined();
+  });
+
+  it("clearAllOutputs wipes runtimes without touching cells", () => {
+    useStore.setState({
+      runtimes: {
+        a: { running: false, result: { status: "ok", elapsed_ms: 1, outputs: [] }, execCount: 7 },
+      },
+    });
+    useStore.getState().clearAllOutputs();
+    expect(useStore.getState().runtimes).toEqual({});
+    expect(useStore.getState().cells.length).toBe(3); // cells untouched
   });
 });
 
