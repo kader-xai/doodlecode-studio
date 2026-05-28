@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Tests (iter 145)
+- Lock `spaceForPresentation` snapshot stability: re-pressing **S**
+  to re-spread cells must NOT overwrite `originalPositions` with
+  the already-spread coordinates — otherwise rollback would
+  no-op and the user's hand-placed layout would be lost. 90
+  frontend tests.
+
 ### Tests (iter 144)
 - Lock `setCallouts` filter rules: whitespace-only text entries are
   dropped, image-only entries (no text) are kept, fully-empty

@@ -216,6 +216,23 @@ describe("store: cell CRUD", () => {
     expect(back.y).toBe(700);
     expect(useStore.getState().originalPositions).toBeNull();
   });
+
+  it("spaceForPresentation re-press preserves the ORIGINAL snapshot (iter 145)", () => {
+    // Place the cell, snapshot at (500, 700) via the first space.
+    useStore.getState().moveCell("c0", 500, 700);
+    useStore.getState().spaceForPresentation(800);
+    const firstSnap = useStore.getState().originalPositions;
+    expect(firstSnap?.c0).toEqual({ x: 500, y: 700 });
+    // Pressing S again must not overwrite the snapshot with the
+    // already-spread coordinates — otherwise rollback would no-op.
+    useStore.getState().spaceForPresentation(800);
+    const secondSnap = useStore.getState().originalPositions;
+    expect(secondSnap?.c0).toEqual({ x: 500, y: 700 });
+    useStore.getState().rollbackLayout();
+    const back = useStore.getState().cells.find((c) => c.id === "c0")!;
+    expect(back.x).toBe(500);
+    expect(back.y).toBe(700);
+  });
 });
 
 describe("store: multi-select + group ops (iter 33-35)", () => {
