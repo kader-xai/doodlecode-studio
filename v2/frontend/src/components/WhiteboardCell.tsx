@@ -276,29 +276,36 @@ export function WhiteboardCell({ data, selected }: NodeProps<{ cellId: string }>
               forceEdit={forceEditTitle}
               className="font-hand text-base truncate text-ink dark:text-white flex-1 min-w-0"
             />
-            <ToolBtn label="✒️" title="Pen" active={tool === "pen"} onClick={() => setTool("pen")} />
-            <ToolBtn label="🖍" title="Highlighter" active={tool === "highlighter"} onClick={() => setTool("highlighter")} />
-            <ToolBtn label="🧽" title="Eraser (drag over strokes)" active={tool === "eraser"} onClick={() => setTool("eraser")} />
-            <div className="mx-0.5 h-5 w-px bg-ink/30 dark:bg-white/30" />
-            {COLORS.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={(e) => { e.stopPropagation(); setColor(c); setTool((t) => t === "eraser" ? "pen" : t); }}
-                onPointerDown={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-                title={c}
-                style={{ background: c }}
-                className={`nodrag w-5 h-5 rounded-full border-2 ${color === c ? "border-[#c2255c] scale-110" : "border-ink/60 dark:border-white/40"} transition`}
-              />
-            ))}
-            <div className="mx-0.5 h-5 w-px bg-ink/30 dark:bg-white/30" />
-            <BgBtn label="□" title="White bg"  active={decoded.bg === "light"}  onClick={() => setBg("light")} />
-            <BgBtn label="◧" title="Sandal bg" active={decoded.bg === "sandal"} onClick={() => setBg("sandal")} />
-            <BgBtn label="■" title="Dark bg"   active={decoded.bg === "dark"}   onClick={() => setBg("dark")} />
-            <div className="mx-0.5 h-5 w-px bg-ink/30 dark:bg-white/30" />
-            <ToolBtn label="↶" title="Undo last stroke" onClick={undo} />
-            <ToolBtn label="🗑" title="Clear all" onClick={clearAll} />
+            {/* Iter 93: hide the tool strip when collapsed — those
+             *  20+ buttons crammed into a 44 px row look terrible.
+             *  Chevron + title is plenty for a collapsed scan view. */}
+            {!cell.collapsed && (
+              <>
+                <ToolBtn label="✒️" title="Pen" active={tool === "pen"} onClick={() => setTool("pen")} />
+                <ToolBtn label="🖍" title="Highlighter" active={tool === "highlighter"} onClick={() => setTool("highlighter")} />
+                <ToolBtn label="🧽" title="Eraser (drag over strokes)" active={tool === "eraser"} onClick={() => setTool("eraser")} />
+                <div className="mx-0.5 h-5 w-px bg-ink/30 dark:bg-white/30" />
+                {COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setColor(c); setTool((t) => t === "eraser" ? "pen" : t); }}
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    title={c}
+                    style={{ background: c }}
+                    className={`nodrag w-5 h-5 rounded-full border-2 ${color === c ? "border-[#c2255c] scale-110" : "border-ink/60 dark:border-white/40"} transition`}
+                  />
+                ))}
+                <div className="mx-0.5 h-5 w-px bg-ink/30 dark:bg-white/30" />
+                <BgBtn label="□" title="White bg"  active={decoded.bg === "light"}  onClick={() => setBg("light")} />
+                <BgBtn label="◧" title="Sandal bg" active={decoded.bg === "sandal"} onClick={() => setBg("sandal")} />
+                <BgBtn label="■" title="Dark bg"   active={decoded.bg === "dark"}   onClick={() => setBg("dark")} />
+                <div className="mx-0.5 h-5 w-px bg-ink/30 dark:bg-white/30" />
+                <ToolBtn label="↶" title="Undo last stroke" onClick={undo} />
+                <ToolBtn label="🗑" title="Clear all" onClick={clearAll} />
+              </>
+            )}
           </div>
 
           {/* Drawing surface — hidden when collapsed (iter 66). */}
