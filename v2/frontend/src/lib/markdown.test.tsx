@@ -35,4 +35,14 @@ describe("renderMarkdown", () => {
     const html = toHtml("---");
     expect(html).toContain("<hr");
   });
+
+  it("renders *italic* without confusing it with **bold** (iter 138)", () => {
+    const html = toHtml("an *emphasized* word");
+    expect(html).toContain("<em");
+    expect(html).toContain("emphasized");
+    // Double-star bold must collapse to <strong>, not <em>.
+    const boldHtml = toHtml("**strong**");
+    expect(boldHtml).toContain("<strong>strong</strong>");
+    expect(boldHtml).not.toContain("<em");
+  });
 });

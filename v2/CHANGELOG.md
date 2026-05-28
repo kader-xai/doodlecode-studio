@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Tests (iter 138)
+- Lock `renderMarkdown` italic vs bold disambiguation: `*foo*`
+  renders as `<em>`, `**foo**` renders as `<strong>` and does NOT
+  also produce a stray `<em>`. 80 frontend tests.
+
 ### Tests (iter 137)
 - Lock `cellsInOrder` y-jitter tolerance: cells whose `y` differ by
   less than the 40 px row bucket sort by `x`, not by `y`. Prevents
