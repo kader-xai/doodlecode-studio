@@ -148,6 +148,17 @@ v2/
     mutate the source. Fix: `links: []` and
     `callouts: src.callouts?.map(co => ({...co}))`.
 
+21g. **React's `e.stopPropagation()` does NOT stop window-level
+    `addEventListener` handlers from firing.** It only stops the
+    synthetic event from continuing through React's bubble path.
+    When a modal/overlay (palette, install modal, …) handles a key
+    locally AND there's a global `window.addEventListener("keydown")`
+    that would also fire for the same key (Esc, etc.), use
+    `e.nativeEvent.stopImmediatePropagation()` to prevent the window
+    listener. Iter 125 caught this for the palette Esc — the App
+    cascade was deselecting the underlying cell even after the
+    palette had already consumed the Esc.
+
 21d. **`DoodleBorder` must render at the parent's real W×H, not a
     100×100 stretched viewBox.** The original implementation used
     `viewBox="0 0 100 100"` + `preserveAspectRatio="none"`, which
