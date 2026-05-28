@@ -160,7 +160,12 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
   return (
     <div
       className="relative"
-      style={{ width: w, height: h }}
+      // Iter 61: when collapsed, shrink the outer height to just the
+      // title strip (~44 px) instead of keeping the full 400+ px the
+      // cell normally claims. We use a fixed px value rather than
+      // "auto" because the inner is absolutely-positioned with
+      // `inset-1`, which collapses to 0 when the outer is auto.
+      style={{ width: w, height: cell.collapsed ? 44 : h }}
       onClickCapture={() => setSelected(cellId)}
     >
       <Handle type="target" position={Position.Left} className="!bg-transparent !border-0" />

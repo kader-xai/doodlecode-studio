@@ -136,7 +136,9 @@ export function BrowserCell({ data, selected }: NodeProps<{ cellId: string }>) {
   return (
     <div
       className="relative"
-      style={{ width: w, height: h }}
+      // Iter 61: collapsed cells shrink to ~44 px so just the title
+      // strip is visible (URL bar + iframe both hidden).
+      style={{ width: w, height: cell.collapsed ? 44 : h }}
       onClickCapture={() => setSelected(cellId)}
     >
       <Handle type="target" position={Position.Left} className="!bg-transparent !border-0" />
