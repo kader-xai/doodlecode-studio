@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Tests (iter 149)
+- Coverage for `alignSelected("bottom")` and `("middleY")`. Closes
+  the vertical-axis side of the align matrix to match iter 148's
+  horizontal additions. The full 7-mode matrix is now exercised.
+  96 frontend tests.
+
 ### Tests (iter 148)
 - Coverage for `alignSelected("right")` (aligns right edges) and
   `alignSelected("centerX")` (centers on bbox midline). Closes the

@@ -309,6 +309,23 @@ describe("store: multi-select + group ops (iter 33-35)", () => {
     expect(a.x).toBe(0); // unchanged
   });
 
+  it("alignSelected('bottom') aligns bottom edges (iter 149)", () => {
+    // Seed cells have h=100; bottoms are 100, 150, 200. B = 200.
+    // Each cell y = B - h = 200 - 100 = 100.
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    useStore.getState().alignSelected("bottom");
+    const ys = useStore.getState().cells.map((c) => c.y);
+    expect(ys).toEqual([100, 100, 100]);
+  });
+
+  it("alignSelected('middleY') centers on the bbox midline (iter 149)", () => {
+    // T=0, B=200, cy=100. Each cell y = cy - h/2 = 100 - 50 = 50.
+    useStore.getState().setSelectedIds(["a", "b", "c"]);
+    useStore.getState().alignSelected("middleY");
+    const ys = useStore.getState().cells.map((c) => c.y);
+    expect(ys).toEqual([50, 50, 50]);
+  });
+
   it("alignSelected('right') aligns right edges (iter 148)", () => {
     // Seed cells have w=100; rights are 100, 300, 500. R = 500.
     // Each cell x = R - w = 500 - 100 = 400.
