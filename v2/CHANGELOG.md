@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Changed (iter 153)
+- **DoodleBorder is now a two-pass sketch.** Pass A is the main
+  wobbly stroke; pass B is a thinner inset ghost at 45% opacity with
+  a different noise seed. The two together read as a confident
+  pencil-drawn box instead of the previous single CAD-like wobble.
+  Refactored `buildPath` to take optional `insetX/insetY/seedOffset`
+  so future passes can share the same path generator.
+
 ### Changed (iter 152)
 - **Auto-link new cells to the previous bottom cell.** Together with
   the iter 151 column flow, pressing **New** now extends a visible
