@@ -9,6 +9,7 @@ import ReactFlow, {
   ReactFlowInstance,
   ReactFlowProvider,
   applyNodeChanges,
+  useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -78,10 +79,15 @@ function CanvasInner() {
   const selectedId = useStore((s) => s.selectedId);
   const moveCell = useStore((s) => s.moveCell);
   const setSelected = useStore((s) => s.setSelected);
+  const addCell = useStore((s) => s.addCell);
   const dark = useStore((s) => s.theme === "dark");
   const presenting = useStore((s) => s.presenting);
   const focusedCellId = useStore((s) => s.focusedCellId);
   const mode = useStore((s) => s.interactionMode);
+  // useReactFlow gives us screenToFlowPosition — needed to translate
+  // a pointer's screen coords into canvas (pre-transform) coords for
+  // the dropped Media cell's position.
+  const rf = useReactFlow();
 
   // Two-mode truth table (Figma-style):
   //   select (default) : drag cells to move; click empty pane deselects.
@@ -275,8 +281,47 @@ function CanvasInner() {
     [moveCell, setSelected],
   );
 
+  // Iter 32: drag image files from desktop → instant Media cell.
+  // We attach handlers to the wrapping div (not ReactFlow directly)
+  // because ReactFlow's pane swallows drop events on its own children.
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    if (Array.from(e.dataTransfer.items).some((it) => it.kind === "file")) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+    }
+  }, []);
+  const onDrop = useCallback(
+    (e: React.DragEvent) => {
+      const f = e.dataTransfer.files?.[0];
+      if (!f) return;
+      e.preventDefault();
+      if (!f.type.startsWith("image/")) {
+        window.alert(`Only image files are supported (got ${f.type || "unknown"})`);
+        return;
+      }
+      if (f.size > 5 * 1024 * 1024) {
+        window.alert(`Image too large (${(f.size / 1024 / 1024).toFixed(1)}MB > 5MB cap)`);
+        return;
+      }
+      const pos = rf.screenToFlowPosition({ x: e.clientX, y: e.clientY });
+      const reader = new FileReader();
+      reader.onload = () => {
+        addCell({
+          kind: "media",
+          source: String(reader.result),
+          x: pos.x - 240,
+          y: pos.y - 160,
+          w: 480,
+          h: 320,
+        });
+      };
+      reader.readAsDataURL(f);
+    },
+    [rf, addCell],
+  );
+
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full" onDragOver={onDragOver} onDrop={onDrop}>
       <ReactFlow
         nodes={nodes}
         nodeTypes={nodeTypes}
