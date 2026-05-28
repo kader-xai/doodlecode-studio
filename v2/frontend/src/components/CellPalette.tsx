@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { DoodleBorder } from "./DoodleBorder";
 import { useStore } from "../store";
 
@@ -31,6 +31,30 @@ function firstLine(source: string, kind: string): string {
     return s.length > 60 ? s.slice(0, 57) + "…" : s;
   }
   return "";
+}
+
+/**
+ * Iter 68: wrap the matching substring (case-insensitive) of `text`
+ * in a highlight `<mark>` so the user sees what the filter caught.
+ * Returns React nodes — no dangerouslySetInnerHTML.
+ */
+function highlight(text: string, q: string): React.ReactNode {
+  const needle = q.trim();
+  if (!needle) return text;
+  const i = text.toLowerCase().indexOf(needle.toLowerCase());
+  if (i < 0) return text;
+  const pre = text.slice(0, i);
+  const hit = text.slice(i, i + needle.length);
+  const post = text.slice(i + needle.length);
+  return (
+    <>
+      {pre}
+      <mark className="bg-marker-pink/40 dark:bg-marker-pink/30 text-ink dark:text-white rounded px-0.5">
+        {hit}
+      </mark>
+      {post}
+    </>
+  );
 }
 
 const KIND_ICON: Record<string, string> = {
@@ -165,10 +189,10 @@ export function CellPalette() {
               >
                 <span className="text-lg leading-none mt-[2px]">{KIND_ICON[m.cell.kind] ?? "•"}</span>
                 <div className="flex-1 min-w-0">
-                  <div className="truncate">{m.label}</div>
+                  <div className="truncate">{highlight(m.label, q)}</div>
                   {m.preview && (
                     <div className="font-mono text-xs truncate text-ink/45 dark:text-white/45">
-                      {m.preview}
+                      {highlight(m.preview, q)}
                     </div>
                   )}
                 </div>
