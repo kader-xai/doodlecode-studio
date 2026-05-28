@@ -114,23 +114,26 @@ export function MarkdownCell({ data, selected }: NodeProps<{ cellId: string }>) 
               forceEdit={forceEditTitle}
               className="font-hand text-2xl truncate text-ink dark:text-white flex-1 min-w-0"
             />
-            <button
-              // `preventDefault` on mousedown keeps the textarea focused
-              // so onBlur doesn't fire BEFORE this click, which would
-              // race and re-open edit mode. `nodrag` lets the click
-              // through ReactFlow's drag detection.
-              onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (editing) commitAndClose();
-                else enterEdit();
-              }}
-              className="nodrag font-hand text-base px-2 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-white/80 dark:bg-[#1f2228] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-              title={editing ? "Stop editing (Esc)" : "Edit markdown"}
-            >
-              {editing ? "✓ Done" : "✏️ Edit"}
-            </button>
+            {/* Iter 95: hide Edit when collapsed — body is hidden anyway. */}
+            {!cell.collapsed && (
+              <button
+                // `preventDefault` on mousedown keeps the textarea focused
+                // so onBlur doesn't fire BEFORE this click, which would
+                // race and re-open edit mode. `nodrag` lets the click
+                // through ReactFlow's drag detection.
+                onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (editing) commitAndClose();
+                  else enterEdit();
+                }}
+                className="nodrag font-hand text-base px-2 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-white/80 dark:bg-[#1f2228] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
+                title={editing ? "Stop editing (Esc)" : "Edit markdown"}
+              >
+                {editing ? "✓ Done" : "✏️ Edit"}
+              </button>
+            )}
           </div>
 
           {/* Iter 55: hide body when collapsed. Title strip stays. */}
