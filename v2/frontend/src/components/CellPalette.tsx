@@ -55,6 +55,10 @@ export function CellPalette() {
   const [q, setQ] = useState("");
   const [idx, setIdx] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  // Iter 107: ref the highlighted row so we can scroll it into view
+  // whenever idx changes (PgDn/End/Tab in a long list could move
+  // focus off-screen).
+  const highlightedRef = useRef<HTMLLIElement | null>(null);
 
   // Reset on each open + focus the input. Iter 106: when a cell is
   // currently selected, start the highlight on its row so the user
@@ -101,6 +105,11 @@ export function CellPalette() {
   useEffect(() => {
     if (idx >= matches.length) setIdx(Math.max(0, matches.length - 1));
   }, [matches, idx]);
+
+  // Iter 107: keep the highlighted row visible.
+  useEffect(() => {
+    highlightedRef.current?.scrollIntoView({ block: "nearest" });
+  }, [idx]);
 
   // Iter 72: terse one-line summary of the notebook so the user
   // sees structure at a glance. Counts links over each pair once.
@@ -202,6 +211,7 @@ export function CellPalette() {
             {matches.map((m, i) => (
               <li
                 key={m.cell.id}
+                ref={i === idx ? highlightedRef : null}
                 onClick={() => pick(m.cell.id)}
                 onMouseEnter={() => setIdx(i)}
                 className={
