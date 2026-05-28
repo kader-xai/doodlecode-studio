@@ -36,6 +36,10 @@ export interface AppState {
   // ── cells & runtime ─────────────────────────────────────────────
   cells: Cell[];
   runtimes: Record<string, CellRuntime>;
+  /** Iter 37: monotonic global counter incremented per runCell call.
+   *  Stamps `execCount` on the per-cell runtime so the UI can show
+   *  Jupyter-style `[n]` badges. Reset on ↻ Kernel + New notebook. */
+  execCounter: number;
   selectedId: string | null;
   /** Iter 33: full selection set. `selectedId` is the "primary"
    *  (last-clicked) cell — toolbar / callout / focus continue to act
@@ -290,6 +294,7 @@ export const useStore = create<AppState>((set, get) => {
 
     cells: seedCells,
     runtimes: {},
+    execCounter: 0,
     selectedId: null,
     selectedIds: [],
     setSelectedIds: (ids) => set({ selectedIds: ids }),
@@ -650,18 +655,34 @@ export const useStore = create<AppState>((set, get) => {
       const cell = get().cells.find((c) => c.id === id);
       if (!cell) return;
       set((s) => ({
-        runtimes: { ...s.runtimes, [id]: { running: true, result: s.runtimes[id]?.result } },
+        runtimes: {
+          ...s.runtimes,
+          [id]: {
+            running: true,
+            result: s.runtimes[id]?.result,
+            execCount: s.runtimes[id]?.execCount,
+          },
+        },
       }));
       try {
         const result = await executeCode(cell.source);
-        set((s) => ({ runtimes: { ...s.runtimes, [id]: { running: false, result } } }));
-      } catch (e) {
+        // Iter 37: bump the global execution counter and stamp the
+        // new number on this cell's runtime.
+        const next = (get().execCounter ?? 0) + 1;
         set((s) => ({
+          execCounter: next,
+          runtimes: { ...s.runtimes, [id]: { running: false, result, execCount: next } },
+        }));
+      } catch (e) {
+        const next = (get().execCounter ?? 0) + 1;
+        set((s) => ({
+          execCounter: next,
           runtimes: {
             ...s.runtimes,
             [id]: {
               running: false,
               result: { status: "error", elapsed_ms: 0, outputs: [{ type: "error", text: String(e) }] },
+              execCount: next,
             },
           },
         }));
@@ -683,6 +704,7 @@ export const useStore = create<AppState>((set, get) => {
         notebookName: "Untitled",
         cells: [{ ...SEED_CELL, id: "c0" }],
         runtimes: {},
+        execCounter: 0,
         selectedId: null,
         selectedIds: [],
       });
@@ -715,6 +737,7 @@ export const useStore = create<AppState>((set, get) => {
           };
         }),
         runtimes: {},
+        execCounter: 0,
         selectedId: null,
         selectedIds: [],
       });

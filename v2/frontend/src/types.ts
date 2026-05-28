@@ -44,4 +44,7 @@ export interface Callout {
 export interface CellRuntime {
   running: boolean;
   result?: ExecuteResponse;
+  /** Iter 37: monotonic execution counter assigned the moment a run
+   *  completes — like Jupyter's `In [n]`. Reset to 0 on ↻ Kernel. */
+  execCount?: number;
 }

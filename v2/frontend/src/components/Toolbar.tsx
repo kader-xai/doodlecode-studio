@@ -206,6 +206,16 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
               if (!window.confirm("Restart the Python kernel? All variables and imports will be wiped.")) return;
               try {
                 await resetKernel();
+                // Iter 37: also reset the in-memory execution counter
+                // + per-cell badges so [n] starts back at [1].
+                useStore.setState((s) => {
+                  const cleared: typeof s.runtimes = {};
+                  for (const k of Object.keys(s.runtimes)) {
+                    const r = s.runtimes[k];
+                    cleared[k] = { ...r, execCount: undefined };
+                  }
+                  return { execCounter: 0, runtimes: cleared };
+                });
               } catch (err) {
                 window.alert(`Could not reset kernel: ${err}`);
               }

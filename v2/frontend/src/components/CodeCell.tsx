@@ -73,6 +73,22 @@ export function CodeCell({ data, selected }: NodeProps<{ cellId: string }>) {
            *  when editing) so they keep working without locking the
            *  whole row from moving the cell. */}
           <div className="flex items-center justify-between mb-2 px-1 gap-2">
+            {/* Iter 37: Jupyter-style execution counter. Shows once
+             *  the cell has run at least once; gray while running so
+             *  the user knows the old number is stale. */}
+            {runtime?.execCount !== undefined && (
+              <span
+                className={
+                  "font-mono text-xs px-1.5 py-0.5 rounded border-2 select-none shrink-0 " +
+                  (runtime.running
+                    ? "border-ink/20 dark:border-white/20 text-ink/40 dark:text-white/40"
+                    : "border-ink/40 dark:border-white/40 bg-white/60 dark:bg-black/40 text-ink/70 dark:text-white/70")
+                }
+                title="Execution count — bumps every time the cell runs"
+              >
+                [{runtime.execCount}]
+              </span>
+            )}
             <EditableTitle
               value={cell.title}
               onCommit={(t) => setTitle(cellId, t)}
