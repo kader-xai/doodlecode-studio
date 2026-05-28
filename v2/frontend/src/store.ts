@@ -143,6 +143,16 @@ export interface AppState {
    *  reset the Python kernel — variables and imports survive so the
    *  next run can pick up where the last one left off. */
   clearAllOutputs: () => void;
+  /** Iter 45: link two cells together. Symmetric — adds `to` into
+   *  `from.links` and vice-versa. No-op when the link already exists
+   *  or when either id is missing. */
+  linkCells: (from: string, to: string) => void;
+  /** Iter 45: drop a link between two cells (both directions). */
+  unlinkCells: (from: string, to: string) => void;
+  /** Iter 45: toolbar shortcut — when exactly 2 cells are selected,
+   *  toggle the link between them. Returns true when a link now
+   *  exists, false when it was just removed. */
+  toggleLinkSelected: () => boolean;
 
   // ── file operations ─────────────────────────────────────────────
   newNotebook: () => void;
@@ -564,7 +574,13 @@ export const useStore = create<AppState>((set, get) => {
     },
     deleteCell: (id) => {
       set((s) => {
-        const cells = s.cells.filter((c) => c.id !== id);
+        // Iter 45: drop any link referencing the deleted cell so we
+        // don't leak dangling endpoints into the saved file.
+        const cells = s.cells
+          .filter((c) => c.id !== id)
+          .map((c) =>
+            c.links?.includes(id) ? { ...c, links: c.links.filter((x) => x !== id) } : c,
+          );
         const { [id]: _drop, ...runtimes } = s.runtimes;
         const selectedId = s.selectedId === id ? null : s.selectedId;
         const selectedIds = s.selectedIds.filter((sid) => sid !== id);
@@ -697,6 +713,58 @@ export const useStore = create<AppState>((set, get) => {
       set({ runtimes: {} });
     },
 
+    linkCells: (from, to) => {
+      if (!from || !to || from === to) return;
+      set((s) => {
+        const cells = s.cells.map((c) => {
+          if (c.id === from) {
+            const list = c.links ?? [];
+            if (list.includes(to)) return c;
+            return { ...c, links: [...list, to] };
+          }
+          if (c.id === to) {
+            // Track the reverse so deletion of one endpoint
+            // still cleans up — but the visual is a single line.
+            const list = c.links ?? [];
+            if (list.includes(from)) return c;
+            return { ...c, links: [...list, from] };
+          }
+          return c;
+        });
+        return { cells };
+      });
+      autosave();
+    },
+    unlinkCells: (from, to) => {
+      if (!from || !to) return;
+      set((s) => {
+        const cells = s.cells.map((c) => {
+          if (c.id === from && c.links?.includes(to)) {
+            return { ...c, links: c.links.filter((id) => id !== to) };
+          }
+          if (c.id === to && c.links?.includes(from)) {
+            return { ...c, links: c.links.filter((id) => id !== from) };
+          }
+          return c;
+        });
+        return { cells };
+      });
+      autosave();
+    },
+    toggleLinkSelected: () => {
+      const s = get();
+      if (s.selectedIds.length !== 2) return false;
+      const [a, b] = s.selectedIds;
+      const cellA = s.cells.find((c) => c.id === a);
+      const linked = !!cellA?.links?.includes(b);
+      if (linked) {
+        s.unlinkCells(a, b);
+        return false;
+      }
+      s.linkCells(a, b);
+      return true;
+    },
+
     runAllCells: async () => {
       const ordered = get().cellsInOrder().filter((c) => c.kind === "code");
       for (const c of ordered) {
@@ -742,6 +810,8 @@ export const useStore = create<AppState>((set, get) => {
             h: c.h,
             diagram_kind: (c as Cell).diagram_kind,
             callouts,
+            // Iter 45: outgoing cell-to-cell links.
+            links: (c as Cell).links ?? [],
           };
         }),
         runtimes: {},

@@ -58,6 +58,9 @@ def serialize(nb: NotebookPayload) -> str:
             out.append(f"# @title: {c.title}")
         if c.diagram_kind:
             out.append(f"# @diagram_kind: {c.diagram_kind}")
+        # Iter 45: cell→cell links emit one directive per target.
+        for target in c.links:
+            out.append(f"# @link_to: {target}")
         # Callouts. The first one needs no marker (writes
         # `# @explain:` / `# @image:` straight into the directive
         # block). Subsequent ones are introduced by `# @callout`.
@@ -117,6 +120,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
         # Directive block.
         title: str | None = None
         diagram_kind: str | None = None
+        links: list[str] = []
         callouts: list[CalloutPayload] = []
         # `current` points at the callout being edited. Starts implicit
         # at index 0 so an `# @explain:` before any `# @callout` marker
@@ -149,6 +153,10 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 ensure_current().text = val.replace("\\n", "\n").strip()
             elif key == "image":
                 ensure_current().image = val.strip()
+            elif key == "link_to":
+                t = val.strip()
+                if t:
+                    links.append(t)
             # Unknown directives silently ignored — keeps forward-compat.
             i += 1
 
@@ -180,6 +188,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 diagram_kind=diagram_kind,
                 explain=explain,
                 callouts=callouts,
+                links=links,
             )
         )
 

@@ -33,6 +33,11 @@ export interface Cell {
   explain?: string;
   /** Zero or more speech bubbles, rendered top-to-bottom beside the cell. */
   callouts?: Callout[];
+  /** Iter 45: outgoing cell→cell links. Each entry is the target
+   *  cell's id. Rendered as solid sketchy lines by ConnectionsLayer
+   *  (distinct from the dashed callout chains). Survives round-trip
+   *  through the .py file via `# @link_to:` directives. */
+  links?: string[];
 }
 
 export interface Callout {

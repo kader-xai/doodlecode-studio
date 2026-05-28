@@ -72,6 +72,9 @@ class CellPayload(BaseModel):
     # Zero or more speech-bubbles displayed beside the cell, top-to-
     # bottom. Persisted via `# @callout` separator directives.
     callouts: list[CalloutPayload] = []
+    # Iter 45: outgoing cell→cell links. Each entry is a target cell id.
+    # Persisted via `# @link_to: <id>` directives (one per link).
+    links: list[str] = []
 
 
 class NotebookPayload(BaseModel):

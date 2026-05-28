@@ -48,7 +48,65 @@ export function ConnectionsLayer() {
   // viewport on every frame.
   const { x: vx, y: vy, zoom } = useViewport();
 
-  const segments: { x1: number; y1: number; x2: number; y2: number; key: string }[] = [];
+  type Seg = {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    key: string;
+    /** Iter 45: links between cells render as solid sketchy lines
+     *  in the doodle ink color so they're distinguishable from
+     *  dashed callout chains. */
+    kind: "callout" | "link";
+  };
+  const segments: Seg[] = [];
+
+  // Iter 45: cell ↔ cell links. We dedupe a→b vs b→a so a symmetric
+  // pair only draws once. Geometry connects the closest pair of
+  // cell edges (right→left or bottom→top) so the line stays inside
+  // the canvas instead of cutting diagonally through cells.
+  const drawn = new Set<string>();
+  const byId = new Map(cells.map((c) => [c.id, c] as const));
+  for (const a of cells) {
+    for (const tid of a.links ?? []) {
+      const key = a.id < tid ? `${a.id}|${tid}` : `${tid}|${a.id}`;
+      if (drawn.has(key)) continue;
+      const b = byId.get(tid);
+      if (!b) continue;
+      drawn.add(key);
+      const aW = a.w ?? FALLBACK_W[a.kind] ?? 560;
+      const aH = a.h ?? FALLBACK_H[a.kind] ?? 280;
+      const bW = b.w ?? FALLBACK_W[b.kind] ?? 560;
+      const bH = b.h ?? FALLBACK_H[b.kind] ?? 280;
+      // Pick edge midpoints from whichever face the centers are closest to.
+      const aCx = a.x + aW / 2, aCy = a.y + aH / 2;
+      const bCx = b.x + bW / 2, bCy = b.y + bH / 2;
+      const dx = bCx - aCx;
+      const dy = bCy - aCy;
+      let x1: number, y1: number, x2: number, y2: number;
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        // horizontal — connect right→left or left→right
+        if (dx >= 0) {
+          x1 = a.x + aW; y1 = aCy;
+          x2 = b.x;       y2 = bCy;
+        } else {
+          x1 = a.x;       y1 = aCy;
+          x2 = b.x + bW;  y2 = bCy;
+        }
+      } else {
+        // vertical — connect bottom→top or top→bottom
+        if (dy >= 0) {
+          x1 = aCx; y1 = a.y + aH;
+          x2 = bCx; y2 = b.y;
+        } else {
+          x1 = aCx; y1 = a.y;
+          x2 = bCx; y2 = b.y + bH;
+        }
+      }
+      segments.push({ x1, y1, x2, y2, key: `lk-${key}`, kind: "link" });
+    }
+  }
+
   for (const c of cells) {
     const list = c.callouts ?? [];
     if (!list.length) continue;
@@ -62,19 +120,19 @@ export function ConnectionsLayer() {
       const bubbleY = c.y + i * STACK_DY;
       const bubbleMidY = bubbleY + BUBBLE_H_APPROX / 2;
       if (i === 0) {
-        // Cell → first callout: cell's right midpoint → bubble's left midpoint.
         segments.push({
           key: `${c.id}-c-${i}`,
           x1: cellRightX, y1: cellMidY,
           x2: bubbleX,    y2: bubbleMidY,
+          kind: "callout",
         });
       } else {
-        // Bubble (i-1) → bubble (i): bottom of prev → top of current.
         const prevBubbleBottom = c.y + (i - 1) * STACK_DY + BUBBLE_H_APPROX;
         segments.push({
           key: `${c.id}-c-${i}`,
           x1: bubbleX + BUBBLE_W / 2, y1: prevBubbleBottom,
           x2: bubbleX + BUBBLE_W / 2, y2: bubbleY,
+          kind: "callout",
         });
       }
     }
@@ -98,21 +156,37 @@ export function ConnectionsLayer() {
       }}
     >
       <g transform={`translate(${vx}, ${vy}) scale(${zoom})`}>
-        {segments.map((s) => (
-          <line
-            key={s.key}
-            x1={s.x1}
-            y1={s.y1}
-            x2={s.x2}
-            y2={s.y2}
-            stroke={dark ? "#aaa" : "#555"}
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeDasharray="1 10"
-            // CSS class powers the dashoffset keyframe in index.css.
-            className="doodle-connector"
-          />
-        ))}
+        {segments.map((s) =>
+          s.kind === "link" ? (
+            // Iter 45: cell↔cell link — solid sketchy line, doodle
+            // ink color, no animation. Distinct from the dashed
+            // dot-flow used for callouts.
+            <line
+              key={s.key}
+              x1={s.x1}
+              y1={s.y1}
+              x2={s.x2}
+              y2={s.y2}
+              stroke={dark ? "#e9d8a6" : "#2a2a2a"}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              opacity={0.85}
+            />
+          ) : (
+            <line
+              key={s.key}
+              x1={s.x1}
+              y1={s.y1}
+              x2={s.x2}
+              y2={s.y2}
+              stroke={dark ? "#aaa" : "#555"}
+              strokeWidth={2.5}
+              strokeLinecap="round"
+              strokeDasharray="1 10"
+              className="doodle-connector"
+            />
+          ),
+        )}
       </g>
     </svg>
   );

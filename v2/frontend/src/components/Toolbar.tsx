@@ -32,6 +32,13 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
   const selectedId = useStore((s) => s.selectedId);
   const selectedIds = useStore((s) => s.selectedIds);
   const alignSelected = useStore((s) => s.alignSelected);
+  const toggleLinkSelected = useStore((s) => s.toggleLinkSelected);
+  const selectedPairLinked = useStore((s) => {
+    if (s.selectedIds.length !== 2) return false;
+    const [a, b] = s.selectedIds;
+    const ca = s.cells.find((c) => c.id === a);
+    return !!ca?.links?.includes(b);
+  });
   const selectedTitle = useStore((s) =>
     s.cells.find((c) => c.id === s.selectedId)?.title ?? null,
   );
@@ -290,6 +297,20 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
                 </button>
               ))}
             </div>
+          )}
+
+          {/* Iter 45: Link / Unlink — only when exactly two cells are
+           *  selected. Single click toggles a sketchy connector
+           *  between them; ConnectionsLayer draws the line. */}
+          {selectedIds.length === 2 && (
+            <button
+              type="button"
+              onClick={() => toggleLinkSelected()}
+              title={selectedPairLinked ? "Unlink these two cells" : "Link these two cells"}
+              className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-violet/80 dark:bg-[#5f3dc4] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
+            >
+              {selectedPairLinked ? "⛓‍💥 Unlink" : "🔗 Link"}
+            </button>
           )}
 
           {selectedId && (
