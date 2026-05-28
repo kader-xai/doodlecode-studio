@@ -96,6 +96,19 @@ export function App() {
         return;
       }
 
+      // Iter 57: Cmd/Ctrl+Shift+[ collapses every cell;
+      //          Cmd/Ctrl+Shift+] expands every cell.
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "[" || e.key === "{")) {
+        e.preventDefault();
+        state.setAllCollapsed(true);
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "]" || e.key === "}")) {
+        e.preventDefault();
+        state.setAllCollapsed(false);
+        return;
+      }
+
       // Iter 38: Cmd/Ctrl+Shift+L — clear every output panel.
       if ((e.metaKey || e.ctrlKey) && e.shiftKey && (e.key === "l" || e.key === "L")) {
         e.preventDefault();

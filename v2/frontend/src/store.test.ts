@@ -285,6 +285,39 @@ describe("store: cell↔cell links (iter 45)", () => {
   });
 });
 
+describe("store: collapse (iter 53/57)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code",     source: "", x: 0, y: 0 },
+        { id: "b", kind: "markdown", source: "", x: 0, y: 100, collapsed: true },
+        { id: "c", kind: "browser",  source: "", x: 0, y: 200 },
+      ],
+      runtimes: {},
+      selectedId: null,
+      selectedIds: [],
+    });
+  });
+
+  it("toggleCollapse flips the flag on the target cell only", () => {
+    useStore.getState().toggleCollapse("a");
+    const cells = useStore.getState().cells;
+    expect(cells.find((c) => c.id === "a")!.collapsed).toBe(true);
+    expect(cells.find((c) => c.id === "b")!.collapsed).toBe(true); // unchanged
+    expect(cells.find((c) => c.id === "c")!.collapsed).toBeFalsy();
+  });
+
+  it("setAllCollapsed(true) collapses every cell", () => {
+    useStore.getState().setAllCollapsed(true);
+    expect(useStore.getState().cells.every((c) => c.collapsed)).toBe(true);
+  });
+
+  it("setAllCollapsed(false) expands every cell", () => {
+    useStore.getState().setAllCollapsed(false);
+    expect(useStore.getState().cells.every((c) => !c.collapsed)).toBe(true);
+  });
+});
+
 describe("store: cellsInOrder", () => {
   it("sorts top-to-bottom then left-to-right", () => {
     useStore.setState({

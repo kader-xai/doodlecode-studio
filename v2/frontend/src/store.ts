@@ -155,6 +155,8 @@ export interface AppState {
   toggleLinkSelected: () => boolean;
   /** Iter 53: toggle a cell's collapsed-to-title state. */
   toggleCollapse: (id: string) => void;
+  /** Iter 57: flip the collapsed flag on every cell at once. */
+  setAllCollapsed: (collapsed: boolean) => void;
 
   // ── file operations ─────────────────────────────────────────────
   newNotebook: () => void;
@@ -771,6 +773,12 @@ export const useStore = create<AppState>((set, get) => {
         cells: s.cells.map((c) =>
           c.id === id ? { ...c, collapsed: !c.collapsed } : c,
         ),
+      }));
+      autosave();
+    },
+    setAllCollapsed: (collapsed) => {
+      set((s) => ({
+        cells: s.cells.map((c) => (c.collapsed === collapsed ? c : { ...c, collapsed })),
       }));
       autosave();
     },
