@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Tests (iter 143)
+- Lock two `setExplain` invariants: whitespace-only text clears
+  the callouts (same as `null`), and replacing `callouts[0]` does
+  not drop `callouts[1+]`. 88 frontend tests.
+
 ### Tests (iter 142)
 - Lock `setAllCollapsed` object-identity preservation: already-
   matching cells keep their reference so React memo / shallow

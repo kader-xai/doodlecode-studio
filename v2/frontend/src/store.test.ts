@@ -170,6 +170,26 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().cells.find((c) => c.id === "c0")!.callouts).toEqual([]);
   });
 
+  it("setExplain('   ') treats whitespace as a clear (iter 143)", () => {
+    useStore.getState().setExplain("c0", "real text");
+    useStore.getState().setExplain("c0", "   \t  ");
+    // The store treats whitespace-only as a clear, same as null.
+    expect(useStore.getState().cells.find((c) => c.id === "c0")!.callouts).toEqual([]);
+  });
+
+  it("setExplain preserves callouts[1+] when replacing callouts[0] (iter 143)", () => {
+    // Seed two callouts; setExplain only touches the first.
+    useStore.getState().setCallouts("c0", [
+      { text: "first" },
+      { text: "second" },
+    ]);
+    useStore.getState().setExplain("c0", "first replaced");
+    const c = useStore.getState().cells.find((x) => x.id === "c0")!;
+    expect(c.callouts?.[0].text).toBe("first replaced");
+    expect(c.callouts?.[1].text).toBe("second");
+    expect(c.callouts?.length).toBe(2);
+  });
+
   it("spaceForPresentation snapshots and rollback restores", () => {
     useStore.getState().moveCell("c0", 500, 700);
     useStore.getState().spaceForPresentation(800);
