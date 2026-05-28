@@ -364,6 +364,13 @@ describe("store: cell↔cell links (iter 45)", () => {
     expect(cells.find((c) => c.id === "b")!.links).toEqual([]);
   });
 
+  it("unlinkCells on a never-linked pair is a no-op (iter 127)", () => {
+    useStore.getState().unlinkCells("a", "c");
+    const cells = useStore.getState().cells;
+    expect(cells.find((c) => c.id === "a")!.links ?? []).toEqual([]);
+    expect(cells.find((c) => c.id === "c")!.links ?? []).toEqual([]);
+  });
+
   it("toggleLinkSelected creates then removes a link with exactly 2 selected", () => {
     useStore.getState().setSelectedIds(["a", "c"]);
     expect(useStore.getState().toggleLinkSelected()).toBe(true);
