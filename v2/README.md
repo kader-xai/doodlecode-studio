@@ -91,6 +91,17 @@ and type `matplotlib`.
 | F                         | Toggle browser fullscreen                 |
 | B                         | Toggle interact mode (browser cell only)  |
 
+## Drag & drop
+
+Two desktop-to-canvas drops are wired:
+
+- **Image file** (`.png`, `.jpg`, `.gif`, …) — becomes a Media cell at
+  the drop point. 5 MB cap. The image is embedded as a data URL so
+  the round-trip through the saved `.py` file is self-contained.
+- **`.py` notebook file** — opens the file as the current notebook,
+  after a confirm prompt so unsaved work isn't clobbered. The
+  filename (sans extension) becomes the new notebook name.
+
 ## File format
 
 One `.py` file per notebook. Cells are separated by `# %%` headers.
