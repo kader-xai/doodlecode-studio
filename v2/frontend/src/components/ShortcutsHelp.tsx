@@ -24,6 +24,7 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "B", what: "Toggle interact mode for selected browser cell", when: "browser cell selected" },
   { keys: "▶ button", what: "Run focused code cell", when: "anywhere" },
   { keys: "Shift+Enter or Cmd/Ctrl+Enter", what: "Run the selected code cell (Jupyter-style)", when: "code cell selected" },
+  { keys: "🎬 / Shift+R", what: "Reveal the next code step (build up code live)", when: "code cell with reveal steps" },
   { keys: "Cmd/Ctrl+0", what: "Reset zoom to 100%", when: "anywhere" },
   { keys: "Cmd/Ctrl+1", what: "Fit entire canvas in view", when: "anywhere" },
   { keys: "Cmd/Ctrl+K", what: "Open cell palette — filter & jump to any cell", when: "anywhere" },

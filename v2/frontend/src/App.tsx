@@ -81,6 +81,20 @@ export function App() {
       const state = useStore.getState();
       const sid = state.selectedId;
 
+      // Iter 158: Shift+R reveals the next code step on the active
+      // cell — works both in presentation (focused cell) and on the
+      // canvas (selected cell). Placed before the presentation
+      // "R runs the cell" handler so Shift+R doesn't trigger a run.
+      if (e.shiftKey && (e.key === "R" || e.key === "r") && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const target = state.presenting ? state.focusedCellId : sid;
+        if (!target) return;
+        const cell = state.cells.find((c) => c.id === target);
+        if (cell?.kind !== "code" || !(cell.reveals?.length)) return;
+        e.preventDefault();
+        state.revealNext(target);
+        return;
+      }
+
       if (e.key === "?" || (e.key === "/" && e.shiftKey)) {
         e.preventDefault();
         setHelpOpen((v) => !v);

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added (iter 158) — Reveal Steps shortcut
+- **Shift+R reveals the next code step** — works during presentation
+  (acts on the focused cell) and on the canvas (selected cell).
+  No-op unless the target is a code cell with reveal steps left.
+  Documented in the Shortcuts overlay (🎬 / Shift+R).
+
 ### Added (iter 155-157) — Reveal Steps (UI + file format)
 - **Reveal Steps editor** (🎬 on a code cell) — author an ordered
   list of code fragments ahead of a talk.
