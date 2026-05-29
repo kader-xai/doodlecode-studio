@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { executeCode, openNotebook, saveNotebook } from "./api";
 import type { Callout, Cell, CellRuntime } from "./types";
+import { effectiveSource } from "./lib/reveal";
 
 /**
  * Global app state. ONE source of truth — components subscribe with
@@ -67,6 +68,23 @@ export interface AppState {
   /** Which cell, if any, is currently in the callout-editor modal. */
   calloutEditorCellId: string | null;
   openCalloutEditor: (id: string | null) => void;
+
+  // ── Reveal steps (iter 154) ─────────────────────────────────────
+  /** Per-cell count of reveal steps currently shown. Ephemeral —
+   *  NOT persisted, resets to 0 on load/new. The displayed/run code
+   *  is `effectiveSource(cell, revealStep[id] ?? 0)`. */
+  revealStep: Record<string, number>;
+  /** Author the ordered reveal fragments for a code cell. Empty
+   *  trailing entries are dropped. */
+  setReveals: (id: string, reveals: string[]) => void;
+  /** Reveal the next stored step (no-op when all are shown). Returns
+   *  the new step count so the caller can drive a typewriter. */
+  revealNext: (id: string) => number;
+  /** Collapse a cell back to step 0 so the reveal can be re-presented. */
+  resetReveals: (id: string) => void;
+  /** Which code cell, if any, is in the Reveal Steps editor modal. */
+  revealEditorCellId: string | null;
+  openRevealEditor: (id: string | null) => void;
   /** Whether the pip-install modal is open. */
   installOpen: boolean;
   setInstallOpen: (on: boolean) => void;
@@ -426,6 +444,37 @@ export const useStore = create<AppState>((set, get) => {
       set((s) => ({ cells: s.cells.map((c) => (c.id === id ? { ...c, diagram_kind: kind } : c)) }));
       autosave();
     },
+
+    // ── Reveal steps (iter 154) ───────────────────────────────────
+    revealStep: {},
+    setReveals: (id, reveals) => {
+      // Drop trailing whitespace-only fragments so an empty editor
+      // row doesn't create a "reveal nothing" step.
+      const cleaned = reveals.filter((r) => r.trim().length > 0);
+      set((s) => ({
+        cells: s.cells.map((c) =>
+          c.id === id ? { ...c, reveals: cleaned.length ? cleaned : undefined } : c,
+        ),
+        // Authoring resets the live step so the next present starts fresh.
+        revealStep: { ...s.revealStep, [id]: 0 },
+      }));
+      autosave();
+    },
+    revealNext: (id) => {
+      const s = get();
+      const cell = s.cells.find((c) => c.id === id);
+      const total = cell?.kind === "code" ? cell.reveals?.length ?? 0 : 0;
+      const cur = s.revealStep[id] ?? 0;
+      if (cur >= total) return cur; // nothing left to reveal
+      const next = cur + 1;
+      set((st) => ({ revealStep: { ...st.revealStep, [id]: next } }));
+      return next;
+    },
+    resetReveals: (id) => {
+      set((s) => ({ revealStep: { ...s.revealStep, [id]: 0 } }));
+    },
+    revealEditorCellId: null,
+    openRevealEditor: (id) => set({ revealEditorCellId: id }),
     setExplain: (id, text) => {
       // Backward-compat shim: a single-text "explain" is now stored
       // as the first entry of `callouts`. We don't carry the legacy
@@ -842,7 +891,10 @@ export const useStore = create<AppState>((set, get) => {
         },
       }));
       try {
-        const result = await executeCode(cell.source);
+        // Iter 154: run the currently-revealed code, not just the
+        // pristine base. effectiveSource appends any revealed steps.
+        const code = effectiveSource(cell, get().revealStep[id] ?? 0);
+        const result = await executeCode(code);
         // Iter 37: bump the global execution counter and stamp the
         // new number on this cell's runtime.
         const next = (get().execCounter ?? 0) + 1;
@@ -1000,6 +1052,7 @@ export const useStore = create<AppState>((set, get) => {
         cells: [{ ...SEED_CELL, id: "c0" }],
         runtimes: {},
         execCounter: 0,
+        revealStep: {},
         selectedId: "c0",
         selectedIds: ["c0"],
       });
@@ -1033,10 +1086,13 @@ export const useStore = create<AppState>((set, get) => {
             links: (c as Cell).links ?? [],
             // Iter 54: collapsed UI state from `# @collapsed:`.
             collapsed: (c as Cell).collapsed ?? false,
+            // Iter 154: reveal steps from `# @reveal:` blocks.
+            reveals: (c as Cell).reveals,
           };
         }),
         runtimes: {},
         execCounter: 0,
+        revealStep: {},
         selectedId: null,
         selectedIds: [],
       });

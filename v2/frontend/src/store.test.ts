@@ -893,3 +893,64 @@ describe("store: cellsInOrder", () => {
     expect(ids).toEqual(["left", "right", "below"]);
   });
 });
+
+describe("store: reveal steps (iter 154)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [{ id: "k", kind: "code", source: "BASE", x: 0, y: 0 }],
+      runtimes: {},
+      revealStep: {},
+      selectedId: "k",
+      selectedIds: ["k"],
+    });
+  });
+
+  it("setReveals stores fragments and drops whitespace-only ones", () => {
+    useStore.getState().setReveals("k", ["STEP1", "   ", "STEP2", ""]);
+    const cell = useStore.getState().cells.find((c) => c.id === "k")!;
+    expect(cell.reveals).toEqual(["STEP1", "STEP2"]);
+  });
+
+  it("setReveals with all-empty clears reveals to undefined", () => {
+    useStore.getState().setReveals("k", ["X"]);
+    useStore.getState().setReveals("k", ["  ", ""]);
+    expect(useStore.getState().cells.find((c) => c.id === "k")!.reveals).toBeUndefined();
+  });
+
+  it("revealNext advances one step at a time and clamps at the end", () => {
+    useStore.getState().setReveals("k", ["A", "B"]);
+    expect(useStore.getState().revealNext("k")).toBe(1);
+    expect(useStore.getState().revealNext("k")).toBe(2);
+    expect(useStore.getState().revealNext("k")).toBe(2); // clamp
+    expect(useStore.getState().revealStep["k"]).toBe(2);
+  });
+
+  it("revealNext is a no-op with no reveals", () => {
+    expect(useStore.getState().revealNext("k")).toBe(0);
+    expect(useStore.getState().revealStep["k"] ?? 0).toBe(0);
+  });
+
+  it("resetReveals returns the cell to step 0", () => {
+    useStore.getState().setReveals("k", ["A", "B"]);
+    useStore.getState().revealNext("k");
+    useStore.getState().revealNext("k");
+    useStore.getState().resetReveals("k");
+    expect(useStore.getState().revealStep["k"]).toBe(0);
+  });
+
+  it("authoring reveals resets the live step (re-present from scratch)", () => {
+    useStore.getState().setReveals("k", ["A", "B"]);
+    useStore.getState().revealNext("k");
+    expect(useStore.getState().revealStep["k"]).toBe(1);
+    // Re-authoring resets the step so the next talk starts at base.
+    useStore.getState().setReveals("k", ["A", "B", "C"]);
+    expect(useStore.getState().revealStep["k"]).toBe(0);
+  });
+
+  it("openRevealEditor sets and clears the modal target", () => {
+    useStore.getState().openRevealEditor("k");
+    expect(useStore.getState().revealEditorCellId).toBe("k");
+    useStore.getState().openRevealEditor(null);
+    expect(useStore.getState().revealEditorCellId).toBeNull();
+  });
+});

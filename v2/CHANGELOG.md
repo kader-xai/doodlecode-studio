@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added (iter 154) — Reveal Steps (store layer)
+- **Code cells can now hold ordered "reveal" steps.** `cell.reveals`
+  is a list of code fragments authored ahead of a talk. The pristine
+  `source` is shown at step 0; each reveal appends the next fragment
+  below (build-up), so the program grows function-by-function. The
+  currently-revealed count is the ephemeral `revealStep` (not
+  persisted, resets on load). `runCell` executes the effective
+  (revealed) code. New store actions: `setReveals`, `revealNext`,
+  `resetReveals`, `openRevealEditor`. Pure `effectiveSource` /
+  `revealCount` helpers in `lib/reveal.ts`. UI + file round-trip
+  land in following iterations.
+
 ### Changed (iter 153)
 - **DoodleBorder is now a two-pass sketch.** Pass A is the main
   wobbly stroke; pass B is a thinner inset ghost at 45% opacity with

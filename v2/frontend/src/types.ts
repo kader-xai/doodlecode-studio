@@ -51,6 +51,15 @@ export interface Cell {
    *  is in the store (and therefore the localStorage autosave) but
    *  isn't yet serialized into the .py file. */
   collapsed?: boolean;
+  /** Iter 154: ordered "reveal" code fragments (code cells only).
+   *  `source` is the pristine base shown at step 0. Each Reveal press
+   *  appends the next fragment below the current code (build-up), so
+   *  the displayed/run code = source + revealed steps. The steps are
+   *  authored ahead of time in the Reveal Steps editor and round-trip
+   *  as `# @reveal:` blocks. The number currently revealed is the
+   *  ephemeral `revealStep` in the store — it is NOT persisted and
+   *  resets to 0 on load. */
+  reveals?: string[];
 }
 
 export interface Callout {
