@@ -78,6 +78,10 @@ class CellPayload(BaseModel):
     # Iter 54: collapsed-to-title UI state. Persisted via
     # `# @collapsed: true` (omitted when False — keeps files clean).
     collapsed: bool = False
+    # Iter 157: ordered "reveal" code fragments (code cells only).
+    # Each is typed in below the base during a talk. Persisted as one
+    # `# @reveal:` directive per step with newlines escaped as \n.
+    reveals: list[str] = []
 
 
 class NotebookPayload(BaseModel):

@@ -182,3 +182,38 @@ def test_empty_link_target_is_ignored():
     )
     nb, _ = notebook_io.parse(text)
     assert nb.cells[0].links == ["b"]
+
+
+def test_reveals_round_trip():
+    """Iter 157: reveal steps survive serialize → parse, in order,
+    with newlines preserved."""
+    nb = NotebookPayload(name="R", cells=[
+        CellPayload(
+            id="c0", kind="code", source="import math",
+            x=0, y=0,
+            reveals=[
+                "def sigmoid(x):\n    return 1 / (1 + math.exp(-x))",
+                "print(sigmoid(0))",
+            ],
+        ),
+    ])
+    out = _roundtrip(nb)
+    assert out.cells[0].reveals == [
+        "def sigmoid(x):\n    return 1 / (1 + math.exp(-x))",
+        "print(sigmoid(0))",
+    ]
+    # Base source is untouched by the reveal round-trip.
+    assert out.cells[0].source == "import math"
+
+
+def test_old_files_without_reveal_default_empty():
+    text = (
+        "# doodlecode format-version: 3\n"
+        "# notebook: T\n"
+        "\n"
+        "# %% kind=code id=c0 x=0 y=0\n"
+        "\n"
+        "x = 1\n"
+    )
+    nb, _ = notebook_io.parse(text)
+    assert nb.cells[0].reveals == []

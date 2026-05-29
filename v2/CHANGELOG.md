@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added (iter 155-157) — Reveal Steps (UI + file format)
+- **Reveal Steps editor** (🎬 on a code cell) — author an ordered
+  list of code fragments ahead of a talk.
+- **CodeCell Reveal UI**: ✨ Reveal types the next step in below the
+  code with a typewriter animation; ↺ resets to the base; the editor
+  is read-only during/after a reveal (only step 0 is editable).
+- **File round-trip**: reveal steps persist as one `# @reveal:`
+  directive per step (newlines escaped, order preserved). Old files
+  without `# @reveal:` load with an empty list. Backend round-trip
+  tests added (18 backend total).
+
 ### Added (iter 154) — Reveal Steps (store layer)
 - **Code cells can now hold ordered "reveal" steps.** `cell.reveals`
   is a list of code fragments authored ahead of a talk. The pristine

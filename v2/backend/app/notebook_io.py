@@ -65,6 +65,11 @@ def serialize(nb: NotebookPayload) -> str:
         # newly-created files don't grow a noisy `# @collapsed: false`.
         if c.collapsed:
             out.append("# @collapsed: true")
+        # Iter 157: reveal steps — one directive per fragment, newlines
+        # escaped so each step stays on one line (same scheme as
+        # `# @explain:`). Order is preserved on parse.
+        for step in c.reveals:
+            out.append(f"# @reveal: {step.replace(chr(10), '\\n')}")
         # Callouts. The first one needs no marker (writes
         # `# @explain:` / `# @image:` straight into the directive
         # block). Subsequent ones are introduced by `# @callout`.
@@ -126,6 +131,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
         diagram_kind: str | None = None
         links: list[str] = []
         collapsed: bool = False
+        reveals: list[str] = []
         callouts: list[CalloutPayload] = []
         # `current` points at the callout being edited. Starts implicit
         # at index 0 so an `# @explain:` before any `# @callout` marker
@@ -164,6 +170,12 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                     links.append(t)
             elif key == "collapsed":
                 collapsed = val.strip().lower() in ("true", "1", "yes")
+            elif key == "reveal":
+                # Iter 157: un-escape newlines; keep order. Don't strip —
+                # leading/trailing whitespace inside a fragment matters
+                # for indentation. (The directive regex already ate the
+                # single space after the colon.)
+                reveals.append(val.replace("\\n", "\n"))
             # Unknown directives silently ignored — keeps forward-compat.
             i += 1
 
@@ -197,6 +209,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 callouts=callouts,
                 links=links,
                 collapsed=collapsed,
+                reveals=reveals,
             )
         )
 
