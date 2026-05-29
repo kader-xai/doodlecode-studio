@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AmbientLayer } from "./components/AmbientLayer";
 import { CalloutEditor } from "./components/CalloutEditor";
+import { RevealEditor } from "./components/RevealEditor";
 import { CellPalette } from "./components/CellPalette";
 import { Canvas } from "./components/Canvas";
 import { EmptyNotebookHint } from "./components/EmptyNotebookHint";
@@ -427,6 +428,7 @@ export function App() {
       {helpOpen && <ShortcutsHelp onClose={() => setHelpOpen(false)} />}
       <CellPalette />
       <CalloutEditor />
+      <RevealEditor />
       <InstallModal />
       <PresenterBar />
       <PresenterOverlay />
