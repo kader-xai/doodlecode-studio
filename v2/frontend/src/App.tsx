@@ -7,6 +7,7 @@ import { Canvas } from "./components/Canvas";
 import { EmptyNotebookHint } from "./components/EmptyNotebookHint";
 import { InstallModal } from "./components/InstallModal";
 import { PresenterBar } from "./components/PresenterBar";
+import { PresenterProgress } from "./components/PresenterProgress";
 import { PresenterOverlay } from "./components/PresenterOverlay";
 import { ShortcutsHelp } from "./components/ShortcutsHelp";
 import { Toolbar } from "./components/Toolbar";
@@ -445,6 +446,7 @@ export function App() {
       <RevealEditor />
       <InstallModal />
       <PresenterBar />
+      <PresenterProgress />
       <PresenterOverlay />
 
       <style>{`

@@ -1,5 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { slideCenterY, topFractionOf } from "./present";
+import { slideCenterY, topFractionOf, progressFraction } from "./present";
+
+describe("progressFraction (iter 163 — deck progress bar)", () => {
+  it("fills to (index+1)/total so the last slide is 100%", () => {
+    expect(progressFraction(0, 4)).toBe(0.25);
+    expect(progressFraction(1, 4)).toBe(0.5);
+    expect(progressFraction(3, 4)).toBe(1);
+  });
+
+  it("returns 0 for an empty / unknown deck", () => {
+    expect(progressFraction(0, 0)).toBe(0);
+    expect(progressFraction(2, 0)).toBe(0);
+  });
+
+  it("clamps an out-of-range index", () => {
+    expect(progressFraction(99, 3)).toBe(1); // past the end → full
+    expect(progressFraction(-5, 3)).toBeCloseTo(1 / 3, 5); // before start → first
+  });
+});
 
 describe("slideCenterY (iter 162 — present in the upper third)", () => {
   it("lands the cell top at the requested fraction (round-trip)", () => {

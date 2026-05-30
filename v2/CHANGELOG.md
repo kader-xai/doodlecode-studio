@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 163) — presentation progress bar
+- **A thin doodle progress bar pins to the top during presentation**,
+  filling to (currentSlide / total) with faint per-slide notches so the
+  audience always knows how far through the deck you are. Marker-pink
+  fill, animated width, `pointer-events:none` so it never blocks the
+  PresenterBar. Pure `progressFraction(index, total)` helper in
+  `lib/present.ts` (clamped, last slide = 100%, empty deck = 0).
+  Verified live: 4-slide deck on slide 2 → 50% fill, zero console
+  errors. 134 frontend tests.
+
 ### Fixed (iter 162) — slides frame to the upper third
 - **Presentation now anchors each slide's TOP at ~33% from the top**
   of the viewport instead of centering the cell's midpoint at 50%.

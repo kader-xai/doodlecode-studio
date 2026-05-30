@@ -36,3 +36,15 @@ export function topFractionOf(
   const screenTop = viewportH / 2 + (cellTopY - cy) * zoom;
   return screenTop / viewportH;
 }
+
+/**
+ * Iter 163: deck progress as a 0..1 fraction for the presentation
+ * progress bar. `index` is the 0-based focused slide; the bar fills to
+ * (index + 1) / total so the last slide reads as 100%. Empty / unknown
+ * decks return 0. The result is always clamped to [0, 1].
+ */
+export function progressFraction(index: number, total: number): number {
+  if (total <= 0) return 0;
+  const i = Math.max(0, Math.min(index, total - 1));
+  return (i + 1) / total;
+}
