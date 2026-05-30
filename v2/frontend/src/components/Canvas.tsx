@@ -23,6 +23,7 @@ import { MediaCell } from "./MediaCell";
 import { WhiteboardCell } from "./WhiteboardCell";
 import { useStore } from "../store";
 import type { Cell } from "../types";
+import { slideCenterY } from "../lib/present";
 
 const nodeTypes: NodeTypes = {
   code: CodeCell,
@@ -139,11 +140,17 @@ function CanvasInner() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Pan-to-focused-cell on presentation focus changes. We center on
-  // the **bounding box** of the cell PLUS any callout bubbles to its
-  // right, so the slide is balanced left/right whether or not it has
-  // a callout column. (The previous +120px right bias pushed
-  // callout-less cells off-center to the left.)
+  // Pan-to-focused-cell on presentation focus changes.
+  //
+  // Horizontally we center on the **bounding box** of the cell PLUS
+  // any callout bubbles to its right, so the slide is balanced
+  // left/right whether or not it has a callout column.
+  //
+  // Vertically we DON'T center the cell's midpoint — that left every
+  // slide sitting low (mid-screen) and tall cells running off the
+  // bottom. Instead the cell's TOP is anchored ~SLIDE_TOP_FRACTION of
+  // the way down the viewport (≈33%), so each slide reads top-to-bottom
+  // from the upper third with breathing room below.
   useEffect(() => {
     if (!presenting || !focusedCellId) return;
     const inst = instanceRef.current;
@@ -151,14 +158,18 @@ function CanvasInner() {
     const cell = cells.find((c) => c.id === focusedCellId);
     if (!cell) return;
     const w = cell.w ?? CELL_WIDTH_FALLBACK[cell.kind] ?? 560;
-    const h = cell.h ?? 360;
     const hasCallouts = (cell.callouts?.length ?? 0) > 0;
-    // Include the callout column in the bounding box when present
-    // so both the cell and the bubble are visually balanced.
     const totalW = w + (hasCallouts ? CALLOUT_GAP + BUBBLE_W : 0);
     const cx = cell.x + totalW / 2;
-    const cy = cell.y + h / 2;
     const z = inst.getZoom();
+
+    // setCenter puts the given world point at the viewport CENTER (50%).
+    // To make the cell's top (cell.y) appear at SLIDE_TOP_FRACTION of
+    // the height, center a point that sits (0.5 - fraction) of a
+    // viewport-height BELOW the cell top, in world units.
+    const SLIDE_TOP_FRACTION = 0.33;
+    const viewportH = typeof window !== "undefined" ? window.innerHeight : 800;
+    const cy = slideCenterY(cell.y, viewportH, z, SLIDE_TOP_FRACTION);
     inst.setCenter(cx, cy, { zoom: z, duration: 350 });
   }, [presenting, focusedCellId, cells]);
 

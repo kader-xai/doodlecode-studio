@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Fixed (iter 162) — slides frame to the upper third
+- **Presentation now anchors each slide's TOP at ~33% from the top**
+  of the viewport instead of centering the cell's midpoint at 50%.
+  Dropping a cell and pressing Present (or navigating with → / ←) used
+  to leave it sitting low / below center; now every slide reads
+  top-to-bottom from the upper third, and tall cells no longer run off
+  the bottom. The math lives in a pure, unit-tested
+  `lib/present.ts:slideCenterY(cellTopY, viewportH, zoom, topFraction)`
+  (round-trip + zoom + height-independence covered; 131 frontend
+  tests). Note: this is a hard coordinate transform — the headless
+  preview throttles ReactFlow's animated `setCenter`, so it's verified
+  by the math/unit tests rather than a pixel screenshot.
+
 ### Fixed (iter 161) — output panel no longer grows forever
 - **The code-cell output panel is now height-capped and scrollable.**
   A runaway `print` loop used to stretch the cell off the canvas with
