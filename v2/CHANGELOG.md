@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Fixed (iter 161) — output panel no longer grows forever
+- **The code-cell output panel is now height-capped and scrollable.**
+  A runaway `print` loop used to stretch the cell off the canvas with
+  no way to scroll ("scrolling indefinitely"). Output now caps at
+  360px and becomes its own `overflow-auto nowheel` scroll region;
+  when it overflows, **↑ Top / ↓ End** jump buttons appear in the
+  header. Each output item is char-capped (`PER_ITEM_CHAR_CAP` =
+  100,000) with a "… N more characters truncated" note so a
+  multi-MB string can't freeze the browser. Updated CLAUDE rule 18
+  to record the output-panel exception. Verified live with a
+  5,000-line / 260k-char print: panel capped at 360px, scrollHeight
+  32k, truncation note + jump buttons shown, ↓ End scrolls to bottom,
+  zero console errors. `clampText` unit-tested (127 frontend tests).
+
 ### Fixed (iter 159) — new cells always appear in view
 - **The canvas now pans to a newly created cell.** Combined with the
   iter 151 column layout, every **+ Code / Text / Media / Browser /

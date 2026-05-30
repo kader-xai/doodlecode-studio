@@ -41,20 +41,24 @@ const CHART_COLORS = ["#e85d75", "#1f9d8a", "#3867d6", "#f2b544", "#7a4ec6"];
 
 export interface FlowEdge { from: string; to: string }
 export interface ChartItem { label: string; value: number }
+/** Iter 160: a labelled line-chart series — one polyline of values. */
+export interface LineSeries { label: string; points: number[] }
 
 export interface Parsed {
   flow: FlowEdge[];
   charts: ChartItem[];
+  lines: LineSeries[];
   chartTitle: string;
 }
 
 export function parseDoodleDiagram(source: string): Parsed {
-  const lines = source.split("\n").map((l) => l.trim()).filter(Boolean);
+  const rawLines = source.split("\n").map((l) => l.trim()).filter(Boolean);
   const flow: FlowEdge[] = [];
   const charts: ChartItem[] = [];
+  const series: LineSeries[] = [];
   let chartTitle = "";
 
-  for (const line of lines) {
+  for (const line of rawLines) {
     const normalized = line.toLowerCase();
 
     // Mermaid-style header — just skip.
@@ -64,6 +68,26 @@ export function parseDoodleDiagram(source: string): Parsed {
     if (normalized.startsWith("chart:")) {
       chartTitle = line.split(":").slice(1).join(":").trim() || "Chart";
       continue;
+    }
+
+    // Iter 160: line-chart series — `line <Label>: 0.9, 0.6, 0.4`.
+    // Must be tested before the bar `Label: Number` rule (it also has
+    // a colon). Numbers are comma- or space-separated.
+    if (normalized.startsWith("line:") || normalized.startsWith("line ")) {
+      const colon = line.indexOf(":");
+      if (colon !== -1) {
+        const head = line.slice(0, colon).trim(); // "line" or "line Loss"
+        const label = head.replace(/^line\b\s*/i, "").trim() || `Series ${series.length + 1}`;
+        const points = line
+          .slice(colon + 1)
+          .split(/[,\s]+/)
+          .map((n) => n.trim())
+          .filter(Boolean) // drop empty tokens — Number("") is 0, a phantom point
+          .map(Number)
+          .filter((n) => Number.isFinite(n));
+        if (points.length) series.push({ label, points });
+        continue;
+      }
     }
 
     // Flow edge (must come before the Label: Number test).
@@ -84,17 +108,18 @@ export function parseDoodleDiagram(source: string): Parsed {
     }
   }
 
-  return { flow, charts, chartTitle };
+  return { flow, charts, lines: series, chartTitle };
 }
 
 export function renderDoodleDiagram(source: string, dark = false): string {
   const parsed = parseDoodleDiagram(source);
   const flow = renderFlow(parsed.flow, dark);
   const chart = renderChart(parsed.charts, parsed.chartTitle || "Chart", dark);
-  if (!flow && !chart) {
+  const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark);
+  if (!flow && !chart && !lineChart) {
     return placeholder(dark);
   }
-  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}</div>`;
+  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${lineChart}</div>`;
 }
 
 // ───────────────────────── Flowchart ────────────────────────────
@@ -266,12 +291,101 @@ function renderChart(items: ChartItem[], title: string, dark: boolean): string {
   </svg>`;
 }
 
+// ───────────────────────── Line chart ───────────────────────────
+
+function renderLineChart(series: LineSeries[], title: string, dark: boolean): string {
+  if (!series.length) return "";
+  const all = series.flatMap((s) => s.points);
+  if (!all.length) return "";
+
+  const minV = Math.min(...all, 0);
+  const maxV = Math.max(...all, 1);
+  const range = maxV - minV || 1;
+
+  const padL = 50, padR = 26, padTop = 52, padBottom = 30;
+  const plotW = 460, plotH = 220;
+  const width = padL + plotW + padR;
+  const height = padTop + plotH + padBottom;
+  const stroke = dark ? "#f0f0f0" : "#202124";
+  const grid = dark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)";
+
+  const xAt = (i: number, n: number) =>
+    padL + (n <= 1 ? plotW / 2 : (plotW * i) / (n - 1));
+  const yAt = (v: number) => padTop + plotH - ((v - minV) / range) * plotH;
+
+  // Faint horizontal gridlines (quartiles) for readability.
+  const gridLines = [0, 0.25, 0.5, 0.75, 1]
+    .map((t) => {
+      const y = (padTop + plotH - t * plotH).toFixed(1);
+      return `<line x1="${padL}" y1="${y}" x2="${padL + plotW}" y2="${y}" stroke="${grid}" stroke-width="1.5"/>`;
+    })
+    .join("");
+
+  // Hand-drawn axes (L-shape, round caps/joins).
+  const axis = `<path d="M ${padL} ${padTop} L ${padL} ${padTop + plotH} L ${padL + plotW} ${padTop + plotH}"
+        fill="none" stroke="${stroke}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  const seriesSvg = series
+    .map((s, si) => {
+      const color = CHART_COLORS[si % CHART_COLORS.length];
+      const n = s.points.length;
+      if (!n) return "";
+      let d = "";
+      s.points.forEach((v, i) => {
+        d += `${i === 0 ? "M" : "L"} ${xAt(i, n).toFixed(1)} ${yAt(v).toFixed(1)} `;
+      });
+      const dots = s.points
+        .map(
+          (v, i) =>
+            `<circle cx="${xAt(i, n).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="4.5" fill="${color}" stroke="${stroke}" stroke-width="2"/>`,
+        )
+        .join("");
+      return `<path d="${d}" fill="none" stroke="${color}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}`;
+    })
+    .join("");
+
+  // Inline legend under the title — coloured dot + series label.
+  const legend = series
+    .map((s, si) => {
+      const color = CHART_COLORS[si % CHART_COLORS.length];
+      const lx = padL + si * 140;
+      const ly = padTop - 18;
+      return `<circle cx="${lx + 5}" cy="${ly - 4}" r="5" fill="${color}" stroke="${stroke}" stroke-width="2"/>
+        <text x="${lx + 16}" y="${ly}" font-family="Patrick Hand, Caveat, sans-serif"
+              font-size="15" font-weight="700" fill="${stroke}">${escape(s.label)}</text>`;
+    })
+    .join("");
+
+  // Min/max y tick labels for scale.
+  const yTicks = `
+    <text x="${padL - 8}" y="${(yAt(maxV) + 5).toFixed(1)}" text-anchor="end"
+          font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(maxV)}</text>
+    <text x="${padL - 8}" y="${(yAt(minV) + 5).toFixed(1)}" text-anchor="end"
+          font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(minV)}</text>`;
+
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
+        style="max-width:100%; height:auto;" role="img" aria-label="Line chart">
+    <text x="${padL}" y="26" font-family="Patrick Hand, Caveat, sans-serif"
+          font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
+    ${legend}
+    ${gridLines}
+    ${axis}
+    ${yTicks}
+    ${seriesSvg}
+  </svg>`;
+}
+
 // ───────────────────────── Helpers ──────────────────────────────
+
+function trimNum(v: number): string {
+  // Compact tick label — drop trailing zeros, cap at 2 decimals.
+  return String(Math.round(v * 100) / 100);
+}
 
 function placeholder(dark: boolean): string {
   const c = dark ? "#aaa" : "#555";
   return `<div style="padding:18px;text-align:center;color:${c};font-family:Patrick Hand,Caveat,sans-serif;font-size:18px;">
-    Empty diagram — write <code>A --&gt; B</code> lines or <code>Label: 5</code> for charts.
+    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, or <code>line Loss: 0.9, 0.6, 0.4</code> for a line chart.
   </div>`;
 }
 

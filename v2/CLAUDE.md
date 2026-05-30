@@ -110,8 +110,14 @@ v2/
     `setState` per pointer-move (drops points, kills FPS, blurs other
     widgets).
 18. **No internal scrollbars on cells.** Cells auto-grow as content
-    grows. Modals use the unobtrusive scrollbar. Monaco's own scroll
-    is the one exception (it's a code editor).
+    grows. Modals use the unobtrusive scrollbar. **Two exceptions:**
+    Monaco's own scroll (it's a code editor), and the **code-cell
+    output panel** (iter 161) — it caps at `MAX_OUTPUT_H` (360px) and
+    becomes its own `overflow-auto nowheel` scroll region, because a
+    runaway `print` loop otherwise stretched the card off-canvas with
+    no way to scroll. When it overflows, ↑ Top / ↓ End jump buttons
+    appear. Each output item is also char-capped (`PER_ITEM_CHAR_CAP`)
+    so a multi-MB string can't freeze the DOM.
 19. **OS-default cursor everywhere except `cursor-move` on cell
     titles, `crosshair` while a presenter pen is active, `grab` in
     Hand mode.**
