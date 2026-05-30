@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Fixed (iter 159) — new cells always appear in view
+- **The canvas now pans to a newly created cell.** Combined with the
+  iter 151 column layout, every **+ Code / Text / Media / Browser /
+  Draw / Diagram** add now places the cell below the bottom of the
+  column AND scrolls it into view, so you always see the box appear
+  in a predictable spot — fixing the "boxes appear here and there"
+  complaint at the moment of creation. Drag-dropped cells (which land
+  at the cursor) are exempt so the viewport doesn't jump. Verified in
+  the browser: consecutive adds each pan into view, selected and
+  chained.
+
 ### Added (iter 158) — Reveal Steps shortcut
 - **Shift+R reveals the next code step** — works during presentation
   (acts on the focused cell) and on the canvas (selected cell).

@@ -72,6 +72,25 @@ describe("store: cell CRUD", () => {
     expect(cell.links ?? []).toEqual([]);
   });
 
+  it("addCell pans to the new cell (panToTick bumps) when auto-positioned (iter 159)", () => {
+    useStore.setState({
+      cells: [{ id: "top", kind: "code", source: "", x: 0, y: 0, h: 300 }],
+      panToTick: 5,
+    });
+    useStore.getState().addCell();
+    expect(useStore.getState().panToTick).toBe(6);
+  });
+
+  it("addCell does NOT pan when the caller positions it explicitly (iter 159)", () => {
+    useStore.setState({
+      cells: [{ id: "top", kind: "code", source: "", x: 0, y: 0, h: 300 }],
+      panToTick: 5,
+    });
+    // Drag-drop passes explicit x/y at the cursor — must not yank the view.
+    useStore.getState().addCell({ kind: "media", source: "x", x: 999, y: 999 });
+    expect(useStore.getState().panToTick).toBe(5);
+  });
+
   it("addCell stacks new cells in a vertical column below the last (iter 151)", () => {
     // Seed two cells, one above the other.
     useStore.setState({

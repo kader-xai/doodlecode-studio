@@ -650,6 +650,13 @@ export const useStore = create<AppState>((set, get) => {
         prevId = ordered[ordered.length - 1].id;
         next.links = [prevId];
       }
+      // Iter 159: pan the canvas to the freshly-created cell UNLESS the
+      // caller positioned it explicitly (drag-drop drops at the cursor
+      // and must not yank the viewport). The iter 151 column layout
+      // places new cells below the bottom-most one — which is often
+      // off-screen — so without this the user "creates a box and
+      // nothing appears" (the long-standing here-and-there complaint).
+      const positionedByCaller = partial.x !== undefined && partial.y !== undefined;
       set((s) => {
         // Mirror the new link onto the previous cell so the graph
         // stays symmetric (rule 21c).
@@ -660,7 +667,12 @@ export const useStore = create<AppState>((set, get) => {
                 : c,
             ), next]
           : [...s.cells, next];
-        return { cells, selectedId: id, selectedIds: [id] };
+        return {
+          cells,
+          selectedId: id,
+          selectedIds: [id],
+          panToTick: positionedByCaller ? s.panToTick : s.panToTick + 1,
+        };
       });
       autosave();
       return id;
