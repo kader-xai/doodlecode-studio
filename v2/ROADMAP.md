@@ -24,7 +24,8 @@ one at a time (see CHANGELOG for the running log).
   renders a hand-drawn multi-series line chart. Trends/loss-curves.
 - **161 — Presentation progress bar** ✓ (shipped as iter 163): thin
   doodle bar across the top showing deck progress + per-slide notches.
-- **162 — Pie / donut doodle chart**: `pie A: 30` slices. *(next)*
+- **162 — Pie / donut doodle chart** ✓ (shipped as iter 164):
+  `pie A: 30` slices → hand-drawn donut + % legend.
 - **163 — Speaker notes**: `# @note:` per cell, shown only to presenter
   in a corner during a talk (round-trips in the .py).
 - **164 — Scatter chart**: `point: x, y` for x/y intuition.

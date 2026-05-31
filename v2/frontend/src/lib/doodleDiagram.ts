@@ -43,12 +43,16 @@ export interface FlowEdge { from: string; to: string }
 export interface ChartItem { label: string; value: number }
 /** Iter 160: a labelled line-chart series — one polyline of values. */
 export interface LineSeries { label: string; points: number[] }
+/** Iter 164: one slice of a pie / donut chart. */
+export interface PieSlice { label: string; value: number }
 
 export interface Parsed {
   flow: FlowEdge[];
   charts: ChartItem[];
   lines: LineSeries[];
+  pies: PieSlice[];
   chartTitle: string;
+  pieTitle: string;
 }
 
 export function parseDoodleDiagram(source: string): Parsed {
@@ -56,7 +60,9 @@ export function parseDoodleDiagram(source: string): Parsed {
   const flow: FlowEdge[] = [];
   const charts: ChartItem[] = [];
   const series: LineSeries[] = [];
+  const pies: PieSlice[] = [];
   let chartTitle = "";
+  let pieTitle = "";
 
   for (const line of rawLines) {
     const normalized = line.toLowerCase();
@@ -68,6 +74,27 @@ export function parseDoodleDiagram(source: string): Parsed {
     if (normalized.startsWith("chart:")) {
       chartTitle = line.split(":").slice(1).join(":").trim() || "Chart";
       continue;
+    }
+
+    // Iter 164: pie title (`pie: Title`) — checked before the slice
+    // rule below so an empty-label slice isn't created.
+    if (normalized.startsWith("pie:")) {
+      pieTitle = line.split(":").slice(1).join(":").trim() || "Breakdown";
+      continue;
+    }
+
+    // Iter 164: pie slice — `pie <Label>: <value>`. Positive values
+    // only; checked before the bar `Label: Number` rule (shared colon).
+    if (normalized.startsWith("pie ")) {
+      const colon = line.indexOf(":");
+      if (colon !== -1) {
+        const label = line.slice(0, colon).replace(/^pie\b\s*/i, "").trim();
+        const value = Number(line.slice(colon + 1).trim());
+        if (label && Number.isFinite(value) && value > 0) {
+          pies.push({ label, value });
+        }
+        continue;
+      }
     }
 
     // Iter 160: line-chart series — `line <Label>: 0.9, 0.6, 0.4`.
@@ -108,7 +135,7 @@ export function parseDoodleDiagram(source: string): Parsed {
     }
   }
 
-  return { flow, charts, lines: series, chartTitle };
+  return { flow, charts, lines: series, pies, chartTitle, pieTitle };
 }
 
 export function renderDoodleDiagram(source: string, dark = false): string {
@@ -116,10 +143,11 @@ export function renderDoodleDiagram(source: string, dark = false): string {
   const flow = renderFlow(parsed.flow, dark);
   const chart = renderChart(parsed.charts, parsed.chartTitle || "Chart", dark);
   const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark);
-  if (!flow && !chart && !lineChart) {
+  const pieChart = renderPieChart(parsed.pies, parsed.pieTitle || "Breakdown", dark);
+  if (!flow && !chart && !lineChart && !pieChart) {
     return placeholder(dark);
   }
-  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${lineChart}</div>`;
+  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${lineChart}${pieChart}</div>`;
 }
 
 // ───────────────────────── Flowchart ────────────────────────────
@@ -375,6 +403,67 @@ function renderLineChart(series: LineSeries[], title: string, dark: boolean): st
   </svg>`;
 }
 
+// ───────────────────────── Pie / donut chart ────────────────────
+
+function renderPieChart(slices: PieSlice[], title: string, dark: boolean): string {
+  if (!slices.length) return "";
+  const total = slices.reduce((sum, s) => sum + s.value, 0);
+  if (total <= 0) return "";
+
+  const stroke = dark ? "#f0f0f0" : "#202124";
+  const R = 96;          // pie radius
+  const HOLE = 40;       // donut hole radius — reads cleaner than a solid pie
+  const cx = R + 16;
+  const cy = R + 48;
+  const legendX = cx + R + 28;
+  const titleH = 30;
+  const width = legendX + 200;
+  const height = Math.max(cy + R + 20, titleH + slices.length * 26 + 40);
+
+  // Donut wedges. Each slice is an annular sector (outer arc + inner arc).
+  let angle = -Math.PI / 2; // start at 12 o'clock
+  const wedges = slices
+    .map((s, i) => {
+      const frac = s.value / total;
+      const a0 = angle;
+      const a1 = angle + frac * Math.PI * 2;
+      angle = a1;
+      const color = CHART_COLORS[i % CHART_COLORS.length];
+      const large = a1 - a0 > Math.PI ? 1 : 0;
+      const ox0 = cx + R * Math.cos(a0), oy0 = cy + R * Math.sin(a0);
+      const ox1 = cx + R * Math.cos(a1), oy1 = cy + R * Math.sin(a1);
+      const ix1 = cx + HOLE * Math.cos(a1), iy1 = cy + HOLE * Math.sin(a1);
+      const ix0 = cx + HOLE * Math.cos(a0), iy0 = cy + HOLE * Math.sin(a0);
+      const d =
+        `M ${ox0.toFixed(1)} ${oy0.toFixed(1)} ` +
+        `A ${R} ${R} 0 ${large} 1 ${ox1.toFixed(1)} ${oy1.toFixed(1)} ` +
+        `L ${ix1.toFixed(1)} ${iy1.toFixed(1)} ` +
+        `A ${HOLE} ${HOLE} 0 ${large} 0 ${ix0.toFixed(1)} ${iy0.toFixed(1)} Z`;
+      return `<path d="${d}" fill="${color}" stroke="${stroke}" stroke-width="2.5" stroke-linejoin="round"/>`;
+    })
+    .join("");
+
+  // Legend — colour dot + label + percentage.
+  const legend = slices
+    .map((s, i) => {
+      const color = CHART_COLORS[i % CHART_COLORS.length];
+      const pct = Math.round((s.value / total) * 100);
+      const ly = titleH + 18 + i * 26;
+      return `<circle cx="${legendX + 6}" cy="${ly - 5}" r="6" fill="${color}" stroke="${stroke}" stroke-width="2"/>
+        <text x="${legendX + 20}" y="${ly}" font-family="Patrick Hand, Caveat, sans-serif"
+              font-size="17" font-weight="700" fill="${stroke}">${escape(s.label)} · ${pct}%</text>`;
+    })
+    .join("");
+
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
+        style="max-width:100%; height:auto;" role="img" aria-label="Pie chart">
+    <text x="16" y="${titleH - 6}" font-family="Patrick Hand, Caveat, sans-serif"
+          font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
+    ${wedges}
+    ${legend}
+  </svg>`;
+}
+
 // ───────────────────────── Helpers ──────────────────────────────
 
 function trimNum(v: number): string {
@@ -385,7 +474,7 @@ function trimNum(v: number): string {
 function placeholder(dark: boolean): string {
   const c = dark ? "#aaa" : "#555";
   return `<div style="padding:18px;text-align:center;color:${c};font-family:Patrick Hand,Caveat,sans-serif;font-size:18px;">
-    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, or <code>line Loss: 0.9, 0.6, 0.4</code> for a line chart.
+    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>line Loss: 0.9, 0.6</code> lines, or <code>pie Cats: 30</code> slices.
   </div>`;
 }
 

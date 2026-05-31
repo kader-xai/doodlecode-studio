@@ -57,6 +57,29 @@ describe("parseDoodleDiagram", () => {
     expect(p.charts).toEqual([{ label: "Bars", value: 5 }]);
     expect(p.lines.length).toBe(1);
   });
+
+  it("parses pie slices and an optional pie title (iter 164)", () => {
+    const p = parseDoodleDiagram("pie: Languages\npie Python: 60\npie Rust: 40");
+    expect(p.pieTitle).toBe("Languages");
+    expect(p.pies).toEqual([
+      { label: "Python", value: 60 },
+      { label: "Rust", value: 40 },
+    ]);
+    // Pie slices must not leak into the bar list.
+    expect(p.charts).toEqual([]);
+  });
+
+  it("ignores non-positive pie slices (iter 164)", () => {
+    const p = parseDoodleDiagram("pie A: 10\npie B: 0\npie C: -3");
+    expect(p.pies).toEqual([{ label: "A", value: 10 }]);
+  });
+
+  it("keeps bars, lines, and pies independent (iter 164)", () => {
+    const p = parseDoodleDiagram("Bar: 5\nline L: 1, 2\npie Slice: 7");
+    expect(p.charts.length).toBe(1);
+    expect(p.lines.length).toBe(1);
+    expect(p.pies.length).toBe(1);
+  });
 });
 
 describe("renderDoodleDiagram", () => {
@@ -89,5 +112,20 @@ describe("renderDoodleDiagram", () => {
     const out = renderDoodleDiagram("line <b>x</b>: 1, 2, 3");
     expect(out).not.toContain("<b>x</b>");
     expect(out).toContain("&lt;b&gt;");
+  });
+
+  it("renders a pie chart with wedges + percentage legend (iter 164)", () => {
+    const out = renderDoodleDiagram("pie: Share\npie Python: 60\npie Rust: 40");
+    expect(out).toContain("<svg");
+    expect(out).toMatch(/aria-label="Pie chart"/);
+    expect(out).toContain("<path"); // wedge
+    expect(out).toContain("60%"); // legend percentage
+    expect(out).toContain("Python");
+  });
+
+  it("escapes a pie slice label (iter 164)", () => {
+    const out = renderDoodleDiagram("pie <i>x</i>: 5\npie y: 5");
+    expect(out).not.toContain("<i>x</i>");
+    expect(out).toContain("&lt;i&gt;");
   });
 });

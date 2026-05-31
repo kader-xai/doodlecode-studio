@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 164) — doodle pie / donut chart
+- **Diagram cells now render pie/donut charts.** `pie: Title` sets a
+  heading; `pie <Label>: <value>` adds a slice. The result is a
+  hand-drawn donut (ink-outlined wedges, center hole) with a
+  percentage legend. Non-positive slices are ignored; pies are kept
+  independent of bars and line series in one source. Verified live:
+  a 4-slice "Language share" donut (45/30/15/10%) renders cleanly with
+  zero console errors. 139 frontend tests.
+
 ### Added (iter 163) — presentation progress bar
 - **A thin doodle progress bar pins to the top during presentation**,
   filling to (currentSlide / total) with faint per-slide notches so the
