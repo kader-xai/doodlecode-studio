@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Accessibility (iter 177) — accessible names for icon controls
+- **Icon-only controls now announce a real name.** A button's emoji
+  *content* normally wins over its `title` in the accessible-name
+  computation, so screen readers were reading the emoji name (e.g.
+  "fountain pen") instead of the action. The four presenter ink tools,
+  the presenter fullscreen toggle, the toolbar keyboard-shortcuts
+  button, and the theme toggle now carry an explicit `aria-label`; the
+  ink tools, fullscreen, and theme toggles also expose `aria-pressed`
+  so their on/off state is conveyed. Toolbar action buttons already
+  carry text labels, so they were left as-is. 168 frontend tests.
+
 ### Accessibility (iter 176) — modal focus management
 - **Modals now trap and restore keyboard focus.** Opening the callout
   editor, reveal-steps editor, speaker-note editor, install modal, or

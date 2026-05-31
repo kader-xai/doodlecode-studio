@@ -67,8 +67,10 @@ one at a time (see CHANGELOG for the running log).
   input.
 - **174 — Focus management for modals** ✓ (iter 176): `useFocusTrap`
   autofocuses, traps Tab, restores focus to the trigger on close.
-- **175 — Icon-button labels sweep**: ensure every icon-only control
-  (toolbar, presenter bar, cell headers) has an accessible name.
+- **175 — Icon-button labels sweep** ✓ (iter 177): presenter ink tools
+  + fullscreen, toolbar help button, theme toggle got `aria-label` +
+  `aria-pressed`; toolbar action buttons already had text labels.
+  *(Follow-up: cell-header collapse chevrons across the six cell types.)*
 - **176 — Reduced-motion audit**: confirm ambient drift + connectors +
   effects all honor `prefers-reduced-motion`.
 - **177 — Color-contrast pass** on callout palettes + chart colors.

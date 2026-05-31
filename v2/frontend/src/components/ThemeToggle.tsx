@@ -7,6 +7,8 @@ export function ThemeToggle() {
     <button
       onClick={toggle}
       title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+      aria-pressed={theme === "dark"}
       className="relative font-hand text-2xl px-3 py-1.5 rounded-xl border-2 border-ink dark:border-white/70 bg-white/70 dark:bg-[#262a31] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
     >
       {theme === "dark" ? "🌙 Dark" : "☀️ Light"}

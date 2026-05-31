@@ -77,6 +77,8 @@ export function PresenterBar() {
         className={toolBtn(tool === "pen")}
         onClick={() => setTool(tool === "pen" ? "none" : "pen")}
         title="Pen (P) — red ink, fades ~1.4s"
+        aria-label="Pen ink tool"
+        aria-pressed={tool === "pen"}
       >
         ✒️
       </button>
@@ -84,6 +86,8 @@ export function PresenterBar() {
         className={toolBtn(tool === "highlighter")}
         onClick={() => setTool(tool === "highlighter" ? "none" : "highlighter")}
         title="Highlighter (H) — yellow ink, fades ~4s"
+        aria-label="Highlighter ink tool"
+        aria-pressed={tool === "highlighter"}
       >
         🖍
       </button>
@@ -91,6 +95,8 @@ export function PresenterBar() {
         className={toolBtn(tool === "fixedPen")}
         onClick={() => setTool(tool === "fixedPen" ? "none" : "fixedPen")}
         title="Fixed pen (X) — red ink that stays until erased"
+        aria-label="Fixed pen ink tool"
+        aria-pressed={tool === "fixedPen"}
       >
         🖊
       </button>
@@ -98,6 +104,7 @@ export function PresenterBar() {
         className={toolBtn(false)}
         onClick={clearInk}
         title="Erase all ink (E)"
+        aria-label="Erase all ink"
       >
         🧽
       </button>
@@ -117,6 +124,8 @@ export function PresenterBar() {
       <button
         onClick={toggleFullscreen}
         title="Toggle fullscreen (F)"
+        aria-label="Toggle fullscreen"
+        aria-pressed={fullscreen}
         className={`w-9 h-9 rounded-md border-2 font-hand text-lg transition ${
           fullscreen
             ? "bg-marker-yellow border-ink dark:bg-amber-700 dark:border-white text-ink dark:text-white shadow-sketch"

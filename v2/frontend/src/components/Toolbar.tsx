@@ -405,6 +405,7 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
         <button
           onClick={onHelp}
           title="Keyboard shortcuts (?)"
+          aria-label="Keyboard shortcuts"
           className="font-hand text-2xl px-3 py-1.5 rounded-xl border-2 border-ink dark:border-white/70 bg-white/70 dark:bg-[#262a31] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
         >
           ⌨️ ?
