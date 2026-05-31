@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Accessibility (iter 179) — color-contrast pass + guardrail
+- **The doodle palette is proven to clear WCAG AAA, and locked in.** A
+  new pure `lib/contrast.ts` (WCAG 2.1 relative-luminance + contrast
+  ratio + `meetsAA`) backs a guardrail test asserting every text/
+  background pair stays readable. Measured ratios all exceed the 7:1
+  AAA bar: ink on the callout yellow **12.7:1**, chart labels on the
+  light card **16.1:1**, dark-theme labels on the dark diagram card
+  **14.8:1**, and ink on the lowest-contrast toolbar pastel (sky)
+  **9.5:1**. No visual change was needed — the test now fails loudly if
+  a future palette tweak drops a pair below AA. 177 frontend tests.
+
 ### Accessibility (iter 178) — reduced-motion audit
 - **`prefers-reduced-motion` now silences every decorative animation.**
   Previously only the slide entrance respected it; the audit extended

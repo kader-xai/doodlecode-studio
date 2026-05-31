@@ -74,6 +74,13 @@ one at a time (see CHANGELOG for the running log).
 - **176 — Reduced-motion audit** ✓ (iter 178): ambient drift, flowing
   connectors, and slide entrance all stop under `prefers-reduced-motion`
   (presenter ink + UI transitions kept). No effects-burst exists in v2.
-- **177 — Color-contrast pass** on callout palettes + chart colors.
+- **177 — Color-contrast pass** ✓ (iter 179): `lib/contrast.ts` (WCAG
+  2.1) + guardrail test; every text/bg pair measured 9.5:1–16.1:1, all
+  clearing AAA. No visual change needed; the test locks it in.
+
+The accessibility & polish batch (173–177) is complete. Next candidate
+areas: responsiveness (small-viewport toolbar), open-source hygiene
+(CONTRIBUTING, issue templates), perf (bundle code-split), or new
+showcase features (embedded video timeline, animated GIF export).
 
 This file is updated as items land or priorities shift.
