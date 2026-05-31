@@ -35,6 +35,26 @@ def test_literal_backslash_n_round_trips_in_reveal_note_callout():
     assert out.cells[0].callouts[0].text == nb.cells[0].callouts[0].text
 
 
+def test_body_with_cell_marker_does_not_split(  ):
+    """Iter 199: a code body containing `# %%` (a Jupyter marker, or a
+    deck explaining this very format) must stay one cell, not split."""
+    body = 'x = 1\n# %% not a real marker\nprint("# %% nor this")\ny = 2'
+    nb = NotebookPayload(cells=[CellPayload(id="c0", kind="code", x=0, y=0, source=body)])
+    out = _roundtrip(nb)
+    assert len(out.cells) == 1
+    assert out.cells[0].source == body
+
+
+def test_body_marker_escape_is_reversible_for_literal_escaped_form():
+    """A body line already shaped like the escape (`# %\\%`) round-trips
+    byte-for-byte — escaping stacks and un-escaping peels one level."""
+    for body in ["# %\\%", "# %\\\\%", "  # %% indented"]:
+        nb = NotebookPayload(cells=[CellPayload(id="c0", kind="code", x=0, y=0, source=body)])
+        out = _roundtrip(nb)
+        assert len(out.cells) == 1
+        assert out.cells[0].source == body
+
+
 def test_serialize_stamps_format_version_4():
     nb = NotebookPayload(cells=[CellPayload(id="c0", kind="code", x=0, y=0, source="x=1")])
     assert "# doodlecode format-version: 4" in notebook_io.serialize(nb)

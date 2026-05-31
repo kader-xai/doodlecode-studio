@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Fixed (iter 199) — code body containing `# %%` no longer splits the cell
+- **A code cell whose body contains a `# %%` line round-trips as one
+  cell.** The serializer wrote the body verbatim, so any line that looked
+  like a cell marker — a pasted Jupyter/VSCode `# %%`, or a deck
+  *explaining this very format* — was re-read as a new cell boundary,
+  silently splitting the cell and truncating its source. v4 now escapes
+  such body lines (`# %%` → `# %\%`) on write and peels one level on
+  read; the escape stacks so already-escaped lines stay exact. Old
+  (v1–v3) files are untouched. 2 new pytest cases (39 backend tests).
+
 ### Fixed (iter 198) — literal `\n` in reveals/notes/callouts no longer corrupts (format v4)
 - **A literal backslash-n in a reveal step, speaker note, or callout now
   round-trips byte-for-byte.** The single-line directive encoder escaped

@@ -134,6 +134,10 @@ The accessibility & polish batch (173–177) is complete.
   now escapes backslashes, so a reveal/note/callout containing a literal
   backslash-n survives save→load byte-for-byte. FILE_FORMAT_VERSION 3→4,
   version-gated decoder keeps every old file parsing. 37 backend tests.
+- **196 — Round-trip fix: `# %%` in a body** ✓ (iter 199): a code body
+  containing a Jupyter-style `# %%` marker (or a deck explaining this
+  format) no longer splits into two cells — v4 escapes/peels marker-like
+  body lines reversibly. 39 backend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

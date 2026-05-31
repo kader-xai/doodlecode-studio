@@ -22,6 +22,11 @@ Rules:
   - Directive lines (`# @key: value`) consumed until the first
     non-directive line. After that, every line is part of the cell
     source.
+  - v4: a source line that itself looks like a `# %%` marker is escaped
+    (`# %\\%`) on write and un-escaped on read, so a cell body can safely
+    contain Jupyter-style markers or explain this format. Single-line
+    directive values (`@reveal`/`@note`/`@explain`) escape backslashes
+    before newlines so a literal `\\n` survives the round-trip.
 
 Backward-compat: a plain `.py` with just `# %%` separators (no
 key=value, no directives) still loads — every cell becomes a code
@@ -68,6 +73,31 @@ def _unescape_inline(s: str) -> str:
         out.append(s[k])
         k += 1
     return "".join(out)
+
+
+_BODY_MARKER_RE = re.compile(r"^(\s*#\s*%)(\\*)(%)")
+
+
+def _escape_body_line(line: str) -> str:
+    """v4: a body line that would be re-read as a cell marker (``# %%``)
+    gets a backslash inserted before the closing ``%`` so it no longer
+    matches ``_CELL_RE``. Stacks on already-escaped lines so the transform
+    stays reversible (``# %%`` → ``# %\\%`` → ``# %\\\\%`` …). Without this a
+    code cell whose body contains ``# %%`` — e.g. a Jupyter cell marker or
+    a tutorial about this very format — split into two cells on load."""
+    m = _BODY_MARKER_RE.match(line)
+    if m:
+        return line[: m.start(3)] + "\\" + line[m.start(3) :]
+    return line
+
+
+def _unescape_body_line(line: str) -> str:
+    """v4 inverse of :func:`_escape_body_line` — removes one backslash from
+    an escaped marker line. No-op for ordinary lines."""
+    m = _BODY_MARKER_RE.match(line)
+    if m and m.group(2):
+        return line[: m.start(2)] + m.group(2)[:-1] + line[m.start(3) :]
+    return line
 
 
 def _legacy_unescape(s: str) -> str:
@@ -124,7 +154,10 @@ def serialize(nb: NotebookPayload) -> str:
         # can tell where the source starts.
         if c.source:
             out.append("")
-            out.append(c.source.rstrip("\n"))
+            # Escape any body line that would be re-read as a `# %%` cell
+            # marker so the source can't be split across cells on load.
+            body = "\n".join(_escape_body_line(ln) for ln in c.source.rstrip("\n").split("\n"))
+            out.append(body)
         out.append("")  # gap between cells
     return "\n".join(out).rstrip() + "\n"
 
@@ -234,10 +267,12 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
         # migration shim. New files use `callouts` exclusively.
         explain = callouts[0].text if callouts and not callouts[0].image else None
 
-        # Source body until the next `# %%` or EOF.
+        # Source body until the next `# %%` or EOF. v4+ un-escapes any
+        # body line that was escaped to avoid colliding with the marker.
         body_lines: list[str] = []
         while i < len(lines) and not _CELL_RE.match(lines[i]):
-            body_lines.append(lines[i])
+            line = lines[i]
+            body_lines.append(_unescape_body_line(line) if version >= 4 else line)
             i += 1
 
         raw_kind = attrs.get("kind") or "code"
