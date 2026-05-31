@@ -205,6 +205,7 @@ print(doodle.stack({"Q1": [5, 3], "Q2": [6, 4]}, series=["Eng", "Ops"]))
 print(doodle.group({"NA": [8, 11], "EU": [6, 9]}, series=["2023", "2024"]))
 print(doodle.pie(counts))
 print(doodle.scatter([(1, 2), (3, 5)], xlabel="x", ylabel="y"))
+print(doodle.table(counts, headers=["Lang", "LOC"]))  # markdown for a Text cell
 ```
 
 `doodle` exposes `bar` · `line` · `area` · `pie` · `scatter` · `flow`,

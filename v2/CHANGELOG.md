@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 203) — `doodle.table()` data→markdown-table helper
+- **The `doodle` kernel helper can now emit a markdown table.**
+  `doodle.table(data, headers=…)` turns a mapping (two columns), a list of
+  dicts (columns from keys), or a list of rows into `| a | b |` markdown
+  source to `print()` and paste into a **Text** cell — closing the loop
+  with the iter-196 table renderer. Pipes are escaped and newlines
+  flattened so a cell value can't break the table. 5 pytest cases
+  (18 helper tests). README helper snippet updated.
+
 ### Docs (iter 202) — document the text-cell markdown dialect
 - **The README now has a "Markdown in text cells" reference table** —
   headings, bullet / task / ordered lists, blockquotes, rules, inline

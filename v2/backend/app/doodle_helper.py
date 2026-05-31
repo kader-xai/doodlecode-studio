@@ -1,4 +1,4 @@
-"""`doodle` — turn Python data into doodle-chart source.
+"""`doodle` — turn Python data into doodle-chart (and markdown-table) source.
 
 Exposed inside every code cell's kernel as the `doodle` namespace (no
 import needed). Each function returns a string in the exact mini-syntax
@@ -167,3 +167,43 @@ def scatter(
 def flow(edges: Sequence[tuple[str, str]]) -> str:
     """Flowchart — one `A --> B` per edge."""
     return "\n".join(f"{a} --> {b}" for a, b in edges)
+
+
+def _cell(v: object) -> str:
+    """One markdown table cell — pipes escaped, newlines flattened."""
+    return str(v).replace("|", "\\|").replace("\n", " ").strip()
+
+
+def table(
+    rows: object,
+    headers: Sequence[str] | None = None,
+) -> str:
+    """Markdown table — turn data into `| a | b |` source to paste into a
+    **Text** cell (which renders it as a doodle table). Accepts:
+
+      - a mapping → two columns (`headers` defaults to ``Key``/``Value``)
+      - a sequence of mappings → columns from the first row's keys
+      - a sequence of row sequences → pass ``headers=[...]``
+
+        print(doodle.table({"Python": 8, "Rust": 4}, headers=["Lang", "LOC"]))
+    """
+    if isinstance(rows, Mapping):
+        cols = list(headers) if headers else ["Key", "Value"]
+        body = [[_cell(k), _cell(v)] for k, v in rows.items()]
+    else:
+        seq = list(rows)  # type: ignore[call-overload]
+        if seq and isinstance(seq[0], Mapping):
+            cols = list(headers) if headers else [str(k) for k in seq[0].keys()]
+            body = [[_cell(r.get(c, "")) for c in cols] for r in seq]
+        else:
+            body = [[_cell(v) for v in r] for r in seq]
+            cols = (
+                list(headers)
+                if headers
+                else [f"Col {i + 1}" for i in range(len(body[0]))]
+                if body
+                else []
+            )
+    head = "| " + " | ".join(_cell(c) for c in cols) + " |"
+    sep = "| " + " | ".join("---" for _ in cols) + " |"
+    return "\n".join([head, sep] + ["| " + " | ".join(r) + " |" for r in body])

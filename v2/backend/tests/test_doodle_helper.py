@@ -67,6 +67,36 @@ def test_stack_and_group_without_series_or_title():
     assert d.group([("B", [3, 4])]) == "group B: 3, 4"
 
 
+def test_table_from_mapping_two_columns():
+    out = d.table({"Python": 8, "Rust": 4}, headers=["Lang", "LOC"])
+    assert out == (
+        "| Lang | LOC |\n| --- | --- |\n| Python | 8 |\n| Rust | 4 |"
+    )
+
+
+def test_table_from_mapping_default_headers():
+    out = d.table({"a": 1})
+    assert out.splitlines()[0] == "| Key | Value |"
+
+
+def test_table_from_list_of_dicts_uses_keys():
+    out = d.table([{"name": "A", "n": 1}, {"name": "B", "n": 2}])
+    assert out == (
+        "| name | n |\n| --- | --- |\n| A | 1 |\n| B | 2 |"
+    )
+
+
+def test_table_from_rows_with_headers():
+    out = d.table([[1, 2], [3, 4]], headers=["x", "y"])
+    assert out == "| x | y |\n| --- | --- |\n| 1 | 2 |\n| 3 | 4 |"
+
+
+def test_table_escapes_pipes_and_flattens_newlines():
+    out = d.table([["a|b", "c\nd"]], headers=["p", "q"])
+    assert "a\\|b" in out
+    assert "c d" in out and "\nd |" not in out
+
+
 def test_flow_edges():
     assert d.flow([("A", "B"), ("B", "C")]) == "A --> B\nB --> C"
 

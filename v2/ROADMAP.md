@@ -148,6 +148,9 @@ The accessibility & polish batch (173–177) is complete.
 - **199 — Markdown reference docs** ✓ (iter 202): README gains a
   "Markdown in text cells" table covering every supported construct +
   an explicit not-supported note; docs back in lockstep with renderer.
+- **200 — `doodle.table()` helper** ✓ (iter 203): kernel helper emits
+  markdown-table source from a mapping / list-of-dicts / rows, pipes
+  escaped — pairs with the iter-196 table renderer. 18 helper tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
