@@ -35,7 +35,9 @@ one at a time (see CHANGELOG for the running log).
 - **165 — Diagram cell chart presets** ✓ (shipped as iter 167): an
   "Insert:" bar of Flow / Bar / Line / Pie / Scatter sample buttons in
   the Diagram editor so users don't memorize syntax.
-- **166 — Chart axis labels + gridlines** (subtle, doodle).
+- **166 — Chart axis labels + gridlines** ✓ (shipped as iter 168):
+  gridlines + ticks landed with line/scatter; `xlabel:`/`ylabel:` add
+  hand-drawn axis titles to both.
 - **167 — Entrance animation for revealed slides** (gentle fade/slide).
 - **168 — Release**: bundle the visual-intuition batch.
 

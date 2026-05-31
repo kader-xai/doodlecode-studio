@@ -22,9 +22,9 @@ const DEFAULT_H = 360;
 const DOODLE_PRESETS: { key: string; label: string; snippet: string }[] = [
   { key: "flow", label: "→ Flow", snippet: "Idea --> Draft\nDraft --> Ship" },
   { key: "bar", label: "▭ Bar", snippet: "chart: Scores\nAlpha: 8\nBeta: 5\nGamma: 10" },
-  { key: "line", label: "📈 Line", snippet: "line Loss: 0.9, 0.6, 0.4, 0.25" },
+  { key: "line", label: "📈 Line", snippet: "xlabel: Epoch\nylabel: Loss\nline Loss: 0.9, 0.6, 0.4, 0.25" },
   { key: "pie", label: "◔ Pie", snippet: "pie: Share\npie Python: 60\npie Rust: 40" },
-  { key: "scatter", label: "⠿ Scatter", snippet: "scatter: Cloud\npoint: 1, 2\npoint: 3, 4\npoint: 5, 3" },
+  { key: "scatter", label: "⠿ Scatter", snippet: "scatter: Cloud\nxlabel: Width\nylabel: Height\npoint: 1, 2\npoint: 3, 4\npoint: 5, 3" },
 ];
 
 function escapeHtml(s: string): string {

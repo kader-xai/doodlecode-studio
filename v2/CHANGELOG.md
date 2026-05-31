@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added (iter 168) — chart axis titles
+- **Line and scatter charts can now name their axes.** Add
+  `xlabel: Epoch` / `ylabel: Loss` to a doodle diagram and the x-title
+  renders centered under the plot, the y-title rotated -90° along the
+  left edge — both in the hand-drawn font. Axis-label directives are
+  parsed before the bar `Label: Number` rule so they're never mistaken
+  for bars, are escaped like every other user string, and no-op when
+  absent (charts without them are unchanged). The Line and Scatter
+  editor presets now seed `xlabel:`/`ylabel:` so the feature is
+  discoverable. 151 frontend tests.
+
 ### Added (iter 167) — diagram chart presets (no syntax to memorize)
 - **The Diagram editor now has one-click chart-sample buttons.** When
   you edit a 🖍 Doodle diagram, an "Insert:" bar appears above the

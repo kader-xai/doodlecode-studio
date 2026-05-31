@@ -57,6 +57,9 @@ export interface Parsed {
   chartTitle: string;
   pieTitle: string;
   scatterTitle: string;
+  /** Iter 168: optional axis titles, shared by line + scatter charts. */
+  xLabel: string;
+  yLabel: string;
 }
 
 export function parseDoodleDiagram(source: string): Parsed {
@@ -69,12 +72,25 @@ export function parseDoodleDiagram(source: string): Parsed {
   let chartTitle = "";
   let pieTitle = "";
   let scatterTitle = "";
+  let xLabel = "";
+  let yLabel = "";
 
   for (const line of rawLines) {
     const normalized = line.toLowerCase();
 
     // Mermaid-style header — just skip.
     if (normalized === "flowchart" || normalized.startsWith("graph ")) continue;
+
+    // Iter 168: axis titles (`xlabel: …` / `ylabel: …`). Checked
+    // before the bar rule so they're never read as a `Label: Number`.
+    if (normalized.startsWith("xlabel:")) {
+      xLabel = line.slice(line.indexOf(":") + 1).trim();
+      continue;
+    }
+    if (normalized.startsWith("ylabel:")) {
+      yLabel = line.slice(line.indexOf(":") + 1).trim();
+      continue;
+    }
 
     // Chart title line.
     if (normalized.startsWith("chart:")) {
@@ -165,16 +181,16 @@ export function parseDoodleDiagram(source: string): Parsed {
     }
   }
 
-  return { flow, charts, lines: series, pies, points, chartTitle, pieTitle, scatterTitle };
+  return { flow, charts, lines: series, pies, points, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
 }
 
 export function renderDoodleDiagram(source: string, dark = false): string {
   const parsed = parseDoodleDiagram(source);
   const flow = renderFlow(parsed.flow, dark);
   const chart = renderChart(parsed.charts, parsed.chartTitle || "Chart", dark);
-  const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark);
+  const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark, parsed.xLabel, parsed.yLabel);
   const pieChart = renderPieChart(parsed.pies, parsed.pieTitle || "Breakdown", dark);
-  const scatterChart = renderScatterChart(parsed.points, parsed.scatterTitle || "Scatter", dark);
+  const scatterChart = renderScatterChart(parsed.points, parsed.scatterTitle || "Scatter", dark, parsed.xLabel, parsed.yLabel);
   if (!flow && !chart && !lineChart && !pieChart && !scatterChart) {
     return placeholder(dark);
   }
@@ -352,7 +368,7 @@ function renderChart(items: ChartItem[], title: string, dark: boolean): string {
 
 // ───────────────────────── Line chart ───────────────────────────
 
-function renderLineChart(series: LineSeries[], title: string, dark: boolean): string {
+function renderLineChart(series: LineSeries[], title: string, dark: boolean, xLabel = "", yLabel = ""): string {
   if (!series.length) return "";
   const all = series.flatMap((s) => s.points);
   if (!all.length) return "";
@@ -361,7 +377,7 @@ function renderLineChart(series: LineSeries[], title: string, dark: boolean): st
   const maxV = Math.max(...all, 1);
   const range = maxV - minV || 1;
 
-  const padL = 50, padR = 26, padTop = 52, padBottom = 30;
+  const padL = 50, padR = 26, padTop = 52, padBottom = xLabel ? 48 : 30;
   const plotW = 460, plotH = 220;
   const width = padL + plotW + padR;
   const height = padTop + plotH + padBottom;
@@ -422,6 +438,8 @@ function renderLineChart(series: LineSeries[], title: string, dark: boolean): st
     <text x="${padL - 8}" y="${(yAt(minV) + 5).toFixed(1)}" text-anchor="end"
           font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(minV)}</text>`;
 
+  const axisTitles = axisTitleSvg(xLabel, yLabel, padL, padTop, plotW, plotH, height, stroke);
+
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
         style="max-width:100%; height:auto;" role="img" aria-label="Line chart">
     <text x="${padL}" y="26" font-family="Patrick Hand, Caveat, sans-serif"
@@ -431,7 +449,44 @@ function renderLineChart(series: LineSeries[], title: string, dark: boolean): st
     ${axis}
     ${yTicks}
     ${seriesSvg}
+    ${axisTitles}
   </svg>`;
+}
+
+/**
+ * Iter 168: shared axis-title renderer for line + scatter charts.
+ * X title is centered under the plot; Y title is rotated -90° along
+ * the left edge. Both no-op when their label is empty.
+ */
+function axisTitleSvg(
+  xLabel: string,
+  yLabel: string,
+  padL: number,
+  padTop: number,
+  plotW: number,
+  plotH: number,
+  height: number,
+  stroke: string,
+): string {
+  const parts: string[] = [];
+  if (xLabel) {
+    const cx = padL + plotW / 2;
+    parts.push(
+      `<text x="${cx}" y="${height - 6}" text-anchor="middle"
+        font-family="Patrick Hand, Caveat, sans-serif" font-size="16" font-weight="700"
+        fill="${stroke}">${escape(xLabel)}</text>`,
+    );
+  }
+  if (yLabel) {
+    const cy = padTop + plotH / 2;
+    parts.push(
+      `<text x="14" y="${cy}" text-anchor="middle"
+        transform="rotate(-90 14 ${cy})"
+        font-family="Patrick Hand, Caveat, sans-serif" font-size="16" font-weight="700"
+        fill="${stroke}">${escape(yLabel)}</text>`,
+    );
+  }
+  return parts.join("");
 }
 
 // ───────────────────────── Pie / donut chart ────────────────────
@@ -497,7 +552,7 @@ function renderPieChart(slices: PieSlice[], title: string, dark: boolean): strin
 
 // ───────────────────────── Scatter plot ─────────────────────────
 
-function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean): string {
+function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean, xLabel = "", yLabel = ""): string {
   if (!points.length) return "";
 
   const xs = points.map((p) => p.x);
@@ -509,7 +564,7 @@ function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean
   const rangeX = maxX - minX || 1;
   const rangeY = maxY - minY || 1;
 
-  const padL = 50, padR = 26, padTop = 52, padBottom = 34;
+  const padL = 50, padR = 26, padTop = 52, padBottom = xLabel ? 52 : 34;
   const plotW = 360, plotH = 240;
   const width = padL + plotW + padR;
   const height = padTop + plotH + padBottom;
@@ -551,6 +606,8 @@ function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean
     <text x="${xAt(maxX).toFixed(1)}" y="${padTop + plotH + 20}" text-anchor="middle"
           font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(maxX)}</text>`;
 
+  const axisTitles = axisTitleSvg(xLabel, yLabel, padL, padTop, plotW, plotH, height, stroke);
+
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
         style="max-width:100%; height:auto;" role="img" aria-label="Scatter plot">
     <text x="${padL}" y="26" font-family="Patrick Hand, Caveat, sans-serif"
@@ -559,6 +616,7 @@ function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean
     ${axis}
     ${ticks}
     ${dots}
+    ${axisTitles}
   </svg>`;
 }
 

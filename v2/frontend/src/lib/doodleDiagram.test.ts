@@ -155,4 +155,34 @@ describe("renderDoodleDiagram", () => {
     expect(out).toContain("<circle");
     expect(out).toContain("XY");
   });
+
+  it("parses xlabel / ylabel axis titles (iter 168)", () => {
+    const p = parseDoodleDiagram("xlabel: Epoch\nylabel: Loss\nline L: 1, 2");
+    expect(p.xLabel).toBe("Epoch");
+    expect(p.yLabel).toBe("Loss");
+  });
+
+  it("does not treat axis-label directives as bars (iter 168)", () => {
+    const p = parseDoodleDiagram("xlabel: Epoch\nylabel: Loss\nA: 5");
+    expect(p.charts).toEqual([{ label: "A", value: 5 }]);
+  });
+
+  it("renders axis titles on a line chart (iter 168)", () => {
+    const out = renderDoodleDiagram("xlabel: Epoch\nylabel: Loss\nline Loss: 0.9, 0.5, 0.3");
+    expect(out).toContain("Epoch");
+    expect(out).toContain("rotate(-90"); // y title rotated
+  });
+
+  it("renders axis titles on a scatter plot (iter 168)", () => {
+    const out = renderDoodleDiagram("scatter: XY\nxlabel: Width\nylabel: Height\npoint: 1, 2\npoint: 3, 4");
+    expect(out).toContain("Width");
+    expect(out).toContain("Height");
+    expect(out).toContain("rotate(-90");
+  });
+
+  it("escapes axis-title text (iter 168)", () => {
+    const out = renderDoodleDiagram("xlabel: <b>x</b>\nline L: 1, 2");
+    expect(out).not.toContain("<b>x</b>");
+    expect(out).toContain("&lt;b&gt;");
+  });
 });
