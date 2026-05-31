@@ -120,6 +120,11 @@ The accessibility & polish batch (173–177) is complete.
   bump 2.6.0 → 2.7.0, tagged. CI-equivalent green (tsc, 212 FE tests,
   build, 31 BE tests).
 
+- **192 — `doodle.stack()` / `doodle.group()` helpers** ✓ (iter 195):
+  the kernel data→syntax helper can now emit stacked + grouped bar source
+  from a `{category: [values]}` table, matching the renderer. 34 backend
+  tests.
+
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
 

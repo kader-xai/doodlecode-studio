@@ -44,6 +44,29 @@ def test_scatter_emits_points_with_axes():
     assert out == "scatter: XY\nxlabel: w\nylabel: h\npoint: 1, 2\npoint: 3, 4.5"
 
 
+def test_stack_with_series_legend_and_title():
+    out = d.stack({"Q1": [5, 3, 2], "Q2": [6, 4, 3]},
+                  series=["Eng", "Sales", "Ops"], title="Spend")
+    assert out == (
+        "stack: Spend\nseries: Eng, Sales, Ops\n"
+        "stack Q1: 5, 3, 2\nstack Q2: 6, 4, 3"
+    )
+
+
+def test_group_with_series_legend_and_title():
+    out = d.group({"NA": [8, 11], "EU": [6, 9]},
+                  series=["2023", "2024"], title="Revenue")
+    assert out == (
+        "group: Revenue\nseries: 2023, 2024\n"
+        "group NA: 8, 11\ngroup EU: 6, 9"
+    )
+
+
+def test_stack_and_group_without_series_or_title():
+    assert d.stack({"A": [1, 2]}) == "stack A: 1, 2"
+    assert d.group([("B", [3, 4])]) == "group B: 3, 4"
+
+
 def test_flow_edges():
     assert d.flow([("A", "B"), ("B", "C")]) == "A --> B\nB --> C"
 

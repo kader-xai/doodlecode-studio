@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 195) — `doodle.stack()` / `doodle.group()` kernel helpers
+- **The `doodle` data→chart-syntax helper now emits stacked and grouped
+  bars.** `doodle.stack(rows, series=…, title=…)` and `doodle.group(…)`
+  turn a `{category: [values]}` table plus a series legend into the exact
+  `stack:` / `group:` mini-syntax the renderer parses — closing the gap
+  where the renderer and editor supported these charts but a code cell
+  couldn't generate them from computed data. Dependency-free and pure;
+  3 new pytest cases (34 backend tests). README helper snippet updated.
+
 ## [2.7.0] — 2026-05-31
 
 Data-visualization release. The doodle chart suite is now exhaustive —

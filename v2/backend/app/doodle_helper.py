@@ -99,6 +99,42 @@ def area(
     return _series("area", series, title, xlabel, ylabel)
 
 
+def _category_bars(
+    keyword: str,
+    rows: Union[Mapping[str, Sequence[Number]], Sequence[tuple[str, Sequence[Number]]]],
+    series: Sequence[str] | None,
+    title: str | None,
+) -> str:
+    lines: list[str] = []
+    if title:
+        lines.append(f"{keyword}: {title}")
+    if series:
+        lines.append("series: " + ", ".join(str(s) for s in series))
+    for label, values in _pairs(rows):  # type: ignore[arg-type]
+        lines.append(f"{keyword} {label}: {_nums(values)}")
+    return "\n".join(lines)
+
+
+def stack(
+    rows: Union[Mapping[str, Sequence[Number]], Sequence[tuple[str, Sequence[Number]]]],
+    series: Sequence[str] | None = None,
+    title: str | None = None,
+) -> str:
+    """Stacked bar — `stack: title` + `series: …` legend + one
+    `stack Category: a, b, c` row each (segments = series)."""
+    return _category_bars("stack", rows, series, title)
+
+
+def group(
+    rows: Union[Mapping[str, Sequence[Number]], Sequence[tuple[str, Sequence[Number]]]],
+    series: Sequence[str] | None = None,
+    title: str | None = None,
+) -> str:
+    """Grouped bar — `group: title` + `series: …` legend + one
+    `group Category: a, b, c` row each (side-by-side columns = series)."""
+    return _category_bars("group", rows, series, title)
+
+
 def pie(data: Table, title: str | None = None) -> str:
     """Pie / donut — `pie: title` + one `pie Label: value` slice each.
     Non-positive values are dropped (the renderer ignores them too)."""
