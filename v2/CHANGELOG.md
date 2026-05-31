@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Accessibility (iter 204) — doodle charts describe their data to screen readers
+- **Every doodle chart's `aria-label` now includes a data summary.** A
+  screen reader announced only "Bar chart" before; it now reads e.g.
+  "Bar chart: Scores — Python 8, Rust 4". Bar / stacked / grouped / line /
+  area / pie spell out their values; scatter reports the point count and
+  axis names. The summary is attribute-escaped, so user labels can't
+  break the markup. 5 vitest cases (230 frontend tests).
+
 ### Added (iter 203) — `doodle.table()` data→markdown-table helper
 - **The `doodle` kernel helper can now emit a markdown table.**
   `doodle.table(data, headers=…)` turns a mapping (two columns), a list of

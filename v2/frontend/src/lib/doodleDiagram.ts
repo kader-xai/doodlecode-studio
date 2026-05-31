@@ -512,7 +512,7 @@ function renderChart(items: ChartItem[], title: string, dark: boolean): string {
   return `<svg viewBox="0 0 ${width} ${height}"
                width="${width}" height="${height}"
                style="max-width:100%; height:auto;"
-               role="img" aria-label="Bar chart">
+               role="img" aria-label="${ariaFor("Bar chart", title, items.map((i) => `${i.label} ${trimNum(i.value)}`).join(", "))}">
     <text x="${padX}" y="${titleH - 12}"
           font-family="Patrick Hand, Caveat, sans-serif"
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
@@ -584,7 +584,7 @@ function renderStackedBar(rows: StackBar[], seriesNames: string[], title: string
 
   void segCount;
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
-               style="max-width:100%; height:auto;" role="img" aria-label="Stacked bar chart">
+               style="max-width:100%; height:auto;" role="img" aria-label="${ariaFor("Stacked bar chart", title, (seriesNames.length ? `series ${seriesNames.join("/")}; ` : "") + rows.map((r) => `${r.label} ${r.values.map(trimNum).join("/")}`).join(", "))}">
     <text x="${padX}" y="${titleH - 12}" font-family="Patrick Hand, Caveat, sans-serif"
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
     ${legend}
@@ -654,7 +654,7 @@ function renderGroupedBar(rows: GroupBar[], seriesNames: string[], title: string
     .join("");
 
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
-               style="max-width:100%; height:auto;" role="img" aria-label="Grouped bar chart">
+               style="max-width:100%; height:auto;" role="img" aria-label="${ariaFor("Grouped bar chart", title, (seriesNames.length ? `series ${seriesNames.join("/")}; ` : "") + rows.map((r) => `${r.label} ${r.values.map(trimNum).join("/")}`).join(", "))}">
     <text x="${padL}" y="${titleH - 12}" font-family="Patrick Hand, Caveat, sans-serif"
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
     ${legend}
@@ -739,7 +739,7 @@ function renderLineChart(series: LineSeries[], title: string, dark: boolean, xLa
   const refLines = renderHLines(hlines, yAt, minV, maxV, padL, plotW, stroke);
 
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
-        style="max-width:100%; height:auto;" role="img" aria-label="Line chart">
+        style="max-width:100%; height:auto;" role="img" aria-label="${ariaFor("Line chart", title, series.map((s) => `${s.label} ${s.points.map(trimNum).join(", ")}`).join("; "))}">
     <text x="${padL}" y="26" font-family="Patrick Hand, Caveat, sans-serif"
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
     ${legend}
@@ -841,7 +841,7 @@ function renderPieChart(slices: PieSlice[], title: string, dark: boolean): strin
     .join("");
 
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
-        style="max-width:100%; height:auto;" role="img" aria-label="Pie chart">
+        style="max-width:100%; height:auto;" role="img" aria-label="${ariaFor("Pie chart", title, slices.map((s) => `${s.label} ${trimNum(s.value)}`).join(", "))}">
     <text x="16" y="${titleH - 6}" font-family="Patrick Hand, Caveat, sans-serif"
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
     ${wedges}
@@ -923,7 +923,7 @@ function renderAreaChart(series: AreaSeries[], title: string, dark: boolean, xLa
   const refLines = renderHLines(hlines, yAt, minV, maxV, padL, plotW, stroke);
 
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
-        style="max-width:100%; height:auto;" role="img" aria-label="Area chart">
+        style="max-width:100%; height:auto;" role="img" aria-label="${ariaFor("Area chart", title, series.map((s) => `${s.label} ${s.points.map(trimNum).join(", ")}`).join("; "))}">
     <text x="${padL}" y="26" font-family="Patrick Hand, Caveat, sans-serif"
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
     ${legend}
@@ -996,7 +996,7 @@ function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean
   const refLines = renderHLines(hlines, yAt, minY, maxY, padL, plotW, stroke);
 
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
-        style="max-width:100%; height:auto;" role="img" aria-label="Scatter plot">
+        style="max-width:100%; height:auto;" role="img" aria-label="${ariaFor("Scatter plot", title, `${points.length} point${points.length === 1 ? "" : "s"}${xLabel || yLabel ? `, ${xLabel || "x"} vs ${yLabel || "y"}` : ""}`)}">
     <text x="${padL}" y="26" font-family="Patrick Hand, Caveat, sans-serif"
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
     ${gridLines}
@@ -1013,6 +1013,14 @@ function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean
 function trimNum(v: number): string {
   // Compact tick label — drop trailing zeros, cap at 2 decimals.
   return String(Math.round(v * 100) / 100);
+}
+
+/** Iter 204: build an accessible chart label — "<Kind>: <Title> — <data
+ * summary>" — so a screen reader announces the actual values, not just
+ * the chart type. The whole string is attribute-escaped. */
+function ariaFor(kind: string, title: string, summary: string): string {
+  const titled = title && title !== kind ? `${kind}: ${title}` : kind;
+  return escape(summary ? `${titled} — ${summary}` : titled);
 }
 
 function placeholder(dark: boolean): string {

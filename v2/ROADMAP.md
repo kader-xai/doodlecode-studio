@@ -151,6 +151,10 @@ The accessibility & polish batch (173–177) is complete.
 - **200 — `doodle.table()` helper** ✓ (iter 203): kernel helper emits
   markdown-table source from a mapping / list-of-dicts / rows, pipes
   escaped — pairs with the iter-196 table renderer. 18 helper tests.
+- **201 — Chart aria data summaries** ✓ (iter 204): every chart's
+  `aria-label` now spells out its values (e.g. "Bar chart: Scores —
+  Python 8, Rust 4") so screen readers convey the data, not just the
+  chart type. 230 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

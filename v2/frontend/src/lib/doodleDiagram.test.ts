@@ -103,7 +103,7 @@ describe("renderDoodleDiagram", () => {
   it("renders a line chart with polyline + dots (iter 160)", () => {
     const out = renderDoodleDiagram("line Loss: 0.9, 0.6, 0.4, 0.25");
     expect(out).toContain("<svg");
-    expect(out).toMatch(/aria-label="Line chart"/);
+    expect(out).toMatch(/aria-label="Line chart/);
     expect(out).toContain("<circle"); // point markers
     expect(out).toContain("Loss"); // legend label
   });
@@ -117,7 +117,7 @@ describe("renderDoodleDiagram", () => {
   it("renders a pie chart with wedges + percentage legend (iter 164)", () => {
     const out = renderDoodleDiagram("pie: Share\npie Python: 60\npie Rust: 40");
     expect(out).toContain("<svg");
-    expect(out).toMatch(/aria-label="Pie chart"/);
+    expect(out).toMatch(/aria-label="Pie chart/);
     expect(out).toContain("<path"); // wedge
     expect(out).toContain("60%"); // legend percentage
     expect(out).toContain("Python");
@@ -151,7 +151,7 @@ describe("renderDoodleDiagram", () => {
   it("renders a scatter plot with dots + axes (iter 166)", () => {
     const out = renderDoodleDiagram("scatter: XY\npoint: 1, 2\npoint: 3, 4\npoint: 5, 1");
     expect(out).toContain("<svg");
-    expect(out).toMatch(/aria-label="Scatter plot"/);
+    expect(out).toMatch(/aria-label="Scatter plot/);
     expect(out).toContain("<circle");
     expect(out).toContain("XY");
   });
@@ -202,7 +202,7 @@ describe("renderDoodleDiagram", () => {
   it("renders an area chart with a filled polygon (iter 172)", () => {
     const out = renderDoodleDiagram("xlabel: Week\nylabel: Users\narea Active: 2, 5, 9, 14");
     expect(out).toContain("<svg");
-    expect(out).toMatch(/aria-label="Area chart"/);
+    expect(out).toMatch(/aria-label="Area chart/);
     expect(out).toContain("fill-opacity=\"0.28\""); // the area fill
     expect(out).toContain("Active");
     expect(out).toContain("Week");
@@ -256,7 +256,7 @@ describe("renderDoodleDiagram", () => {
   it("renders a stacked bar with segments + legend (iter 190)", () => {
     const out = renderDoodleDiagram("stack: Budget\nseries: Eng, Ops\nstack Q1: 5, 3\nstack Q2: 6, 4");
     expect(out).toContain("<svg");
-    expect(out).toMatch(/aria-label="Stacked bar chart"/);
+    expect(out).toMatch(/aria-label="Stacked bar chart/);
     expect(out).toContain("Eng"); // legend
     expect(out).toContain("Q1");  // row label
   });
@@ -291,7 +291,7 @@ describe("renderDoodleDiagram", () => {
   it("renders a grouped bar with clustered columns + legend (iter 193)", () => {
     const out = renderDoodleDiagram("group: Budget\nseries: Eng, Ops\ngroup Q1: 5, 3\ngroup Q2: 6, 4");
     expect(out).toContain("<svg");
-    expect(out).toMatch(/aria-label="Grouped bar chart"/);
+    expect(out).toMatch(/aria-label="Grouped bar chart/);
     expect(out).toContain("Eng"); // legend
     expect(out).toContain("Q1");  // category label
   });
@@ -300,5 +300,31 @@ describe("renderDoodleDiagram", () => {
     const out = renderDoodleDiagram("group <b>x</b>: 1, 2");
     expect(out).not.toContain("<b>x</b>");
     expect(out).toContain("&lt;b&gt;");
+  });
+
+  it("puts the bar data + title into the aria-label (iter 204)", () => {
+    const out = renderDoodleDiagram("chart: Scores\nPython: 8\nRust: 4");
+    expect(out).toMatch(/aria-label="Bar chart: Scores — Python 8, Rust 4"/);
+  });
+
+  it("summarizes pie slices in the aria-label (iter 204)", () => {
+    const out = renderDoodleDiagram("pie: Share\npie A: 3\npie B: 1");
+    expect(out).toContain('aria-label="Pie chart: Share — A 3, B 1"');
+  });
+
+  it("summarizes line series in the aria-label (iter 204)", () => {
+    const out = renderDoodleDiagram("line Loss: 0.9, 0.5");
+    expect(out).toContain("Loss 0.9, 0.5");
+  });
+
+  it("reports the point count for a scatter aria-label (iter 204)", () => {
+    const out = renderDoodleDiagram("scatter: XY\npoint: 1, 2\npoint: 3, 4");
+    expect(out).toContain("2 points");
+  });
+
+  it("escapes the aria data summary (iter 204)", () => {
+    const out = renderDoodleDiagram('chart: T\n<b>x</b>: 5');
+    // The bar label is escaped inside the aria-label too, never raw markup.
+    expect(out).not.toMatch(/aria-label="[^"]*<b>/);
   });
 });
