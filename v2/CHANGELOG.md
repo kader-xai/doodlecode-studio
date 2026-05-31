@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added (iter 173) — `doodle` helper: data → chart syntax in code cells
+- **Every code cell's kernel now exposes a `doodle` namespace** (no
+  import) that turns Python data into doodle-chart source:
+  `print(doodle.bar({"Python": 8, "Rust": 4}, title="LOC"))`. It covers
+  `bar` · `line` · `area` · `pie` · `scatter` · `flow`, accepts a dict
+  or list of pairs, keeps ints int / trims floats, drops non-positive
+  pie slices, and emits exactly the tokens the diagram parser keys on —
+  so you compute in Python and paste the printed lines into a 🖍 Doodle
+  diagram. First slice of code-driven visuals. Pure, dependency-free
+  module (`app/doodle_helper.py`) injected at kernel startup;
+  end-to-end verified through the runner subprocess. 31 backend tests.
+
 ### Added (iter 172) — doodle area chart
 - **Diagram cells render filled area charts.** `area Active: 2, 5, 9`
   draws a line filled to the baseline (28%-opacity wash + solid ink

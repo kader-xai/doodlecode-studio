@@ -84,8 +84,24 @@ def _run_once(_globals: dict, source: str) -> dict:
     }
 
 
+def _doodle_namespace():
+    """The `doodle` chart-syntax helper, exposed in every cell. Lives
+    next to this script (the runner's own dir is on sys.path[0]), so a
+    plain import works even though the runner is launched as a file."""
+    try:
+        import doodle_helper  # app/ is sys.path[0] when run as a script
+        return doodle_helper
+    except Exception:
+        return None
+
+
 def main() -> None:
     _globals: dict = {"__name__": "__main__"}
+    # Iter 173: pre-seed the `doodle` data→chart-syntax helper so a code
+    # cell can `print(doodle.bar({...}))` with no import.
+    _doodle = _doodle_namespace()
+    if _doodle is not None:
+        _globals["doodle"] = _doodle
     # Unbuffered line-by-line. Parent reads exactly one JSON line
     # per request.
     for raw in sys.stdin:

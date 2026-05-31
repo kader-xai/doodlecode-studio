@@ -152,6 +152,25 @@ point: 3, 5
 See [`examples/data_viz_demo.py`](examples/data_viz_demo.py) for a deck
 that exercises every kind plus speaker notes and reveal steps.
 
+### Data → chart syntax from a code cell
+
+Compute numbers in a **Code** cell and let the built-in `doodle` helper
+emit the matching chart source (no import needed) — then paste it into a
+Doodle diagram:
+
+```python
+counts = {"Python": 8, "Rust": 4, "Go": 6}
+print(doodle.bar(counts, title="Lines of code"))
+print(doodle.line({"Train": [0.9, 0.6, 0.4]}, xlabel="Epoch", ylabel="Loss"))
+print(doodle.pie(counts))
+print(doodle.scatter([(1, 2), (3, 5)], xlabel="x", ylabel="y"))
+```
+
+`doodle` exposes `bar` · `line` · `area` · `pie` · `scatter` · `flow`,
+each taking a dict (or list of pairs) and returning ready-to-paste
+syntax. Ints stay ints, floats are trimmed, non-positive pie slices are
+dropped.
+
 ## File format
 
 One `.py` file per notebook. Cells are separated by `# %%` headers.
