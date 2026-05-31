@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "../lib/focusTrap";
 import { DoodleBorder } from "./DoodleBorder";
 import { useStore } from "../store";
 import type { Callout } from "../types";
@@ -57,6 +58,9 @@ export function CalloutEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cellId, draft]);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!cellId && !!cell, panelRef);
+
   if (!cellId || !cell) return null;
 
   const save = () => {
@@ -106,6 +110,7 @@ export function CalloutEditor() {
       onClick={cancel}
     >
       <div
+        ref={panelRef}
         className="relative max-w-2xl w-full max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
         role="dialog"

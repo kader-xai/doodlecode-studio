@@ -65,8 +65,8 @@ one at a time (see CHANGELOG for the running log).
 - **173 — Modal dialog semantics** ✓ (iter 175): `role="dialog"` +
   `aria-modal` + `aria-label` on all six overlays; labelled palette
   input.
-- **174 — Focus management for modals**: focus the first field on open,
-  return focus to the trigger on close, trap Tab within the dialog.
+- **174 — Focus management for modals** ✓ (iter 176): `useFocusTrap`
+  autofocuses, traps Tab, restores focus to the trigger on close.
 - **175 — Icon-button labels sweep**: ensure every icon-only control
   (toolbar, presenter bar, cell headers) has an accessible name.
 - **176 — Reduced-motion audit**: confirm ambient drift + connectors +

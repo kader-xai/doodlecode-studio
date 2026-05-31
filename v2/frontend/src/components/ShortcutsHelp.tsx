@@ -1,4 +1,6 @@
+import { useRef } from "react";
 import { DoodleBorder } from "./DoodleBorder";
+import { useFocusTrap } from "../lib/focusTrap";
 import { APP_VERSION } from "../types";
 
 const ROWS: { keys: string; what: string; when?: string }[] = [
@@ -53,12 +55,15 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
 ];
 
 export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(true, panelRef);
   return (
     <div
       className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-6"
       onClick={onClose}
     >
       <div
+        ref={panelRef}
         className="relative p-6 max-w-lg w-full"
         onClick={(e) => e.stopPropagation()}
         role="dialog"

@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useFocusTrap } from "../lib/focusTrap";
 import { installPackages } from "../api";
 import { useStore } from "../store";
 import { DoodleBorder } from "./DoodleBorder";
@@ -44,6 +45,9 @@ export function InstallModal() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, setOpen]);
 
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(open, panelRef);
+
   if (!open) return null;
 
   const run = async () => {
@@ -66,6 +70,7 @@ export function InstallModal() {
       onClick={() => setOpen(false)}
     >
       <div
+        ref={panelRef}
         className="relative max-w-2xl w-full max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
         role="dialog"

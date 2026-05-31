@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DoodleBorder } from "./DoodleBorder";
+import { useFocusTrap } from "../lib/focusTrap";
 import { useStore } from "../store";
 
 /**
@@ -14,6 +15,8 @@ export function NoteEditor() {
   const setNote = useStore((s) => s.setNote);
 
   const [draft, setDraft] = useState("");
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(!!cellId && !!cell, panelRef);
 
   useEffect(() => {
     if (!cellId) return;
@@ -51,6 +54,7 @@ export function NoteEditor() {
       onClick={cancel}
     >
       <div
+        ref={panelRef}
         className="relative max-w-xl w-full"
         onClick={(e) => e.stopPropagation()}
         role="dialog"

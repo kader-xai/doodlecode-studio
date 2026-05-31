@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Accessibility (iter 176) — modal focus management
+- **Modals now trap and restore keyboard focus.** Opening the callout
+  editor, reveal-steps editor, speaker-note editor, install modal, or
+  shortcuts overlay focuses the first field (respecting an existing
+  autoFocus), keeps Tab / Shift+Tab cycling **within** the dialog, and
+  on close returns focus to whatever triggered it — so keyboard and
+  screen-reader users are never dumped at the top of the page. Reusable
+  `useFocusTrap` hook with a pure, unit-tested `nextTrapTarget` wrap
+  helper. The Cmd/Ctrl+K palette keeps its own Tab-navigates-results
+  behavior. 168 frontend tests.
+
 ### Accessibility (iter 175) — modal dialog semantics
 - **Every modal now announces itself to assistive tech.** The callout
   editor, reveal-steps editor, speaker-note editor, install modal,
