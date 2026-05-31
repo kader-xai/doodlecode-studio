@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added (iter 201) — markdown task lists in text cells
+- **`- [ ]` / `- [x]` render read-only checkboxes.** Task-list items in a
+  text cell show a checkbox (capital `[X]` accepted); done items strike
+  through. Plain bullets and tasks mix freely in one list. Useful for
+  tutorial checklists and "what you'll learn" sections. 3 vitest cases
+  (225 frontend tests).
+
 ## [2.8.0] — 2026-05-31
 
 Authoring + file-format hardening release. Text cells gain **markdown

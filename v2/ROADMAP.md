@@ -142,6 +142,9 @@ The accessibility & polish batch (173–177) is complete.
   code, `doodle.stack/group` helpers, and the two file-format round-trip
   fixes (FILE_FORMAT_VERSION 3→4). Lockstep bump 2.7.0 → 2.8.0, tagged.
   CI-equivalent green (tsc, 222 FE tests, build, 39 BE tests).
+- **198 — Markdown task lists** ✓ (iter 201): `- [ ]` / `- [x]` render
+  read-only checkboxes (done items strike through); plain + task bullets
+  mix in one list. For tutorial checklists. 225 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

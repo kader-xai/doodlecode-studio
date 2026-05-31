@@ -20,6 +20,27 @@ describe("renderMarkdown", () => {
     expect((html.match(/<li/g) ?? []).length).toBe(2);
   });
 
+  it("renders task-list checkboxes, checked + unchecked (iter 201)", () => {
+    const html = toHtml("- [ ] todo\n- [x] done");
+    expect((html.match(/<input[^>]*type="checkbox"/g) ?? []).length).toBe(2);
+    expect(html).toContain("checked"); // the [x] item
+    expect(html).toContain("todo");
+    expect(html).toContain("done");
+  });
+
+  it("accepts capital [X] and strikes through done items (iter 201)", () => {
+    const html = toHtml("- [X] finished");
+    expect(html).toContain("checkbox");
+    expect(html).toContain("line-through");
+  });
+
+  it("mixes task and plain bullets in one list (iter 201)", () => {
+    const html = toHtml("- plain\n- [ ] task");
+    expect(html).toContain("<ul");
+    expect((html.match(/<li/g) ?? []).length).toBe(2);
+    expect((html.match(/type="checkbox"/g) ?? []).length).toBe(1);
+  });
+
   it("renders ordered lists with a start offset (iter 186)", () => {
     const html = toHtml("1. first\n2. second\n3. third");
     expect(html).toContain("<ol");

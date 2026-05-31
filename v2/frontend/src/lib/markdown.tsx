@@ -6,6 +6,7 @@ import { JSX } from "react";
  * Supports:
  *   `# H1`, `## H2`, `### H3`
  *   `- item` or `* item`            (bullet list)
+ *   `- [ ] todo` / `- [x] done`     (task list — read-only checkbox)
  *   `1. item` or `1) item`          (ordered list)
  *   `> blockquote`
  *   `---`                           (horizontal rule)
@@ -224,9 +225,29 @@ export function renderMarkdown(src: string): JSX.Element[] {
           key={key++}
           className={`list-disc pl-6 font-hand text-xl leading-snug space-y-0.5 ${wrap}`}
         >
-          {items.map((it, j) => (
-            <li key={j}>{renderInline(it)}</li>
-          ))}
+          {items.map((it, j) => {
+            // Iter 201: GitHub-style task list — `- [ ]` / `- [x]` renders
+            // a read-only checkbox instead of a disc. Mixed lists are fine.
+            const task = /^\[([ xX])\]\s+(.*)$/.exec(it);
+            if (task) {
+              const checked = task[1].toLowerCase() === "x";
+              return (
+                <li key={j} className="list-none -ml-6 flex items-start gap-2">
+                  <input
+                    type="checkbox"
+                    checked={checked}
+                    readOnly
+                    aria-checked={checked}
+                    className="mt-1.5 accent-marker-pink"
+                  />
+                  <span className={checked ? "line-through opacity-70" : ""}>
+                    {renderInline(task[2])}
+                  </span>
+                </li>
+              );
+            }
+            return <li key={j}>{renderInline(it)}</li>;
+          })}
         </ul>,
       );
       continue;
