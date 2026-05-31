@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 193) — grouped (side-by-side) bar chart
+- **Diagram cells render grouped bars for comparing series within
+  categories.** `group: Title` sets a heading, `series: 2023, 2024` names
+  the clustered columns (shared with the stacked-bar legend), and each
+  `group NA: 8, 11` row becomes a category whose values are drawn as
+  side-by-side columns scaled to the tallest value. A **▦ Grouped** editor
+  preset seeds a working sample; the README example + kind table document
+  it. Completes the bar family (single / stacked / grouped). 6 vitest
+  cases; 212 frontend tests green.
+
 ### Added (iter 192) — stacked bar in the data-viz demo deck
 - **`examples/data_viz_demo.py` now showcases the stacked bar chart.** A
   new "Stacked — part-to-whole over time" slide (Engineering hours by

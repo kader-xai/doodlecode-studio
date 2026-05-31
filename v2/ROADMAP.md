@@ -111,6 +111,9 @@ The accessibility & polish batch (173–177) is complete.
 - **189 — Stacked bar in the demo deck** ✓ (iter 192): a stacked slide in
   `examples/data_viz_demo.py` (Engineering hours by quarter); coverage
   test now asserts 9 cells / 6 diagrams and the `stack`/`series:` lines.
+- **190 — Grouped (side-by-side) bar chart** ✓ (iter 193): `group Cat: a, b`
+  clusters one column per series, shares the `series:` legend; ▦ Grouped
+  preset + README. Bar family complete (single / stacked / grouped).
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

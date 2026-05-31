@@ -53,6 +53,8 @@ export interface ScatterPoint { x: number; y: number }
 export interface HLine { value: number; label?: string }
 /** Iter 190: one category row of a stacked bar (segments = series). */
 export interface StackBar { label: string; values: number[] }
+/** Iter 193: one category row of a grouped bar (clustered columns = series). */
+export interface GroupBar { label: string; values: number[] }
 
 export interface Parsed {
   flow: FlowEdge[];
@@ -67,6 +69,9 @@ export interface Parsed {
   stacks: StackBar[];
   stackSeries: string[];
   stackTitle: string;
+  /** Iter 193: grouped-bar category rows + title. Shares `series:` legend. */
+  groups: GroupBar[];
+  groupTitle: string;
   chartTitle: string;
   pieTitle: string;
   scatterTitle: string;
@@ -87,6 +92,8 @@ export function parseDoodleDiagram(source: string): Parsed {
   const stacks: StackBar[] = [];
   let stackSeries: string[] = [];
   let stackTitle = "";
+  const groups: GroupBar[] = [];
+  let groupTitle = "";
   let chartTitle = "";
   let pieTitle = "";
   let scatterTitle = "";
@@ -147,6 +154,31 @@ export function parseDoodleDiagram(source: string): Parsed {
           .map(Number)
           .filter((n) => Number.isFinite(n) && n >= 0);
         if (label && values.length) stacks.push({ label, values });
+        continue;
+      }
+    }
+
+    // Iter 193: grouped-bar title — `group: Title`. Before the `group
+    // <Label>:` row rule so an empty-label row isn't created.
+    if (normalized.startsWith("group:")) {
+      groupTitle = line.split(":").slice(1).join(":").trim() || "Grouped";
+      continue;
+    }
+
+    // Iter 193: grouped-bar category row — `group <Label>: 3, 5, 2`.
+    // One clustered column per value, shares the `series:` legend.
+    if (normalized.startsWith("group ")) {
+      const colon = line.indexOf(":");
+      if (colon !== -1) {
+        const label = line.slice(0, colon).replace(/^group\b\s*/i, "").trim();
+        const values = line
+          .slice(colon + 1)
+          .split(/[,\s]+/)
+          .map((n) => n.trim())
+          .filter(Boolean)
+          .map(Number)
+          .filter((n) => Number.isFinite(n) && n >= 0);
+        if (label && values.length) groups.push({ label, values });
         continue;
       }
     }
@@ -267,7 +299,7 @@ export function parseDoodleDiagram(source: string): Parsed {
     }
   }
 
-  return { flow, charts, lines: series, areas, pies, points, hlines, stacks, stackSeries, stackTitle, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
+  return { flow, charts, lines: series, areas, pies, points, hlines, stacks, stackSeries, stackTitle, groups, groupTitle, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
 }
 
 /**
@@ -308,14 +340,15 @@ export function renderDoodleDiagram(source: string, dark = false): string {
   const flow = renderFlow(parsed.flow, dark);
   const chart = renderChart(parsed.charts, parsed.chartTitle || "Chart", dark);
   const stackedChart = renderStackedBar(parsed.stacks, parsed.stackSeries, parsed.stackTitle || "Stacked", dark);
+  const groupedChart = renderGroupedBar(parsed.groups, parsed.stackSeries, parsed.groupTitle || "Grouped", dark);
   const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
   const areaChart = renderAreaChart(parsed.areas, parsed.chartTitle || "Area", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
   const pieChart = renderPieChart(parsed.pies, parsed.pieTitle || "Breakdown", dark);
   const scatterChart = renderScatterChart(parsed.points, parsed.scatterTitle || "Scatter", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
-  if (!flow && !chart && !stackedChart && !lineChart && !areaChart && !pieChart && !scatterChart) {
+  if (!flow && !chart && !stackedChart && !groupedChart && !lineChart && !areaChart && !pieChart && !scatterChart) {
     return placeholder(dark);
   }
-  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${stackedChart}${lineChart}${areaChart}${pieChart}${scatterChart}</div>`;
+  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${stackedChart}${groupedChart}${lineChart}${areaChart}${pieChart}${scatterChart}</div>`;
 }
 
 // ───────────────────────── Flowchart ────────────────────────────
@@ -556,6 +589,77 @@ function renderStackedBar(rows: StackBar[], seriesNames: string[], title: string
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
     ${legend}
     ${bars}
+  </svg>`;
+}
+
+// ───────────────────────── Grouped bar ──────────────────────────
+
+function renderGroupedBar(rows: GroupBar[], seriesNames: string[], title: string, dark: boolean): string {
+  if (!rows.length) return "";
+  const segCount = Math.max(...rows.map((r) => r.values.length), 1);
+  const maxVal = Math.max(...rows.flatMap((r) => r.values), 1);
+
+  const barW = 24;
+  const innerGap = 5;
+  const clusterW = segCount * barW + (segCount - 1) * innerGap;
+  const categoryGap = 38;
+  const padL = 24;
+  const padR = 24;
+  const titleH = 40;
+  const legendH = seriesNames.length ? 26 : 0;
+  const plotH = 190;
+  const padBottom = 32; // room for category labels
+
+  const plotTop = titleH + legendH;
+  const baseY = plotTop + plotH;
+  const width = padL + rows.length * clusterW + (rows.length - 1) * categoryGap + padR;
+  const height = baseY + padBottom;
+  const stroke = dark ? "#f0f0f0" : "#202124";
+
+  const legend = seriesNames
+    .map((name, si) => {
+      const color = CHART_COLORS[si % CHART_COLORS.length];
+      const lx = padL + si * 130;
+      const ly = titleH + 6;
+      return `<rect x="${lx}" y="${ly - 10}" width="12" height="12" rx="2" fill="${color}" stroke="${stroke}" stroke-width="2"/>
+        <text x="${lx + 18}" y="${ly}" font-family="Patrick Hand, Caveat, sans-serif"
+              font-size="14" font-weight="700" fill="${stroke}">${escape(name)}</text>`;
+    })
+    .join("");
+
+  const axis = `<line x1="${padL}" y1="${baseY}" x2="${(width - padR).toFixed(1)}" y2="${baseY}"
+    stroke="${stroke}" stroke-width="2.5"/>`;
+
+  const clusters = rows
+    .map((row, ri) => {
+      const cx = padL + ri * (clusterW + categoryGap);
+      const bars = row.values
+        .map((v, si) => {
+          const h = (plotH * v) / maxVal;
+          const x = cx + si * (barW + innerGap);
+          const y = baseY - h;
+          const color = CHART_COLORS[si % CHART_COLORS.length];
+          return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW}" height="${h.toFixed(1)}" rx="4"
+            fill="${color}" stroke="${stroke}" stroke-width="2.5"/>
+            <text x="${(x + barW / 2).toFixed(1)}" y="${(y - 5).toFixed(1)}" text-anchor="middle"
+              font-family="Patrick Hand, Caveat, sans-serif" font-size="12" font-weight="800"
+              fill="${stroke}">${trimNum(v)}</text>`;
+        })
+        .join("");
+      const label = `<text x="${(cx + clusterW / 2).toFixed(1)}" y="${baseY + 20}" text-anchor="middle"
+        font-family="Patrick Hand, Caveat, sans-serif" font-size="15" font-weight="700"
+        fill="${stroke}">${escape(row.label)}</text>`;
+      return `<g>${bars}${label}</g>`;
+    })
+    .join("");
+
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
+               style="max-width:100%; height:auto;" role="img" aria-label="Grouped bar chart">
+    <text x="${padL}" y="${titleH - 12}" font-family="Patrick Hand, Caveat, sans-serif"
+          font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
+    ${legend}
+    ${axis}
+    ${clusters}
   </svg>`;
 }
 
@@ -914,7 +1018,7 @@ function trimNum(v: number): string {
 function placeholder(dark: boolean): string {
   const c = dark ? "#aaa" : "#555";
   return `<div style="padding:18px;text-align:center;color:${c};font-family:Patrick Hand,Caveat,sans-serif;font-size:18px;">
-    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>stack Q1: 3, 5</code> stacked bars, <code>line Loss: 0.9, 0.6</code> lines, <code>area Users: 1, 3</code> areas, <code>pie Cats: 30</code> slices, or <code>point: 1, 2</code> scatter dots.
+    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>stack Q1: 3, 5</code> stacked bars, <code>group Q1: 3, 5</code> grouped bars, <code>line Loss: 0.9, 0.6</code> lines, <code>area Users: 1, 3</code> areas, <code>pie Cats: 30</code> slices, or <code>point: 1, 2</code> scatter dots.
   </div>`;
 }
 

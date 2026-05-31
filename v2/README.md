@@ -131,6 +131,11 @@ series: Eng, Sales, Ops       # segment legend
 stack Q1: 5, 3, 2
 stack Q2: 6, 4, 3
 
+group: Revenue by region      # grouped bar — compare series side by side
+series: 2023, 2024            # one clustered column per series
+group NA: 8, 11
+group EU: 6, 9
+
 xlabel: Epoch                 # axis titles apply to line / area / scatter
 ylabel: Loss
 hline Target: 0.3             # dashed reference line (line / area / scatter)
@@ -153,6 +158,7 @@ point: 3, 5
 | Flow      | any line containing `-->`              |
 | Bar       | `chart: Title` + `Label: number` rows  |
 | Stacked   | `stack: Title` + `series: A, B` + `stack Cat: a, b` |
+| Grouped   | `group: Title` + `series: A, B` + `group Cat: a, b` |
 | Line      | `line Label: n, n, n` (comma/space)    |
 | Area      | `area Label: n, n, n` (filled line)    |
 | Pie       | `pie: Title` + `pie Label: number`     |

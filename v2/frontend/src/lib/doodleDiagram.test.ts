@@ -266,4 +266,39 @@ describe("renderDoodleDiagram", () => {
     expect(out).not.toContain("<b>x</b>");
     expect(out).toContain("&lt;b&gt;");
   });
+
+  it("parses grouped-bar rows + shares the series legend (iter 193)", () => {
+    const p = parseDoodleDiagram("group: Budget\nseries: A, B\ngroup Q1: 3, 5\ngroup Q2: 4, 2");
+    expect(p.groupTitle).toBe("Budget");
+    expect(p.stackSeries).toEqual(["A", "B"]);
+    expect(p.groups).toEqual([
+      { label: "Q1", values: [3, 5] },
+      { label: "Q2", values: [4, 2] },
+    ]);
+  });
+
+  it("does not read a group row as a bar (iter 193)", () => {
+    const p = parseDoodleDiagram("group Q1: 3, 5");
+    expect(p.charts).toEqual([]);
+  });
+
+  it("keeps grouped and stacked bars independent (iter 193)", () => {
+    const p = parseDoodleDiagram("stack S1: 1, 2\ngroup G1: 3, 4");
+    expect(p.stacks).toEqual([{ label: "S1", values: [1, 2] }]);
+    expect(p.groups).toEqual([{ label: "G1", values: [3, 4] }]);
+  });
+
+  it("renders a grouped bar with clustered columns + legend (iter 193)", () => {
+    const out = renderDoodleDiagram("group: Budget\nseries: Eng, Ops\ngroup Q1: 5, 3\ngroup Q2: 6, 4");
+    expect(out).toContain("<svg");
+    expect(out).toMatch(/aria-label="Grouped bar chart"/);
+    expect(out).toContain("Eng"); // legend
+    expect(out).toContain("Q1");  // category label
+  });
+
+  it("escapes a grouped-bar label (iter 193)", () => {
+    const out = renderDoodleDiagram("group <b>x</b>: 1, 2");
+    expect(out).not.toContain("<b>x</b>");
+    expect(out).toContain("&lt;b&gt;");
+  });
 });
