@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added (iter 166) — doodle scatter plot
+- **Diagram cells now render scatter plots for x/y intuition.**
+  `scatter: Title` sets a heading; `point: x, y` adds a dot. The result
+  is a hand-drawn x/y plane with faint quartile gridlines on both axes,
+  L-shaped ink axes, min/max tick labels on each axis, and
+  semi-transparent ink-outlined dots. Points need exactly two finite
+  numbers (a `point:` with one value is ignored), and scatter is parsed
+  before the bar `Label: Number` rule so dots are never mistaken for
+  bars. Independent of bars / lines / pies — all can coexist in one
+  source. 146 frontend tests.
+
 ### Added (iter 165) — presenter speaker notes
 - **Per-cell speaker notes you can read while presenting, never shown
   on the slide.** Press **N** with a cell selected (or use the 📝 entry

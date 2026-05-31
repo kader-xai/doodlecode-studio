@@ -10,7 +10,8 @@ one at a time (see CHANGELOG for the running log).
 1. **Code explanation** — code cells run real Python; reveal-steps build
    programs up live; inline matplotlib output.
 2. **Visual intuition** — doodle charts (bar ✓, **line ✓ iter 160**,
-   pie ▢, scatter ▢), flowcharts ✓, mermaid ✓, math (KaTeX) ✓.
+   pie ✓ iter 164, **scatter ✓ iter 166**), flowcharts ✓, mermaid ✓,
+   math (KaTeX) ✓.
 3. **Live demo + video** — browser cells embed live pages ✓; media cells
    play video/GIF ✓; (▢) one-click "record this slide → GIF/MP4".
 4. **Presentation** — slide flow ✓, slide counter ✓, presenter ink ✓,
@@ -29,7 +30,8 @@ one at a time (see CHANGELOG for the running log).
 - **163 — Speaker notes** ✓ (shipped as iter 165): `# @note:` per cell,
   shown only to the presenter (bottom-left HUD) during a talk. **N**
   opens the editor; round-trips in the .py.
-- **164 — Scatter chart**: `point: x, y` for x/y intuition.
+- **164 — Scatter chart** ✓ (shipped as iter 166): `point: x, y` →
+  hand-drawn x/y plane with gridlines + axis ticks. For x/y intuition.
 - **165 — Diagram cell chart presets**: a chart-kind switch (bar / line /
   pie) in the Diagram editor so users don't memorize syntax.
 - **166 — Chart axis labels + gridlines** (subtle, doodle).

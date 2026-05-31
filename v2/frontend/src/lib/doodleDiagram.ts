@@ -45,14 +45,18 @@ export interface ChartItem { label: string; value: number }
 export interface LineSeries { label: string; points: number[] }
 /** Iter 164: one slice of a pie / donut chart. */
 export interface PieSlice { label: string; value: number }
+/** Iter 166: one (x, y) dot of a scatter plot. */
+export interface ScatterPoint { x: number; y: number }
 
 export interface Parsed {
   flow: FlowEdge[];
   charts: ChartItem[];
   lines: LineSeries[];
   pies: PieSlice[];
+  points: ScatterPoint[];
   chartTitle: string;
   pieTitle: string;
+  scatterTitle: string;
 }
 
 export function parseDoodleDiagram(source: string): Parsed {
@@ -61,8 +65,10 @@ export function parseDoodleDiagram(source: string): Parsed {
   const charts: ChartItem[] = [];
   const series: LineSeries[] = [];
   const pies: PieSlice[] = [];
+  const points: ScatterPoint[] = [];
   let chartTitle = "";
   let pieTitle = "";
+  let scatterTitle = "";
 
   for (const line of rawLines) {
     const normalized = line.toLowerCase();
@@ -74,6 +80,30 @@ export function parseDoodleDiagram(source: string): Parsed {
     if (normalized.startsWith("chart:")) {
       chartTitle = line.split(":").slice(1).join(":").trim() || "Chart";
       continue;
+    }
+
+    // Iter 166: scatter title (`scatter: Title`) — checked before the
+    // `point:` rule so an empty point isn't created.
+    if (normalized.startsWith("scatter:")) {
+      scatterTitle = line.split(":").slice(1).join(":").trim() || "Scatter";
+      continue;
+    }
+
+    // Iter 166: scatter point — `point: x, y`. Needs exactly two finite
+    // numbers; checked before the bar `Label: Number` rule (shared colon).
+    if (normalized.startsWith("point ") || normalized.startsWith("point:")) {
+      const colon = line.indexOf(":");
+      if (colon !== -1) {
+        const nums = line
+          .slice(colon + 1)
+          .split(/[,\s]+/)
+          .map((n) => n.trim())
+          .filter(Boolean)
+          .map(Number)
+          .filter((n) => Number.isFinite(n));
+        if (nums.length >= 2) points.push({ x: nums[0], y: nums[1] });
+        continue;
+      }
     }
 
     // Iter 164: pie title (`pie: Title`) — checked before the slice
@@ -135,7 +165,7 @@ export function parseDoodleDiagram(source: string): Parsed {
     }
   }
 
-  return { flow, charts, lines: series, pies, chartTitle, pieTitle };
+  return { flow, charts, lines: series, pies, points, chartTitle, pieTitle, scatterTitle };
 }
 
 export function renderDoodleDiagram(source: string, dark = false): string {
@@ -144,10 +174,11 @@ export function renderDoodleDiagram(source: string, dark = false): string {
   const chart = renderChart(parsed.charts, parsed.chartTitle || "Chart", dark);
   const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark);
   const pieChart = renderPieChart(parsed.pies, parsed.pieTitle || "Breakdown", dark);
-  if (!flow && !chart && !lineChart && !pieChart) {
+  const scatterChart = renderScatterChart(parsed.points, parsed.scatterTitle || "Scatter", dark);
+  if (!flow && !chart && !lineChart && !pieChart && !scatterChart) {
     return placeholder(dark);
   }
-  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${lineChart}${pieChart}</div>`;
+  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${lineChart}${pieChart}${scatterChart}</div>`;
 }
 
 // ───────────────────────── Flowchart ────────────────────────────
@@ -464,6 +495,73 @@ function renderPieChart(slices: PieSlice[], title: string, dark: boolean): strin
   </svg>`;
 }
 
+// ───────────────────────── Scatter plot ─────────────────────────
+
+function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean): string {
+  if (!points.length) return "";
+
+  const xs = points.map((p) => p.x);
+  const ys = points.map((p) => p.y);
+  // Include 0 in the range so the axes read as a real origin when the
+  // data is all-positive; otherwise frame to the data extent.
+  const minX = Math.min(...xs, 0), maxX = Math.max(...xs, 1);
+  const minY = Math.min(...ys, 0), maxY = Math.max(...ys, 1);
+  const rangeX = maxX - minX || 1;
+  const rangeY = maxY - minY || 1;
+
+  const padL = 50, padR = 26, padTop = 52, padBottom = 34;
+  const plotW = 360, plotH = 240;
+  const width = padL + plotW + padR;
+  const height = padTop + plotH + padBottom;
+  const stroke = dark ? "#f0f0f0" : "#202124";
+  const grid = dark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)";
+  const dotColor = CHART_COLORS[0];
+
+  const xAt = (x: number) => padL + ((x - minX) / rangeX) * plotW;
+  const yAt = (y: number) => padTop + plotH - ((y - minY) / rangeY) * plotH;
+
+  // Faint gridlines on both axes (quartiles).
+  const gridLines = [0.25, 0.5, 0.75]
+    .map((t) => {
+      const y = (padTop + plotH - t * plotH).toFixed(1);
+      const x = (padL + t * plotW).toFixed(1);
+      return `<line x1="${padL}" y1="${y}" x2="${padL + plotW}" y2="${y}" stroke="${grid}" stroke-width="1.5"/>` +
+        `<line x1="${x}" y1="${padTop}" x2="${x}" y2="${padTop + plotH}" stroke="${grid}" stroke-width="1.5"/>`;
+    })
+    .join("");
+
+  const axis = `<path d="M ${padL} ${padTop} L ${padL} ${padTop + plotH} L ${padL + plotW} ${padTop + plotH}"
+        fill="none" stroke="${stroke}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  const dots = points
+    .map(
+      (p) =>
+        `<circle cx="${xAt(p.x).toFixed(1)}" cy="${yAt(p.y).toFixed(1)}" r="5" fill="${dotColor}" fill-opacity="0.8" stroke="${stroke}" stroke-width="2"/>`,
+    )
+    .join("");
+
+  // Min/max ticks on each axis for scale.
+  const ticks = `
+    <text x="${padL - 8}" y="${(yAt(maxY) + 5).toFixed(1)}" text-anchor="end"
+          font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(maxY)}</text>
+    <text x="${padL - 8}" y="${(yAt(minY) + 5).toFixed(1)}" text-anchor="end"
+          font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(minY)}</text>
+    <text x="${xAt(minX).toFixed(1)}" y="${padTop + plotH + 20}" text-anchor="middle"
+          font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(minX)}</text>
+    <text x="${xAt(maxX).toFixed(1)}" y="${padTop + plotH + 20}" text-anchor="middle"
+          font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(maxX)}</text>`;
+
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
+        style="max-width:100%; height:auto;" role="img" aria-label="Scatter plot">
+    <text x="${padL}" y="26" font-family="Patrick Hand, Caveat, sans-serif"
+          font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
+    ${gridLines}
+    ${axis}
+    ${ticks}
+    ${dots}
+  </svg>`;
+}
+
 // ───────────────────────── Helpers ──────────────────────────────
 
 function trimNum(v: number): string {
@@ -474,7 +572,7 @@ function trimNum(v: number): string {
 function placeholder(dark: boolean): string {
   const c = dark ? "#aaa" : "#555";
   return `<div style="padding:18px;text-align:center;color:${c};font-family:Patrick Hand,Caveat,sans-serif;font-size:18px;">
-    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>line Loss: 0.9, 0.6</code> lines, or <code>pie Cats: 30</code> slices.
+    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>line Loss: 0.9, 0.6</code> lines, <code>pie Cats: 30</code> slices, or <code>point: 1, 2</code> scatter dots.
   </div>`;
 }
 

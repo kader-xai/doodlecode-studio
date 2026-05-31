@@ -128,4 +128,31 @@ describe("renderDoodleDiagram", () => {
     expect(out).not.toContain("<i>x</i>");
     expect(out).toContain("&lt;i&gt;");
   });
+
+  it("parses scatter points (point: x, y) (iter 166)", () => {
+    const p = parseDoodleDiagram("scatter: Cloud\npoint: 1, 2\npoint: 3, 4.5");
+    expect(p.scatterTitle).toBe("Cloud");
+    expect(p.points).toEqual([
+      { x: 1, y: 2 },
+      { x: 3, y: 4.5 },
+    ]);
+  });
+
+  it("ignores a point with fewer than two numbers (iter 166)", () => {
+    const p = parseDoodleDiagram("point: 5\npoint: 1, 2");
+    expect(p.points).toEqual([{ x: 1, y: 2 }]);
+  });
+
+  it("does not treat scatter points as bars (iter 166)", () => {
+    const p = parseDoodleDiagram("point: 1, 2");
+    expect(p.charts).toEqual([]);
+  });
+
+  it("renders a scatter plot with dots + axes (iter 166)", () => {
+    const out = renderDoodleDiagram("scatter: XY\npoint: 1, 2\npoint: 3, 4\npoint: 5, 1");
+    expect(out).toContain("<svg");
+    expect(out).toMatch(/aria-label="Scatter plot"/);
+    expect(out).toContain("<circle");
+    expect(out).toContain("XY");
+  });
 });
