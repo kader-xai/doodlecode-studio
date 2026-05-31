@@ -113,4 +113,34 @@ describe("renderMarkdown", () => {
     // header defines 2 columns, so the short row still emits 2 <td>.
     expect((html.match(/<td/g) ?? []).length).toBe(2);
   });
+
+  it("renders a fenced code block verbatim (iter 197)", () => {
+    const html = toHtml("```\nx = 1\ny = 2\n```");
+    expect(html).toContain("<pre");
+    expect(html).toContain("<code");
+    expect(html).toContain("x = 1\ny = 2");
+  });
+
+  it("does not parse markdown inside a fenced block (iter 197)", () => {
+    const html = toHtml("```\n**not bold** and `not code`\n```");
+    expect(html).not.toContain("<strong>");
+    expect(html).toContain("**not bold**");
+  });
+
+  it("keeps a language tag from the opening fence (iter 197)", () => {
+    const html = toHtml("```python\nprint(1)\n```");
+    expect(html).toContain('data-lang="python"');
+  });
+
+  it("closes an unterminated fence at end of source (iter 197)", () => {
+    const html = toHtml("```\nstuck open");
+    expect(html).toContain("<pre");
+    expect(html).toContain("stuck open");
+  });
+
+  it("does not treat fence content as a heading (iter 197)", () => {
+    const html = toHtml("```\n# not a heading\n```");
+    expect(html).not.toContain("<h1");
+    expect(html).toContain("# not a heading");
+  });
 });

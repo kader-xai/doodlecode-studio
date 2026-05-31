@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 197) — fenced code blocks in text cells
+- **Text cells render ```` ``` ```` fenced code blocks.** The content is
+  literal — markdown inside a fence is shown verbatim, not parsed — so
+  example syntax displays exactly as typed in a monospace doodle-bordered
+  block. An optional language tag after the opening fence is kept as a
+  `data-lang` attribute; an unterminated fence runs to the end of the
+  cell. Complements inline `` `code` `` for code-explanation narratives.
+  5 vitest cases (222 frontend tests).
+
 ### Added (iter 196) — markdown tables in text cells
 - **Text cells now render GitHub-style tables.** A header row of
   `| a | b |` followed by a separator `| --- | :-: |` renders a

@@ -11,13 +11,14 @@ import { JSX } from "react";
  *   `---`                           (horizontal rule)
  *   `**bold**` and `*italic*`
  *   `` `inline code` ``
+ *   ```` ```fenced code``` ````     (literal block, optional language)
  *   `[text](url)`                   (link — http/https/mailto/relative)
  *   `| a | b |` + `| --- | :-: |`   (table, with column alignment)
  *   blank lines separate paragraphs
  *
- * We do NOT support full CommonMark (no images, nested lists, fenced
- * code). That's intentional — v1 grew a giant markdown surface and most
- * of it went unused. Add only what users ask for.
+ * We do NOT support full CommonMark (no images, nested lists). That's
+ * intentional — v1 grew a giant markdown surface and most of it went
+ * unused. Add only what users ask for.
  */
 /** A `| --- | :--: |` row: pipes plus dashes, only dash/colon/pipe/space. */
 function isTableSeparator(line: string): boolean {
@@ -62,6 +63,34 @@ export function renderMarkdown(src: string): JSX.Element[] {
     if (line.trim() === "") {
       out.push(<div key={key++} className="h-2" />);
       i++;
+      continue;
+    }
+
+    // Iter 197: fenced code block — ```lang … ```. Content is literal
+    // (no inline parsing), so example syntax shows verbatim. An
+    // unterminated fence runs to the end of the source.
+    if (/^```/.test(line)) {
+      const lang = line.replace(/^```+/, "").trim();
+      const codeLines: string[] = [];
+      i++; // skip opening fence
+      while (i < lines.length && !/^```/.test(lines[i])) {
+        codeLines.push(lines[i]);
+        i++;
+      }
+      if (i < lines.length) i++; // skip closing fence
+      out.push(
+        <pre
+          key={key++}
+          className="my-2 rounded-lg border-2 border-ink/25 dark:border-white/25 bg-ink/5 dark:bg-white/10 p-3 overflow-x-auto scrollbar-none"
+        >
+          <code
+            className="font-mono text-base whitespace-pre"
+            data-lang={lang || undefined}
+          >
+            {codeLines.join("\n")}
+          </code>
+        </pre>,
+      );
       continue;
     }
 

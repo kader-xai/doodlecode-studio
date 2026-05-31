@@ -127,6 +127,9 @@ The accessibility & polish batch (173–177) is complete.
 - **193 — Markdown tables** ✓ (iter 196): text cells render GitHub-style
   `| a | b |` tables with per-column alignment from the `:--:` separator;
   inline formatting inside cells. 217 frontend tests.
+- **194 — Fenced code blocks** ✓ (iter 197): ```` ``` ````-delimited
+  literal code blocks in text cells, optional language tag, no inline
+  parsing inside. Complements inline `code`. 222 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
