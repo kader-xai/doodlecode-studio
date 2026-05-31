@@ -51,6 +51,8 @@ export interface PieSlice { label: string; value: number }
 export interface ScatterPoint { x: number; y: number }
 /** Iter 187: a horizontal reference/threshold line on a y-axis chart. */
 export interface HLine { value: number; label?: string }
+/** Iter 190: one category row of a stacked bar (segments = series). */
+export interface StackBar { label: string; values: number[] }
 
 export interface Parsed {
   flow: FlowEdge[];
@@ -61,6 +63,10 @@ export interface Parsed {
   points: ScatterPoint[];
   /** Iter 187: dashed reference lines, shared by line / area / scatter. */
   hlines: HLine[];
+  /** Iter 190: stacked-bar category rows + their series legend + title. */
+  stacks: StackBar[];
+  stackSeries: string[];
+  stackTitle: string;
   chartTitle: string;
   pieTitle: string;
   scatterTitle: string;
@@ -78,6 +84,9 @@ export function parseDoodleDiagram(source: string): Parsed {
   const pies: PieSlice[] = [];
   const points: ScatterPoint[] = [];
   const hlines: HLine[] = [];
+  const stacks: StackBar[] = [];
+  let stackSeries: string[] = [];
+  let stackTitle = "";
   let chartTitle = "";
   let pieTitle = "";
   let scatterTitle = "";
@@ -105,6 +114,41 @@ export function parseDoodleDiagram(source: string): Parsed {
     if (normalized.startsWith("chart:")) {
       chartTitle = line.split(":").slice(1).join(":").trim() || "Chart";
       continue;
+    }
+
+    // Iter 190: stacked-bar legend — `series: Q1, Q2, Q3`. Checked
+    // before the bar rule (shared colon).
+    if (normalized.startsWith("series:")) {
+      stackSeries = line
+        .slice(line.indexOf(":") + 1)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      continue;
+    }
+
+    // Iter 190: stacked-bar title — `stack: Title`. Before the `stack
+    // <Label>:` row rule so an empty-label row isn't created.
+    if (normalized.startsWith("stack:")) {
+      stackTitle = line.split(":").slice(1).join(":").trim() || "Stacked";
+      continue;
+    }
+
+    // Iter 190: stacked-bar category row — `stack <Label>: 3, 5, 2`.
+    if (normalized.startsWith("stack ")) {
+      const colon = line.indexOf(":");
+      if (colon !== -1) {
+        const label = line.slice(0, colon).replace(/^stack\b\s*/i, "").trim();
+        const values = line
+          .slice(colon + 1)
+          .split(/[,\s]+/)
+          .map((n) => n.trim())
+          .filter(Boolean)
+          .map(Number)
+          .filter((n) => Number.isFinite(n) && n >= 0);
+        if (label && values.length) stacks.push({ label, values });
+        continue;
+      }
     }
 
     // Iter 187: reference line — `hline: 0.5` or `hline Target: 0.5`.
@@ -223,7 +267,7 @@ export function parseDoodleDiagram(source: string): Parsed {
     }
   }
 
-  return { flow, charts, lines: series, areas, pies, points, hlines, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
+  return { flow, charts, lines: series, areas, pies, points, hlines, stacks, stackSeries, stackTitle, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
 }
 
 /**
@@ -263,14 +307,15 @@ export function renderDoodleDiagram(source: string, dark = false): string {
   const parsed = parseDoodleDiagram(source);
   const flow = renderFlow(parsed.flow, dark);
   const chart = renderChart(parsed.charts, parsed.chartTitle || "Chart", dark);
+  const stackedChart = renderStackedBar(parsed.stacks, parsed.stackSeries, parsed.stackTitle || "Stacked", dark);
   const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
   const areaChart = renderAreaChart(parsed.areas, parsed.chartTitle || "Area", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
   const pieChart = renderPieChart(parsed.pies, parsed.pieTitle || "Breakdown", dark);
   const scatterChart = renderScatterChart(parsed.points, parsed.scatterTitle || "Scatter", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
-  if (!flow && !chart && !lineChart && !areaChart && !pieChart && !scatterChart) {
+  if (!flow && !chart && !stackedChart && !lineChart && !areaChart && !pieChart && !scatterChart) {
     return placeholder(dark);
   }
-  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${lineChart}${areaChart}${pieChart}${scatterChart}</div>`;
+  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${stackedChart}${lineChart}${areaChart}${pieChart}${scatterChart}</div>`;
 }
 
 // ───────────────────────── Flowchart ────────────────────────────
@@ -438,6 +483,78 @@ function renderChart(items: ChartItem[], title: string, dark: boolean): string {
     <text x="${padX}" y="${titleH - 12}"
           font-family="Patrick Hand, Caveat, sans-serif"
           font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
+    ${bars}
+  </svg>`;
+}
+
+// ───────────────────────── Stacked bar ──────────────────────────
+
+function renderStackedBar(rows: StackBar[], seriesNames: string[], title: string, dark: boolean): string {
+  if (!rows.length) return "";
+  // Bar length scales to the widest row total, so proportions read true.
+  const totals = rows.map((r) => r.values.reduce((s, v) => s + v, 0));
+  const maxTotal = Math.max(...totals, 1);
+  const segCount = Math.max(...rows.map((r) => r.values.length));
+
+  const barH = 30;
+  const gap = 18;
+  const labelGutter = 130;
+  const barAreaW = 380;
+  const padX = 24;
+  const titleH = 40;
+  const legendH = seriesNames.length ? 26 : 0;
+  const padBottom = 16;
+
+  const width = padX + labelGutter + barAreaW + padX + 50;
+  const height = titleH + legendH + rows.length * (barH + gap) + padBottom;
+  const stroke = dark ? "#f0f0f0" : "#202124";
+
+  // Legend — coloured chip + series name across the top.
+  const legend = seriesNames
+    .map((name, si) => {
+      const color = CHART_COLORS[si % CHART_COLORS.length];
+      const lx = padX + si * 130;
+      const ly = titleH + 6;
+      return `<rect x="${lx}" y="${ly - 10}" width="12" height="12" rx="2" fill="${color}" stroke="${stroke}" stroke-width="2"/>
+        <text x="${lx + 18}" y="${ly}" font-family="Patrick Hand, Caveat, sans-serif"
+              font-size="14" font-weight="700" fill="${stroke}">${escape(name)}</text>`;
+    })
+    .join("");
+
+  const bars = rows
+    .map((row, ri) => {
+      const y = titleH + legendH + ri * (barH + gap);
+      const total = totals[ri];
+      const fullW = (barAreaW * total) / maxTotal;
+      let x = padX + labelGutter;
+      const segs = row.values
+        .map((v, si) => {
+          const segW = total > 0 ? (fullW * v) / total : 0;
+          const color = CHART_COLORS[si % CHART_COLORS.length];
+          const rect = `<rect x="${x.toFixed(1)}" y="${y}" width="${segW.toFixed(1)}" height="${barH}"
+            fill="${color}" stroke="${stroke}" stroke-width="2.5"/>`;
+          x += segW;
+          return rect;
+        })
+        .join("");
+      return `<g>
+        <text x="${padX}" y="${y + barH / 2 + 5}"
+              font-family="Patrick Hand, Caveat, sans-serif"
+              font-size="16" font-weight="700" fill="${stroke}">${escape(row.label)}</text>
+        ${segs}
+        <text x="${(padX + labelGutter + fullW + 8).toFixed(1)}" y="${y + barH / 2 + 5}"
+              font-family="Patrick Hand, Caveat, sans-serif"
+              font-size="15" font-weight="800" fill="${stroke}">${trimNum(total)}</text>
+      </g>`;
+    })
+    .join("");
+
+  void segCount;
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
+               style="max-width:100%; height:auto;" role="img" aria-label="Stacked bar chart">
+    <text x="${padX}" y="${titleH - 12}" font-family="Patrick Hand, Caveat, sans-serif"
+          font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
+    ${legend}
     ${bars}
   </svg>`;
 }
@@ -797,7 +914,7 @@ function trimNum(v: number): string {
 function placeholder(dark: boolean): string {
   const c = dark ? "#aaa" : "#555";
   return `<div style="padding:18px;text-align:center;color:${c};font-family:Patrick Hand,Caveat,sans-serif;font-size:18px;">
-    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>line Loss: 0.9, 0.6</code> lines, <code>area Users: 1, 3</code> areas, <code>pie Cats: 30</code> slices, or <code>point: 1, 2</code> scatter dots.
+    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>stack Q1: 3, 5</code> stacked bars, <code>line Loss: 0.9, 0.6</code> lines, <code>area Users: 1, 3</code> areas, <code>pie Cats: 30</code> slices, or <code>point: 1, 2</code> scatter dots.
   </div>`;
 }
 

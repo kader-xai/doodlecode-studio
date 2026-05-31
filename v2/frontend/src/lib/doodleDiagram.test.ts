@@ -237,4 +237,33 @@ describe("renderDoodleDiagram", () => {
     const out = renderDoodleDiagram("scatter: XY\nhline: 3\npoint: 1, 2\npoint: 2, 5");
     expect(out).toContain('stroke-dasharray="6 4"');
   });
+
+  it("parses stacked-bar rows + series legend (iter 190)", () => {
+    const p = parseDoodleDiagram("stack: Budget\nseries: A, B\nstack Q1: 3, 5\nstack Q2: 4, 2");
+    expect(p.stackTitle).toBe("Budget");
+    expect(p.stackSeries).toEqual(["A", "B"]);
+    expect(p.stacks).toEqual([
+      { label: "Q1", values: [3, 5] },
+      { label: "Q2", values: [4, 2] },
+    ]);
+  });
+
+  it("does not read a stack row as a bar (iter 190)", () => {
+    const p = parseDoodleDiagram("stack Q1: 3, 5");
+    expect(p.charts).toEqual([]);
+  });
+
+  it("renders a stacked bar with segments + legend (iter 190)", () => {
+    const out = renderDoodleDiagram("stack: Budget\nseries: Eng, Ops\nstack Q1: 5, 3\nstack Q2: 6, 4");
+    expect(out).toContain("<svg");
+    expect(out).toMatch(/aria-label="Stacked bar chart"/);
+    expect(out).toContain("Eng"); // legend
+    expect(out).toContain("Q1");  // row label
+  });
+
+  it("escapes a stacked-bar label (iter 190)", () => {
+    const out = renderDoodleDiagram("stack <b>x</b>: 1, 2");
+    expect(out).not.toContain("<b>x</b>");
+    expect(out).toContain("&lt;b&gt;");
+  });
 });

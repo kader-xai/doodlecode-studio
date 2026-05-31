@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 190) — doodle stacked bar chart
+- **Diagram cells render stacked bars for part-to-whole across
+  categories.** `stack: Title` sets a heading, `series: Eng, Sales, Ops`
+  names the segments (legend), and each `stack Q1: 5, 3, 2` row is a
+  horizontal bar split into series-coloured segments with the row total
+  at the end. Bar length scales to the widest row so proportions read
+  true. Parsed before the bar rule (never mistaken for a `Label: number`
+  bar); the Diagram editor gains a **▥ Stacked** preset. 207 frontend
+  tests.
+
 ### Docs (iter 189) — demo deck exercises the full chart suite
 - **`examples/data_viz_demo.py` now covers every v2.6+ feature.** Added
   an Area-chart slide and a target `hline:` on the line chart, plus a

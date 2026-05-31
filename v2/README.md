@@ -144,6 +144,7 @@ point: 3, 5
 |----------|----------------------------------------|
 | Flow     | any line containing `-->`              |
 | Bar      | `chart: Title` + `Label: number` rows  |
+| Stacked  | `stack: Title` + `series: A, B` + `stack Cat: a, b` |
 | Line     | `line Label: n, n, n` (comma/space)    |
 | Pie      | `pie: Title` + `pie Label: number`     |
 | Scatter  | `scatter: Title` + `point: x, y`       |

@@ -103,6 +103,8 @@ The accessibility & polish batch (173–177) is complete.
   lists with `<ol start>` offset.
 - **186 — Chart reference lines** ✓ (iter 187): `hline: 0.5` dashed
   threshold on line/area/scatter for "beat the baseline" storytelling.
+- **187 — Stacked bar chart** ✓ (iter 190): `stack Cat: a, b` + `series:`
+  legend for part-to-whole across categories.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

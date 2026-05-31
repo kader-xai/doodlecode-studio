@@ -20,6 +20,7 @@ const DEFAULT_H = 360;
 const DOODLE_PRESETS: { key: string; label: string; snippet: string }[] = [
   { key: "flow", label: "→ Flow", snippet: "Idea --> Draft\nDraft --> Ship" },
   { key: "bar", label: "▭ Bar", snippet: "chart: Scores\nAlpha: 8\nBeta: 5\nGamma: 10" },
+  { key: "stack", label: "▥ Stacked", snippet: "stack: Spend by quarter\nseries: Eng, Sales, Ops\nstack Q1: 5, 3, 2\nstack Q2: 6, 4, 3\nstack Q3: 7, 5, 4" },
   { key: "line", label: "📈 Line", snippet: "xlabel: Epoch\nylabel: Loss\nhline Target: 0.3\nline Loss: 0.9, 0.6, 0.4, 0.25" },
   { key: "area", label: "▰ Area", snippet: "xlabel: Week\nylabel: Users\narea Active: 2, 5, 9, 14, 20" },
   { key: "pie", label: "◔ Pie", snippet: "pie: Share\npie Python: 60\npie Rust: 40" },
