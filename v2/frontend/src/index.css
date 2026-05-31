@@ -68,6 +68,14 @@ html.ink-highlighter, html.ink-highlighter * {
 .react-flow__node.slide-enter > * {
   animation: doodle-slide-enter 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+/* Iter 178: reduced-motion audit. When the OS requests less motion, we
+ * stop all decorative, continuous, or entrance animations: the ambient
+ * background drift (inline `animation`, so it needs `!important`), the
+ * flowing dashed cell→cell connectors, and the slide entrance. Presenter
+ * ink strokes (functional feedback) and one-shot UI transitions are
+ * left alone. */
 @media (prefers-reduced-motion: reduce) {
   .react-flow__node.slide-enter > * { animation: none; }
+  .doodle-connector { animation: none; }
+  .doodle-drift-shape { animation: none !important; }
 }

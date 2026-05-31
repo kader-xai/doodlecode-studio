@@ -75,7 +75,7 @@ export function AmbientLayer() {
       {shapes.map((s, i) => (
         <span
           key={`${ambient}-${i}`}
-          className="absolute select-none"
+          className="absolute select-none doodle-drift-shape"
           style={{
             left: `${s.left}%`,
             top: `${s.top}%`,

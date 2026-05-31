@@ -71,8 +71,9 @@ one at a time (see CHANGELOG for the running log).
   + fullscreen, toolbar help button, theme toggle got `aria-label` +
   `aria-pressed`; toolbar action buttons already had text labels.
   *(Follow-up: cell-header collapse chevrons across the six cell types.)*
-- **176 — Reduced-motion audit**: confirm ambient drift + connectors +
-  effects all honor `prefers-reduced-motion`.
+- **176 — Reduced-motion audit** ✓ (iter 178): ambient drift, flowing
+  connectors, and slide entrance all stop under `prefers-reduced-motion`
+  (presenter ink + UI transitions kept). No effects-burst exists in v2.
 - **177 — Color-contrast pass** on callout palettes + chart colors.
 
 This file is updated as items land or priorities shift.

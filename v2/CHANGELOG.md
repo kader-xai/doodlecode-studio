@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Accessibility (iter 178) — reduced-motion audit
+- **`prefers-reduced-motion` now silences every decorative animation.**
+  Previously only the slide entrance respected it; the audit extended
+  the media query to also stop the ambient background drift (which uses
+  an inline `animation`, so a `.doodle-drift-shape` class + `!important`
+  was needed) and the flowing dashed cell→cell connectors. Functional
+  presenter ink strokes and one-shot UI transitions are intentionally
+  left alone. Result: with "reduce motion" set, the canvas is fully
+  still except for direct user interaction. 168 frontend tests.
+
 ### Accessibility (iter 177) — accessible names for icon controls
 - **Icon-only controls now announce a real name.** A button's emoji
   *content* normally wins over its `title` in the accessible-name
