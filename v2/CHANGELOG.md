@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Accessibility (iter 205) — flowchart aria summary + table header scope
+- **Flowcharts now describe their edges in the `aria-label`** ("Flowchart
+  — Idea to Draft, Draft to Ship"), matching the chart data summaries from
+  iter 204.
+- **Markdown table headers carry `scope="col"`** so screen readers
+  associate each header with its column's cells. 2 vitest cases
+  (232 frontend tests).
+
 ### Accessibility (iter 204) — doodle charts describe their data to screen readers
 - **Every doodle chart's `aria-label` now includes a data summary.** A
   screen reader announced only "Bar chart" before; it now reads e.g.

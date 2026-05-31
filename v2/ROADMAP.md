@@ -155,6 +155,9 @@ The accessibility & polish batch (173–177) is complete.
   `aria-label` now spells out its values (e.g. "Bar chart: Scores —
   Python 8, Rust 4") so screen readers convey the data, not just the
   chart type. 230 frontend tests.
+- **202 — Flow aria + table header scope** ✓ (iter 205): flowcharts list
+  their edges in the aria-label; markdown table `<th>` gain `scope="col"`
+  for screen-reader header association. 232 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

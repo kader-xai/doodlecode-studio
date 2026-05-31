@@ -409,7 +409,7 @@ function renderFlow(edges: FlowEdge[], dark: boolean): string {
   return `<svg viewBox="0 0 ${width} ${height}"
                width="${width}" height="${height}"
                style="max-width:100%; height:auto;"
-               role="img" aria-label="Flowchart">
+               role="img" aria-label="${ariaFor("Flowchart", "", edges.map((e) => `${e.from} to ${e.to}`).join(", "))}">
     <defs>
       <marker id="${arrowId}" markerWidth="10" markerHeight="10"
               refX="9" refY="3" orient="auto" markerUnits="strokeWidth">

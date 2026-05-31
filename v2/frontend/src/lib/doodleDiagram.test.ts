@@ -327,4 +327,11 @@ describe("renderDoodleDiagram", () => {
     // The bar label is escaped inside the aria-label too, never raw markup.
     expect(out).not.toMatch(/aria-label="[^"]*<b>/);
   });
+
+  it("lists flow edges in the aria-label (iter 205)", () => {
+    const out = renderDoodleDiagram("Idea --> Draft\nDraft --> Ship");
+    expect(out).toContain(
+      'aria-label="Flowchart — Idea to Draft, Draft to Ship"',
+    );
+  });
 });

@@ -110,6 +110,11 @@ describe("renderMarkdown", () => {
     expect(html).toContain(">4</td>");
   });
 
+  it("marks table headers with scope=col for screen readers (iter 205)", () => {
+    const html = toHtml("| A | B |\n| --- | --- |\n| 1 | 2 |");
+    expect((html.match(/scope="col"/g) ?? []).length).toBe(2);
+  });
+
   it("honors per-column alignment from the separator (iter 196)", () => {
     const html = toHtml("| L | C | R |\n| :-- | :-: | --: |\n| a | b | c |");
     expect(html).toContain("text-align:left");

@@ -164,6 +164,7 @@ export function renderMarkdown(src: string): JSX.Element[] {
                 {headers.map((h, j) => (
                   <th
                     key={j}
+                    scope="col"
                     style={{ textAlign: aligns[j] ?? "left" }}
                     className={`${cellBase} font-bold bg-ink/5 dark:bg-white/10`}
                   >
