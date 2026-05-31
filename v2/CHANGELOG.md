@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 170) — data-viz demo deck + regression fixture
+- **New `examples/data_viz_demo.py`** — a 7-slide deck that exercises
+  the whole v2.6.0 suite end-to-end: a bar chart, a line chart with
+  axis titles, a pie/donut, a scatter plot with axis titles, a code
+  cell with two reveal steps, and a speaker note on every diagram. It
+  doubles as a **regression fixture**: a backend test parses it, asserts
+  feature coverage (all four chart kinds, axis titles, notes, reveals),
+  and checks an exact round-trip of the format-stable fields — so the
+  example can't silently rot. 21 backend tests.
+
 ## [2.6.0] — Visual-intuition batch 🎨
 
 _Presenter speaker notes, a full doodle data-viz suite (scatter plots,

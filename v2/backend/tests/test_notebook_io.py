@@ -1,6 +1,10 @@
 """Round-trip tests for the .py notebook format."""
+from pathlib import Path
+
 from app import notebook_io
 from app.models import CalloutPayload, CellPayload, NotebookPayload
+
+_EXAMPLES = Path(__file__).resolve().parents[2] / "examples"
 
 
 def _roundtrip(nb: NotebookPayload) -> NotebookPayload:
@@ -243,3 +247,37 @@ def test_old_files_without_note_default_none():
     )
     nb, _ = notebook_io.parse(text)
     assert nb.cells[0].note is None
+
+
+# ── Example decks double as regression fixtures ─────────────────────
+
+
+def test_data_viz_demo_parses_and_round_trips():
+    """The shipped data-viz demo must keep parsing and round-tripping —
+    it's the canonical fixture for the v2.6.0 chart + notes suite."""
+    src = (_EXAMPLES / "data_viz_demo.py").read_text()
+    nb, ver = notebook_io.parse(src)
+    assert ver == 3
+    assert len(nb.cells) == 7
+
+    # Every diagram cell carries a speaker note; the code cell has reveals.
+    diagrams = [c for c in nb.cells if c.kind == "diagram"]
+    assert len(diagrams) == 4
+    assert all(c.note for c in diagrams)
+    code = [c for c in nb.cells if c.kind == "code"]
+    assert len(code) == 1 and len(code[0].reveals) == 2
+
+    # Coverage: bar, line (with axis titles), pie, scatter all present.
+    blob = "\n".join(c.source for c in diagrams)
+    assert "chart:" in blob          # bar / line titles
+    assert "line " in blob           # line series
+    assert "xlabel:" in blob and "ylabel:" in blob  # axis titles
+    assert "pie " in blob            # pie slices
+    assert "point:" in blob          # scatter points
+
+    # Exact round-trip of the format-stable fields.
+    nb2, _ = notebook_io.parse(notebook_io.serialize(nb))
+    for a, b in zip(nb.cells, nb2.cells):
+        assert (a.id, a.kind, a.title, a.note, a.reveals, a.source) == (
+            b.id, b.kind, b.title, b.note, b.reveals, b.source
+        )

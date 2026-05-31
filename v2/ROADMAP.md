@@ -46,9 +46,10 @@ one at a time (see CHANGELOG for the running log).
   entrance animation). Lockstep bump 2.5.5 → 2.6.0, tagged.
 
 ### Next batch (post-2.6.0) — ideas, prioritized
-- **169 — Visual-intuition demo deck**: a `.py` example exercising
-  every chart kind (bar/line/pie/scatter + axis labels), speaker notes,
-  and reveal steps end-to-end. Doubles as a regression fixture.
+- **169 — Visual-intuition demo deck** ✓ (shipped as iter 170):
+  `examples/data_viz_demo.py` exercises every chart kind
+  (bar/line/pie/scatter + axis labels), speaker notes, and reveal steps;
+  a backend test asserts coverage + round-trip so it stays honest.
 - **170 — README/docs refresh** for the v2.6.0 data-viz suite.
 - **171 — Area / stacked-bar chart** for part-to-whole-over-x.
 - **172 — Chart data from a code cell** (wire a cell's output into a
