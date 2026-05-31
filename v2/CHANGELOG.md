@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Docs (iter 189) — demo deck exercises the full chart suite
+- **`examples/data_viz_demo.py` now covers every v2.6+ feature.** Added
+  an Area-chart slide and a target `hline:` on the line chart, plus a
+  recap slide that uses markdown **links** and an **ordered list**. The
+  backend fixture test was tightened to assert the new coverage (8 cells,
+  5 diagrams, area + hline present) and an exact round-trip, so the
+  example can't drift from the renderer. 31 backend tests.
+
 ### Fixed (iter 188) — new cells always spawn in a tidy column
 - **New cells no longer scatter across the canvas.** Spawning used to
   inherit the x of whatever cell was "bottom-most in reading order" and

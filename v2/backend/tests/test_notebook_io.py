@@ -258,19 +258,21 @@ def test_data_viz_demo_parses_and_round_trips():
     src = (_EXAMPLES / "data_viz_demo.py").read_text()
     nb, ver = notebook_io.parse(src)
     assert ver == 3
-    assert len(nb.cells) == 7
+    assert len(nb.cells) == 8
 
     # Every diagram cell carries a speaker note; the code cell has reveals.
     diagrams = [c for c in nb.cells if c.kind == "diagram"]
-    assert len(diagrams) == 4
+    assert len(diagrams) == 5
     assert all(c.note for c in diagrams)
     code = [c for c in nb.cells if c.kind == "code"]
     assert len(code) == 1 and len(code[0].reveals) == 2
 
-    # Coverage: bar, line (with axis titles), pie, scatter all present.
+    # Coverage: bar, line (+ axis titles + target line), area, pie, scatter.
     blob = "\n".join(c.source for c in diagrams)
-    assert "chart:" in blob          # bar / line titles
+    assert "chart:" in blob          # bar / line / area titles
     assert "line " in blob           # line series
+    assert "area " in blob           # area series
+    assert "hline " in blob          # reference / target line
     assert "xlabel:" in blob and "ylabel:" in blob  # axis titles
     assert "pie " in blob            # pie slices
     assert "point:" in blob          # scatter points
