@@ -44,27 +44,50 @@ export function startSecondsOf(u: URL): number | null {
   );
 }
 
+// Iter 184: playback flags the user can include on the source URL and
+// have carried into the embed — handy for "loop this demo silently"
+// showcase slides. Order is fixed so the output is deterministic.
+const YT_PASS = ["autoplay", "mute", "controls", "loop", "modestbranding", "rel", "end"] as const;
+// Vimeo uses different param names; map source → Vimeo player param.
+const VIMEO_PASS: Record<string, string> = {
+  autoplay: "autoplay",
+  mute: "muted",
+  loop: "loop",
+  controls: "controls",
+};
+
 /** YouTube watch / youtu.be / shorts / embed URL → embed URL. */
 export function youTubeEmbed(url: string): string | null {
   try {
     const u = new URL(url);
     const host = u.hostname.replace(/^www\./, "");
     const start = startSecondsOf(u);
-    const withStart = (base: string) =>
-      start ? `${base}${base.includes("?") ? "&" : "?"}start=${start}` : base;
+
+    const build = (id: string) => {
+      const p = new URLSearchParams();
+      if (start) p.set("start", String(start));
+      for (const k of YT_PASS) {
+        const v = u.searchParams.get(k);
+        if (v != null) p.set(k, v);
+      }
+      // YouTube only loops an embed when a single-video playlist is named.
+      if (p.get("loop") === "1") p.set("playlist", id);
+      const qs = p.toString();
+      return `https://www.youtube.com/embed/${id}${qs ? `?${qs}` : ""}`;
+    };
 
     if (host === "youtu.be") {
       const id = u.pathname.slice(1).split("/")[0];
-      return id ? withStart(`https://www.youtube.com/embed/${id}`) : null;
+      return id ? build(id) : null;
     }
     if (host === "youtube.com" || host === "m.youtube.com") {
       if (u.pathname === "/watch") {
         const id = u.searchParams.get("v");
-        return id ? withStart(`https://www.youtube.com/embed/${id}`) : null;
+        return id ? build(id) : null;
       }
       if (u.pathname.startsWith("/embed/")) return url; // already an embed
       const shorts = u.pathname.match(/^\/shorts\/([^/]+)/);
-      if (shorts) return withStart(`https://www.youtube.com/embed/${shorts[1]}`);
+      if (shorts) return build(shorts[1]);
     }
     return null;
   } catch {
@@ -72,7 +95,7 @@ export function youTubeEmbed(url: string): string | null {
   }
 }
 
-/** Vimeo link → player embed (start time appended as `#t=Ns`). */
+/** Vimeo link → player embed (playback flags + start time appended). */
 export function vimeoEmbed(url: string): string | null {
   try {
     const u = new URL(url);
@@ -80,8 +103,16 @@ export function vimeoEmbed(url: string): string | null {
     const m = u.pathname.match(/^\/(\d+)/);
     if (!m) return null;
     const start = startSecondsOf(u);
-    const base = `https://player.vimeo.com/video/${m[1]}`;
-    return start ? `${base}#t=${start}s` : base;
+    const p = new URLSearchParams();
+    for (const [src, dst] of Object.entries(VIMEO_PASS)) {
+      const v = u.searchParams.get(src);
+      if (v != null) p.set(dst, v);
+    }
+    const qs = p.toString();
+    let out = `https://player.vimeo.com/video/${m[1]}`;
+    if (qs) out += `?${qs}`;
+    if (start) out += `#t=${start}s`;
+    return out;
   } catch {
     return null;
   }

@@ -91,8 +91,9 @@ The accessibility & polish batch (173–177) is complete.
 ### Showcase features
 - **181 — Video start-time timestamps** ✓ (iter 183): media cells honor
   `?t=`/`#t=` start offsets in YouTube/Vimeo links.
-- **182 — Loop / autoplay / mute toggles** on a media cell (presenter
-  ergonomics for embedded demos).
+- **182 — Loop / autoplay / mute toggles** ✓ (iter 184): playback flags
+  (`autoplay`/`mute`/`loop`/`controls`) propagate from the URL to the
+  embed for YouTube + Vimeo.
 - **183 — Animated GIF export** of a single slide (capture the canvas
   region to a shareable loop).
 

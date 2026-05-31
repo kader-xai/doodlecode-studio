@@ -60,6 +60,24 @@ describe("youTubeEmbed (iter 183)", () => {
   it("returns null for non-YouTube", () => {
     expect(youTubeEmbed("https://example.com")).toBeNull();
   });
+
+  it("propagates autoplay + mute flags (iter 184)", () => {
+    expect(youTubeEmbed("https://www.youtube.com/watch?v=x&autoplay=1&mute=1")).toBe(
+      "https://www.youtube.com/embed/x?autoplay=1&mute=1",
+    );
+  });
+
+  it("loop names the single-video playlist (iter 184)", () => {
+    expect(youTubeEmbed("https://www.youtube.com/watch?v=x&loop=1")).toBe(
+      "https://www.youtube.com/embed/x?loop=1&playlist=x",
+    );
+  });
+
+  it("combines start + flags deterministically (iter 184)", () => {
+    expect(
+      youTubeEmbed("https://www.youtube.com/watch?v=x&t=30&autoplay=1"),
+    ).toBe("https://www.youtube.com/embed/x?start=30&autoplay=1");
+  });
 });
 
 describe("vimeoEmbed (iter 183)", () => {

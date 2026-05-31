@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 184) — video playback flags (loop / autoplay / mute)
+- **Media cells carry playback flags from the pasted URL into the
+  embed.** Add `&autoplay=1`, `&mute=1`, `&loop=1`, or `&controls=0` to a
+  YouTube/Vimeo link and the player honors them — so a "loop this demo
+  silently" showcase slide just works. YouTube's `loop=1` automatically
+  names the single-video playlist it requires; Vimeo's `mute` maps to
+  its `muted` param. Combines cleanly with the iter-183 start time. Param
+  order is deterministic (start first), keeping `videoEmbed` fully
+  unit-tested. 194 frontend tests.
+
 ### Added (iter 183) — video start-time timestamps
 - **Media cells honor a start time in YouTube / Vimeo links**, so a
   "jump to the demo" showcase slide opens the clip at the right moment.
