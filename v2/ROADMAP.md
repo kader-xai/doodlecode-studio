@@ -114,6 +114,11 @@ The accessibility & polish batch (173–177) is complete.
 - **190 — Grouped (side-by-side) bar chart** ✓ (iter 193): `group Cat: a, b`
   clusters one column per series, shares the `series:` legend; ▦ Grouped
   preset + README. Bar family complete (single / stacked / grouped).
+- **191 — Release v2.7.0** ✓ (iter 194): bundled the data-viz batch
+  (stacked + grouped bar, demo-deck coverage, complete chart-syntax docs)
+  on top of the a11y / code-split / showcase work since 2.6.0. Lockstep
+  bump 2.6.0 → 2.7.0, tagged. CI-equivalent green (tsc, 212 FE tests,
+  build, 31 BE tests).
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

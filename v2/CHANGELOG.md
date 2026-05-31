@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+## [2.7.0] — 2026-05-31
+
+Data-visualization release. The doodle chart suite is now exhaustive —
+flow, single / stacked / grouped bar, line, area, pie, and scatter, with
+axis titles, dashed reference lines, and live data from a code cell — each
+implemented, documented in the README, seeded by an editor preset, shown
+in the bundled `examples/data_viz_demo.py` deck, and locked by tests.
+Also bundles the accessibility, code-splitting, responsiveness, and
+showcase (video timestamps / playback flags, markdown links + ordered
+lists) work since 2.6.0.
+
 ### Added (iter 193) — grouped (side-by-side) bar chart
 - **Diagram cells render grouped bars for comparing series within
   categories.** `group: Title` sets a heading, `series: 2023, 2024` names
