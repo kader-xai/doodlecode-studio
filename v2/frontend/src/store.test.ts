@@ -973,3 +973,34 @@ describe("store: reveal steps (iter 154)", () => {
     expect(useStore.getState().revealEditorCellId).toBeNull();
   });
 });
+
+describe("store: speaker notes (iter 165)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [{ id: "k", kind: "code", source: "BASE", x: 0, y: 0 }],
+      runtimes: {},
+      noteEditorCellId: null,
+      selectedId: "k",
+      selectedIds: ["k"],
+    });
+  });
+
+  it("setNote stores the note text", () => {
+    useStore.getState().setNote("k", "Pause here.");
+    expect(useStore.getState().cells.find((c) => c.id === "k")!.note).toBe("Pause here.");
+  });
+
+  it("setNote preserves internal whitespace but drops whitespace-only notes", () => {
+    useStore.getState().setNote("k", "line one\n  line two");
+    expect(useStore.getState().cells.find((c) => c.id === "k")!.note).toBe("line one\n  line two");
+    useStore.getState().setNote("k", "   \n  ");
+    expect(useStore.getState().cells.find((c) => c.id === "k")!.note).toBeUndefined();
+  });
+
+  it("openNoteEditor sets and clears the modal target", () => {
+    useStore.getState().openNoteEditor("k");
+    expect(useStore.getState().noteEditorCellId).toBe("k");
+    useStore.getState().openNoteEditor(null);
+    expect(useStore.getState().noteEditorCellId).toBeNull();
+  });
+});

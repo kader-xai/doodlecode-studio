@@ -70,6 +70,10 @@ def serialize(nb: NotebookPayload) -> str:
         # `# @explain:`). Order is preserved on parse.
         for step in c.reveals:
             out.append(f"# @reveal: {step.replace(chr(10), '\\n')}")
+        # Iter 165: presenter speaker note (newlines escaped). Emitted
+        # only when present so clean files don't grow an empty note.
+        if c.note:
+            out.append(f"# @note: {c.note.replace(chr(10), '\\n')}")
         # Callouts. The first one needs no marker (writes
         # `# @explain:` / `# @image:` straight into the directive
         # block). Subsequent ones are introduced by `# @callout`.
@@ -132,6 +136,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
         links: list[str] = []
         collapsed: bool = False
         reveals: list[str] = []
+        note: str | None = None
         callouts: list[CalloutPayload] = []
         # `current` points at the callout being edited. Starts implicit
         # at index 0 so an `# @explain:` before any `# @callout` marker
@@ -176,6 +181,9 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 # for indentation. (The directive regex already ate the
                 # single space after the colon.)
                 reveals.append(val.replace("\\n", "\n"))
+            elif key == "note":
+                # Iter 165: presenter speaker note (un-escape newlines).
+                note = val.replace("\\n", "\n")
             # Unknown directives silently ignored — keeps forward-compat.
             i += 1
 
@@ -210,6 +218,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 links=links,
                 collapsed=collapsed,
                 reveals=reveals,
+                note=note,
             )
         )
 

@@ -82,6 +82,9 @@ class CellPayload(BaseModel):
     # Each is typed in below the base during a talk. Persisted as one
     # `# @reveal:` directive per step with newlines escaped as \n.
     reveals: list[str] = []
+    # Iter 165: presenter-only speaker note. Shown in the presenter HUD,
+    # never on the slide. Persisted as `# @note:` (newlines escaped).
+    note: Optional[str] = None
 
 
 class NotebookPayload(BaseModel):

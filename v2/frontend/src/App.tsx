@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { AmbientLayer } from "./components/AmbientLayer";
 import { CalloutEditor } from "./components/CalloutEditor";
 import { RevealEditor } from "./components/RevealEditor";
+import { NoteEditor } from "./components/NoteEditor";
+import { PresenterNotes } from "./components/PresenterNotes";
 import { CellPalette } from "./components/CellPalette";
 import { Canvas } from "./components/Canvas";
 import { EmptyNotebookHint } from "./components/EmptyNotebookHint";
@@ -93,6 +95,21 @@ export function App() {
         if (cell?.kind !== "code" || !(cell.reveals?.length)) return;
         e.preventDefault();
         state.revealNext(target);
+        return;
+      }
+
+      // Iter 165: N opens the speaker-note editor for the selected cell
+      // (any kind). Plain key, no modifiers; skipped while presenting so
+      // it doesn't interfere with navigation/ink.
+      if (
+        (e.key === "n" || e.key === "N") &&
+        !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey &&
+        !state.presenting
+      ) {
+        const target = sid ?? state.focusedCellId;
+        if (!target) return;
+        e.preventDefault();
+        state.openNoteEditor(target);
         return;
       }
 
@@ -444,9 +461,11 @@ export function App() {
       <CellPalette />
       <CalloutEditor />
       <RevealEditor />
+      <NoteEditor />
       <InstallModal />
       <PresenterBar />
       <PresenterProgress />
+      <PresenterNotes />
       <PresenterOverlay />
 
       <style>{`

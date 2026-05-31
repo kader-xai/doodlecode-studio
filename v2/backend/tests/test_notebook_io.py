@@ -217,3 +217,29 @@ def test_old_files_without_reveal_default_empty():
     )
     nb, _ = notebook_io.parse(text)
     assert nb.cells[0].reveals == []
+
+
+def test_note_round_trips():
+    """Iter 165: presenter speaker note survives serialize → parse
+    with newlines preserved, and is omitted when empty."""
+    nb = NotebookPayload(name="N", cells=[
+        CellPayload(id="c0", kind="markdown", source="# Slide", x=0, y=0,
+                    note="Mention the benchmark here.\nThen pause."),
+        CellPayload(id="c1", kind="code", source="x=1", x=0, y=200),
+    ])
+    out = _roundtrip(nb)
+    assert out.cells[0].note == "Mention the benchmark here.\nThen pause."
+    assert out.cells[1].note is None  # omitted, not empty string
+
+
+def test_old_files_without_note_default_none():
+    text = (
+        "# doodlecode format-version: 3\n"
+        "# notebook: T\n"
+        "\n"
+        "# %% kind=code id=c0 x=0 y=0\n"
+        "\n"
+        "x = 1\n"
+    )
+    nb, _ = notebook_io.parse(text)
+    assert nb.cells[0].note is None

@@ -51,6 +51,10 @@ export interface Cell {
    *  is in the store (and therefore the localStorage autosave) but
    *  isn't yet serialized into the .py file. */
   collapsed?: boolean;
+  /** Iter 165: presenter-only speaker note. Shown in the bottom-left
+   *  HUD during presentation; never on the slide itself. Any cell
+   *  kind. Round-trips as a `# @note:` directive. */
+  note?: string;
   /** Iter 154: ordered "reveal" code fragments (code cells only).
    *  `source` is the pristine base shown at step 0. Each Reveal press
    *  appends the next fragment below the current code (build-up), so

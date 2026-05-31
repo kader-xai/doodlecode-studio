@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Added (iter 165) — presenter speaker notes
+- **Per-cell speaker notes you can read while presenting, never shown
+  on the slide.** Press **N** with a cell selected (or use the 📝 entry
+  in the shortcuts overlay) to open a singleton `NoteEditor` modal;
+  the text is saved on the cell as `note`. During presentation a
+  `PresenterNotes` HUD pins bottom-left (z-40, `pointer-events:none` so
+  it never blocks the PresenterBar or canvas) and shows the focused
+  cell's note — hidden when the cell has none. Notes round-trip through
+  the `.py` as `# @note:` (newlines escaped, emitted only when present
+  so clean files stay clean); old files default to no note. The store
+  trims whitespace-only notes back to `undefined`. 142 frontend tests,
+  20 backend tests.
+
 ### Added (iter 164) — doodle pie / donut chart
 - **Diagram cells now render pie/donut charts.** `pie: Title` sets a
   heading; `pie <Label>: <value>` adds a slice. The result is a

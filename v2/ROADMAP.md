@@ -14,7 +14,7 @@ one at a time (see CHANGELOG for the running log).
 3. **Live demo + video** — browser cells embed live pages ✓; media cells
    play video/GIF ✓; (▢) one-click "record this slide → GIF/MP4".
 4. **Presentation** — slide flow ✓, slide counter ✓, presenter ink ✓,
-   reveal steps ✓; (▢) progress bar, (▢) speaker notes, (▢) auto-advance.
+   reveal steps ✓, progress bar ✓, speaker notes ✓; (▢) auto-advance.
 5. **Doodle visual treat** — two-pass sketch borders ✓, ambient themes ✓,
    sketchy connectors ✓; (▢) hand-drawn chart axes, (▢) entrance anims.
 
@@ -26,8 +26,9 @@ one at a time (see CHANGELOG for the running log).
   doodle bar across the top showing deck progress + per-slide notches.
 - **162 — Pie / donut doodle chart** ✓ (shipped as iter 164):
   `pie A: 30` slices → hand-drawn donut + % legend.
-- **163 — Speaker notes**: `# @note:` per cell, shown only to presenter
-  in a corner during a talk (round-trips in the .py).
+- **163 — Speaker notes** ✓ (shipped as iter 165): `# @note:` per cell,
+  shown only to the presenter (bottom-left HUD) during a talk. **N**
+  opens the editor; round-trips in the .py.
 - **164 — Scatter chart**: `point: x, y` for x/y intuition.
 - **165 — Diagram cell chart presets**: a chart-kind switch (bar / line /
   pie) in the Diagram editor so users don't memorize syntax.

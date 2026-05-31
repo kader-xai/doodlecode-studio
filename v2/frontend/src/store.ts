@@ -85,6 +85,13 @@ export interface AppState {
   /** Which code cell, if any, is in the Reveal Steps editor modal. */
   revealEditorCellId: string | null;
   openRevealEditor: (id: string | null) => void;
+
+  // ── Speaker notes (iter 165) ────────────────────────────────────
+  /** Set the presenter-only note on a cell (empty string clears it). */
+  setNote: (id: string, note: string) => void;
+  /** Which cell, if any, is in the speaker-notes editor modal. */
+  noteEditorCellId: string | null;
+  openNoteEditor: (id: string | null) => void;
   /** Whether the pip-install modal is open. */
   installOpen: boolean;
   setInstallOpen: (on: boolean) => void;
@@ -475,6 +482,19 @@ export const useStore = create<AppState>((set, get) => {
     },
     revealEditorCellId: null,
     openRevealEditor: (id) => set({ revealEditorCellId: id }),
+
+    // ── Speaker notes (iter 165) ──────────────────────────────────
+    setNote: (id, note) => {
+      const trimmed = note.trim();
+      set((s) => ({
+        cells: s.cells.map((c) =>
+          c.id === id ? { ...c, note: trimmed ? note : undefined } : c,
+        ),
+      }));
+      autosave();
+    },
+    noteEditorCellId: null,
+    openNoteEditor: (id) => set({ noteEditorCellId: id }),
     setExplain: (id, text) => {
       // Backward-compat shim: a single-text "explain" is now stored
       // as the first entry of `callouts`. We don't carry the legacy
@@ -1100,6 +1120,8 @@ export const useStore = create<AppState>((set, get) => {
             collapsed: (c as Cell).collapsed ?? false,
             // Iter 154: reveal steps from `# @reveal:` blocks.
             reveals: (c as Cell).reveals,
+            // Iter 165: presenter speaker note from `# @note:`.
+            note: (c as Cell).note,
           };
         }),
         runtimes: {},
