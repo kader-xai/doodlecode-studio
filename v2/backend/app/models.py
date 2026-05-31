@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 # Bump whenever a new directive or field is added. Reader stays
 # backward-compatible — old files keep parsing as long as the
 # directives they use still exist.
-FILE_FORMAT_VERSION = 3
+FILE_FORMAT_VERSION = 4
 
 
 class ExecuteRequest(BaseModel):

@@ -130,6 +130,10 @@ The accessibility & polish batch (173–177) is complete.
 - **194 — Fenced code blocks** ✓ (iter 197): ```` ``` ````-delimited
   literal code blocks in text cells, optional language tag, no inline
   parsing inside. Complements inline `code`. 222 frontend tests.
+- **195 — Round-trip fix: literal `\n`** ✓ (iter 198): directive encoder
+  now escapes backslashes, so a reveal/note/callout containing a literal
+  backslash-n survives save→load byte-for-byte. FILE_FORMAT_VERSION 3→4,
+  version-gated decoder keeps every old file parsing. 37 backend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

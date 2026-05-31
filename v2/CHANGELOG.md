@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Fixed (iter 198) — literal `\n` in reveals/notes/callouts no longer corrupts (format v4)
+- **A literal backslash-n in a reveal step, speaker note, or callout now
+  round-trips byte-for-byte.** The single-line directive encoder escaped
+  real newlines as `\n` but didn't escape backslashes, so a reveal of
+  `print("a\nb")` (code — backslash-n is everywhere) decoded back to a
+  real newline and split the string. The encoder now escapes backslashes
+  first and the decoder un-escapes in a single left-to-right pass.
+- **`FILE_FORMAT_VERSION` 3 → 4.** New files stamp version 4 and use the
+  safe escaping; v1–v3 files keep decoding with the legacy scheme, so
+  every previously-saved notebook still parses exactly as before
+  (backward-compat verified by test). 4 new pytest cases (37 backend).
+
 ### Added (iter 197) — fenced code blocks in text cells
 - **Text cells render ```` ``` ```` fenced code blocks.** The content is
   literal — markdown inside a fence is shown verbatim, not parsed — so

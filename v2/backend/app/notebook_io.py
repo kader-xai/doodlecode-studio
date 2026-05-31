@@ -1,8 +1,8 @@
 """Serialize / parse the `.py` notebook format.
 
-Format (v3, additive over v1's v2.x):
+Format (v4, additive over v1's v2.x):
 
-    # doodlecode format-version: 3
+    # doodlecode format-version: 4
     # notebook: Untitled
 
     # %% kind=code id=c0 x=80 y=80
@@ -41,6 +41,42 @@ _DIRECTIVE_RE = re.compile(r"^\s*#\s*@(\w+)\s*:\s*(.*)$")
 _KV_RE = re.compile(r"(\w+)=(?:\"([^\"]*)\"|(\S+))")
 
 
+def _escape_inline(s: str) -> str:
+    """v4: escape backslashes *before* newlines so a literal ``\\n`` in the
+    value survives the round-trip. Without the backslash escape, a reveal
+    of ``print("a\\nb")`` (two chars: backslash, n) decoded back to a real
+    newline and split the string — see iter 198."""
+    return s.replace("\\", "\\\\").replace("\n", "\\n")
+
+
+def _unescape_inline(s: str) -> str:
+    """v4 inverse of :func:`_escape_inline`. A single left-to-right pass so
+    ``\\\\n`` (escaped backslash + literal ``n``) is NOT read as a newline."""
+    out: list[str] = []
+    k = 0
+    while k < len(s):
+        if s[k] == "\\" and k + 1 < len(s):
+            nxt = s[k + 1]
+            if nxt == "n":
+                out.append("\n")
+                k += 2
+                continue
+            if nxt == "\\":
+                out.append("\\")
+                k += 2
+                continue
+        out.append(s[k])
+        k += 1
+    return "".join(out)
+
+
+def _legacy_unescape(s: str) -> str:
+    """Pre-v4 decoder: turns every ``\\n`` into a newline. Lossy for values
+    that contained a literal backslash-n, but kept verbatim so files
+    written by older versions parse exactly as they did then."""
+    return s.replace("\\n", "\n")
+
+
 def serialize(nb: NotebookPayload) -> str:
     out: list[str] = [
         f"# doodlecode format-version: {FILE_FORMAT_VERSION}",
@@ -69,11 +105,11 @@ def serialize(nb: NotebookPayload) -> str:
         # escaped so each step stays on one line (same scheme as
         # `# @explain:`). Order is preserved on parse.
         for step in c.reveals:
-            out.append(f"# @reveal: {step.replace(chr(10), '\\n')}")
+            out.append(f"# @reveal: {_escape_inline(step)}")
         # Iter 165: presenter speaker note (newlines escaped). Emitted
         # only when present so clean files don't grow an empty note.
         if c.note:
-            out.append(f"# @note: {c.note.replace(chr(10), '\\n')}")
+            out.append(f"# @note: {_escape_inline(c.note)}")
         # Callouts. The first one needs no marker (writes
         # `# @explain:` / `# @image:` straight into the directive
         # block). Subsequent ones are introduced by `# @callout`.
@@ -81,7 +117,7 @@ def serialize(nb: NotebookPayload) -> str:
             if idx > 0:
                 out.append("# @callout")
             if co.text:
-                out.append(f"# @explain: {co.text.replace(chr(10), '\\n')}")
+                out.append(f"# @explain: {_escape_inline(co.text)}")
             if co.image:
                 out.append(f"# @image: {co.image}")
         # Blank line after directives, before body, so manual readers
@@ -121,6 +157,12 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
             if n:
                 name = n.group(1).strip()
         i += 1
+
+    # Iter 198: pick the inline decoder by format version. v4+ files were
+    # written with backslash escaping, so a literal `\n` in the value
+    # survives; v1–v3 files used the lossy legacy scheme and must decode
+    # exactly as they did when written.
+    unescape = _unescape_inline if version >= 4 else _legacy_unescape
 
     # Cells.
     while i < len(lines):
@@ -166,7 +208,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
             elif key == "diagram_kind":
                 diagram_kind = val.strip()
             elif key == "explain":
-                ensure_current().text = val.replace("\\n", "\n").strip()
+                ensure_current().text = unescape(val).strip()
             elif key == "image":
                 ensure_current().image = val.strip()
             elif key == "link_to":
@@ -180,10 +222,10 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 # leading/trailing whitespace inside a fragment matters
                 # for indentation. (The directive regex already ate the
                 # single space after the colon.)
-                reveals.append(val.replace("\\n", "\n"))
+                reveals.append(unescape(val))
             elif key == "note":
                 # Iter 165: presenter speaker note (un-escape newlines).
-                note = val.replace("\\n", "\n")
+                note = unescape(val)
             # Unknown directives silently ignored — keeps forward-compat.
             i += 1
 

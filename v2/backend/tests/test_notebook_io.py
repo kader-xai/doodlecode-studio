@@ -20,6 +20,38 @@ def test_empty_notebook():
     assert out.cells == []
 
 
+def test_literal_backslash_n_round_trips_in_reveal_note_callout():
+    """Iter 198: a literal ``\\n`` (backslash + n) in a reveal / note /
+    callout must survive — reveals are code that often contains it."""
+    nb = NotebookPayload(cells=[CellPayload(
+        id="c0", kind="code", x=0, y=0, source="print()",
+        reveals=['print("a\\nb")', "x = 1\ny = 2"],   # literal \n, then real newline
+        note='use \\n for a newline\nsecond line',
+        callouts=[CalloutPayload(text='regex: \\n \\\\ \\t')],
+    )])
+    out = _roundtrip(nb)
+    assert out.cells[0].reveals == nb.cells[0].reveals
+    assert out.cells[0].note == nb.cells[0].note
+    assert out.cells[0].callouts[0].text == nb.cells[0].callouts[0].text
+
+
+def test_serialize_stamps_format_version_4():
+    nb = NotebookPayload(cells=[CellPayload(id="c0", kind="code", x=0, y=0, source="x=1")])
+    assert "# doodlecode format-version: 4" in notebook_io.serialize(nb)
+
+
+def test_legacy_v3_note_decodes_with_old_scheme():
+    """A v3 file's ``\\n`` is a newline under the legacy decoder — old
+    files must parse exactly as they did when written."""
+    legacy = (
+        "# doodlecode format-version: 3\n# notebook: Old\n\n"
+        "# %% kind=code id=c0 x=0.0 y=0.0\n# @note: line1\\nline2\n\nprint(1)\n"
+    )
+    nb, ver = notebook_io.parse(legacy)
+    assert ver == 3
+    assert nb.cells[0].note == "line1\nline2"
+
+
 def test_code_cell_roundtrip():
     nb = NotebookPayload(name="X", cells=[
         CellPayload(id="c0", kind="code", source="print(1)\nprint(2)",
