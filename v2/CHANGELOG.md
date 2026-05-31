@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added (iter 169) — slide entrance animation
+- **Each slide gently rises into focus during presentation.** When you
+  advance to a cell (→ / ← / Home / End / arrow nav), its content fades
+  up with a soft rise + settle (`translateY(12px)→0`, `scale .985→1`,
+  420 ms ease-out) so the eye lands on the new slide. The animation
+  targets the cell's *inner* content, never the ReactFlow node wrapper
+  whose transform carries pan/zoom — so it never fights the viewport and
+  is **not** a zoom (CLAUDE rule 6 preserved). It re-triggers each time
+  focus lands on a cell, and is fully disabled under
+  `prefers-reduced-motion`. 151 frontend tests.
+
 ### Added (iter 168) — chart axis titles
 - **Line and scatter charts can now name their axes.** Add
   `xlabel: Epoch` / `ylabel: Loss` to a doodle diagram and the x-title

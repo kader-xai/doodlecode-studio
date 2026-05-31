@@ -280,6 +280,14 @@ function CanvasInner() {
             selected: selSet.has(c.id),
             style: cellStyle,
             draggable: true,
+            // Iter 169: gentle entrance animation when this cell becomes
+            // the focused slide during presentation. The class targets
+            // the cell's inner content (not the ReactFlow node wrapper,
+            // whose transform carries pan/zoom) so it never fights the
+            // viewport transform. Re-triggers each time focus lands here
+            // because the style change above already forces a rebuild.
+            className:
+              presenting && focusedCellId === c.id ? "slide-enter" : undefined,
           });
         }
         // Append callout bubbles after each cell. Position is always

@@ -38,7 +38,9 @@ one at a time (see CHANGELOG for the running log).
 - **166 — Chart axis labels + gridlines** ✓ (shipped as iter 168):
   gridlines + ticks landed with line/scatter; `xlabel:`/`ylabel:` add
   hand-drawn axis titles to both.
-- **167 — Entrance animation for revealed slides** (gentle fade/slide).
+- **167 — Entrance animation for revealed slides** ✓ (shipped as iter
+  169): focused slide rises + settles (translateY + fade), inner content
+  only so it never fights pan/zoom; respects reduced-motion.
 - **168 — Release**: bundle the visual-intuition batch.
 
 This file is updated as items land or priorities shift.
