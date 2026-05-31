@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### CI / open-source (iter 180) — v2 is now gated by CI
+- **Continuous integration finally tests the v2 app.** The shared
+  `.github/workflows/ci.yml` previously only ran the legacy v1
+  `backend/` + `frontend/` suites, so every v2 PR — where all current
+  development happens — merged with **zero** automated checks. Added
+  `v2-backend` (pytest on Python 3.11 + 3.12) and `v2-frontend`
+  (`tsc -b --noEmit` + vitest + `vite build` on Node 20) jobs. Also
+  pointed contributors at the active app: CONTRIBUTING now has an
+  "Active app lives in `v2/`" section with the v2 dev + local
+  CI-equivalent commands.
+
 ### Accessibility (iter 179) — color-contrast pass + guardrail
 - **The doodle palette is proven to clear WCAG AAA, and locked in.** A
   new pure `lib/contrast.ts` (WCAG 2.1 relative-luminance + contrast

@@ -53,6 +53,27 @@ docs/           Architecture, file format, usage, dev, roadmap.
 examples/       Tutorial files in the project's own format.
 ```
 
+### Active app lives in `v2/`
+
+**New work should target `v2/`** — the current DoodleCode Studio (FastAPI
+on :8001 + React/Vite/Zustand/ReactFlow). It has the same
+`backend/` + `frontend/` shape and its own `v2/CLAUDE.md` capturing the
+load-bearing rules, plus `v2/ROADMAP.md` and `v2/CHANGELOG.md`.
+
+```bash
+cd v2 && ./start.sh          # build UI once + serve everything on :8001
+cd v2 && ./start.sh --dev    # Vite hot-reload on :5174 + API on :8001
+```
+
+CI runs the v1 *and* v2 suites on every PR (see
+`.github/workflows/ci.yml`). The v2 CI-equivalent you should run locally
+before pushing:
+
+```bash
+cd v2/frontend && npx tsc -b --noEmit && npm test && npm run build
+cd v2/backend  && .venv/bin/python -m pytest -q
+```
+
 ## Style
 
 - **Python**: PEP 8, 100-char lines, `from __future__ import annotations`.

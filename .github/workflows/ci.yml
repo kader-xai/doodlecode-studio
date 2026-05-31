@@ -63,3 +63,56 @@ jobs:
       - name: Production build
         working-directory: frontend
         run: npm run build
+
+  # ── DoodleCode Studio v2 (the active app) ──────────────────────────
+  # All current development happens under v2/. These jobs gate every PR
+  # that touches it, mirroring the local CI-equivalent in v2/CLAUDE.md.
+  v2-backend:
+    name: v2 Backend · Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: v2/backend/requirements.txt
+      - name: Install backend deps
+        working-directory: v2/backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Tests (pytest)
+        working-directory: v2/backend
+        run: pytest -q
+
+  v2-frontend:
+    name: v2 Frontend · Node ${{ matrix.node }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+          cache-dependency-path: v2/frontend/package-lock.json
+      - name: Install
+        working-directory: v2/frontend
+        run: npm ci || npm install
+      - name: Typecheck
+        working-directory: v2/frontend
+        run: npx tsc -b --noEmit
+      - name: Unit tests (vitest)
+        working-directory: v2/frontend
+        run: npm test
+      - name: Production build
+        working-directory: v2/frontend
+        run: npm run build

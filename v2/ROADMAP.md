@@ -78,9 +78,17 @@ one at a time (see CHANGELOG for the running log).
   2.1) + guardrail test; every text/bg pair measured 9.5:1–16.1:1, all
   clearing AAA. No visual change needed; the test locks it in.
 
-The accessibility & polish batch (173–177) is complete. Next candidate
-areas: responsiveness (small-viewport toolbar), open-source hygiene
-(CONTRIBUTING, issue templates), perf (bundle code-split), or new
-showcase features (embedded video timeline, animated GIF export).
+The accessibility & polish batch (173–177) is complete.
+
+### Open-source readiness
+- **178 — CI covers v2** ✓ (iter 180): added `v2-backend` (pytest) +
+  `v2-frontend` (tsc/vitest/build) jobs; CONTRIBUTING points to `v2/`.
+- **179 — Bundle code-split**: lazy-load Mermaid/KaTeX so the main
+  chunk drops well under the 500 kB warning.
+- **180 — Small-viewport responsiveness**: toolbar wraps / collapses
+  into an overflow menu on narrow screens.
+
+Other candidate areas: new showcase features (embedded video timeline,
+animated GIF export of a slide), richer diagram presets.
 
 This file is updated as items land or priorities shift.
