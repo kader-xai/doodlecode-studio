@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+## [2.6.0] — Visual-intuition batch 🎨
+
+_Presenter speaker notes, a full doodle data-viz suite (scatter plots,
+chart presets, axis titles), and a gentle slide entrance animation._
+
 ### Added (iter 169) — slide entrance animation
 - **Each slide gently rises into focus during presentation.** When you
   advance to a cell (→ / ← / Home / End / arrow nav), its content fades
