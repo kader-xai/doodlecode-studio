@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Fixed (iter 188) — new cells always spawn in a tidy column
+- **New cells no longer scatter across the canvas.** Spawning used to
+  inherit the x of whatever cell was "bottom-most in reading order" and
+  fall back to a diagonal step on collision, so once you dragged cells
+  around, each new cell appeared at a different x — a staircase. Now
+  every new cell spawns in a single fixed left column (`x = 120`),
+  placed one gap below the lowest cell's bottom edge so it can never
+  overlap. The canvas still auto-pans to it, and you remain free to drag
+  it anywhere afterward. 203 frontend tests.
+
 ### Added (iter 187) — chart reference / threshold lines
 - **Line, area, and scatter charts can draw a dashed reference line.**
   `hline: 0.5` (or `hline Target: 0.5` with a label) marks a goal /

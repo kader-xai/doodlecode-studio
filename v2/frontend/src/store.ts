@@ -317,37 +317,23 @@ const CANVAS_ORIGIN_X = 120;
 const CANVAS_ORIGIN_Y = 100;
 const COLUMN_GAP_Y = 80; // pixels between the bottom of one cell and the top of the next
 
-function spawnPosition(cells: Cell[]): { x: number; y: number } {
-  if (cells.length === 0) {
-    return { x: CANVAS_ORIGIN_X, y: CANVAS_ORIGIN_Y };
-  }
-  // Find the bottom-most cell in reading order. Reading order is
-  // y-bucket first then x — so this picks the last cell the user
-  // sees as the "end" of their flow.
-  const BUCKET = 40;
-  const ordered = [...cells].sort((a, b) => {
-    const ay = Math.round(a.y / BUCKET);
-    const by = Math.round(b.y / BUCKET);
-    if (ay !== by) return ay - by;
-    return a.x - b.x;
-  });
-  const last = ordered[ordered.length - 1];
-  const lastH = last.h ?? (last.kind === "code" ? 360 : last.kind === "markdown" ? 220 : 360);
-  const x = last.x;
-  const y = last.y + lastH + COLUMN_GAP_Y;
+/** Best-effort cell height when `h` hasn't been measured yet. */
+function spawnHeightOf(c: Cell): number {
+  return c.h ?? (c.kind === "code" ? 360 : c.kind === "markdown" ? 220 : 360);
+}
 
-  // Collision check — fall back to diagonal stepping from there if
-  // something else is already occupying the slot (rare, but happens
-  // after a user manually arranges and then triggers a New cell).
-  const STEP = 40;
-  const occupied = new Set(cells.map((c) => `${Math.round(c.x / STEP)}:${Math.round(c.y / STEP)}`));
-  let cx = x, cy = y;
-  for (let i = 0; i < 200; i++) {
-    if (!occupied.has(`${Math.round(cx / STEP)}:${Math.round(cy / STEP)}`)) return { x: cx, y: cy };
-    cx += STEP;
-    cy += STEP;
+function spawnPosition(cells: Cell[]): { x: number; y: number } {
+  // Always spawn in a single, fixed left-hand column so new cells appear
+  // in a predictable LINE — never scattered, even after the user has
+  // dragged existing cells all over the canvas. We only choose the y:
+  // one gap below the lowest cell's bottom edge, so the new cell can't
+  // overlap anything. The user is then free to drag it anywhere.
+  const x = CANVAS_ORIGIN_X;
+  if (cells.length === 0) {
+    return { x, y: CANVAS_ORIGIN_Y };
   }
-  return { x: cx, y: cy };
+  const lowestBottom = Math.max(...cells.map((c) => c.y + spawnHeightOf(c)));
+  return { x, y: lowestBottom + COLUMN_GAP_Y };
 }
 
 function triggerDownload(filename: string, text: string) {

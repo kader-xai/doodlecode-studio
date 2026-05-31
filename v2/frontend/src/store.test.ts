@@ -91,25 +91,23 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().panToTick).toBe(5);
   });
 
-  it("addCell stacks new cells in a vertical column below the last (iter 151)", () => {
-    // Seed two cells, one above the other.
+  it("addCell spawns in a fixed left column, below all cells (iter 188)", () => {
+    // Two cells dragged to arbitrary x positions.
     useStore.setState({
       cells: [
         { id: "top",    kind: "code", source: "", x: 200, y: 100, h: 300 },
-        { id: "bottom", kind: "code", source: "", x: 200, y: 500, h: 300 },
+        { id: "bottom", kind: "code", source: "", x: 640, y: 500, h: 300 },
       ],
     });
     const id = useStore.getState().addCell();
     const added = useStore.getState().cells.find((c) => c.id === id)!;
-    // New cell appears under the bottom cell at the same x.
-    expect(added.x).toBe(200);
-    // bottom.y (500) + bottom.h (300) + COLUMN_GAP_Y (80) = 880.
+    // Always the fixed origin x — NOT inherited from a moved cell.
+    expect(added.x).toBe(120);
+    // Below the lowest bottom edge: max(100+300, 500+300) + 80 = 880.
     expect(added.y).toBe(880);
   });
 
-  it("addCell never spawns on top of an existing cell (iter 136)", () => {
-    // Seed the canvas with a wall of cells covering the default spawn
-    // origin so spawnPosition must step diagonally past them.
+  it("addCell never overlaps an existing cell — it stacks below (iter 188)", () => {
     useStore.setState({
       cells: Array.from({ length: 5 }, (_, i) => ({
         id: `seed${i}`,
@@ -117,18 +115,17 @@ describe("store: cell CRUD", () => {
         source: "",
         x: 80 + i * 40,
         y: 80 + i * 40,
+        h: 200,
       })),
     });
     const id = useStore.getState().addCell();
     const added = useStore.getState().cells.find((c) => c.id === id)!;
-    // The new cell must occupy a slot none of the seeds already do.
-    const STEP = 40;
-    const key = (x: number, y: number) =>
-      `${Math.round(x / STEP)}:${Math.round(y / STEP)}`;
-    const seeded = new Set(
-      useStore.getState().cells.filter((c) => c.id !== id).map((c) => key(c.x, c.y)),
+    // The new cell's top is strictly below every existing cell's bottom.
+    const maxBottom = Math.max(
+      ...useStore.getState().cells.filter((c) => c.id !== id).map((c) => c.y + (c.h ?? 200)),
     );
-    expect(seeded.has(key(added.x, added.y))).toBe(false);
+    expect(added.y).toBeGreaterThanOrEqual(maxBottom);
+    expect(added.x).toBe(120);
   });
 
   it("moveCell updates x/y", () => {
