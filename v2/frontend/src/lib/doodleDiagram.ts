@@ -43,6 +43,8 @@ export interface FlowEdge { from: string; to: string }
 export interface ChartItem { label: string; value: number }
 /** Iter 160: a labelled line-chart series — one polyline of values. */
 export interface LineSeries { label: string; points: number[] }
+/** Iter 172: an area series — a line filled to the baseline. */
+export interface AreaSeries { label: string; points: number[] }
 /** Iter 164: one slice of a pie / donut chart. */
 export interface PieSlice { label: string; value: number }
 /** Iter 166: one (x, y) dot of a scatter plot. */
@@ -52,6 +54,7 @@ export interface Parsed {
   flow: FlowEdge[];
   charts: ChartItem[];
   lines: LineSeries[];
+  areas: AreaSeries[];
   pies: PieSlice[];
   points: ScatterPoint[];
   chartTitle: string;
@@ -67,6 +70,7 @@ export function parseDoodleDiagram(source: string): Parsed {
   const flow: FlowEdge[] = [];
   const charts: ChartItem[] = [];
   const series: LineSeries[] = [];
+  const areas: AreaSeries[] = [];
   const pies: PieSlice[] = [];
   const points: ScatterPoint[] = [];
   let chartTitle = "";
@@ -163,6 +167,25 @@ export function parseDoodleDiagram(source: string): Parsed {
       }
     }
 
+    // Iter 172: area series — `area <Label>: 1, 3, 2`. A filled line.
+    // Same parsing as `line`; checked before the bar rule.
+    if (normalized.startsWith("area:") || normalized.startsWith("area ")) {
+      const colon = line.indexOf(":");
+      if (colon !== -1) {
+        const head = line.slice(0, colon).trim();
+        const label = head.replace(/^area\b\s*/i, "").trim() || `Area ${areas.length + 1}`;
+        const points = line
+          .slice(colon + 1)
+          .split(/[,\s]+/)
+          .map((n) => n.trim())
+          .filter(Boolean)
+          .map(Number)
+          .filter((n) => Number.isFinite(n));
+        if (points.length) areas.push({ label, points });
+        continue;
+      }
+    }
+
     // Flow edge (must come before the Label: Number test).
     if (line.includes("-->")) {
       const [from, to] = line.split("-->").map((p) => p.trim());
@@ -181,7 +204,7 @@ export function parseDoodleDiagram(source: string): Parsed {
     }
   }
 
-  return { flow, charts, lines: series, pies, points, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
+  return { flow, charts, lines: series, areas, pies, points, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
 }
 
 export function renderDoodleDiagram(source: string, dark = false): string {
@@ -189,12 +212,13 @@ export function renderDoodleDiagram(source: string, dark = false): string {
   const flow = renderFlow(parsed.flow, dark);
   const chart = renderChart(parsed.charts, parsed.chartTitle || "Chart", dark);
   const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark, parsed.xLabel, parsed.yLabel);
+  const areaChart = renderAreaChart(parsed.areas, parsed.chartTitle || "Area", dark, parsed.xLabel, parsed.yLabel);
   const pieChart = renderPieChart(parsed.pies, parsed.pieTitle || "Breakdown", dark);
   const scatterChart = renderScatterChart(parsed.points, parsed.scatterTitle || "Scatter", dark, parsed.xLabel, parsed.yLabel);
-  if (!flow && !chart && !lineChart && !pieChart && !scatterChart) {
+  if (!flow && !chart && !lineChart && !areaChart && !pieChart && !scatterChart) {
     return placeholder(dark);
   }
-  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${lineChart}${pieChart}${scatterChart}</div>`;
+  return `<div class="doodle-diagram-stack" style="display:flex;flex-direction:column;gap:14px;align-items:center;">${flow}${chart}${lineChart}${areaChart}${pieChart}${scatterChart}</div>`;
 }
 
 // ───────────────────────── Flowchart ────────────────────────────
@@ -550,6 +574,91 @@ function renderPieChart(slices: PieSlice[], title: string, dark: boolean): strin
   </svg>`;
 }
 
+// ───────────────────────── Area chart ───────────────────────────
+
+function renderAreaChart(series: AreaSeries[], title: string, dark: boolean, xLabel = "", yLabel = ""): string {
+  if (!series.length) return "";
+  const all = series.flatMap((s) => s.points);
+  if (!all.length) return "";
+
+  const minV = Math.min(...all, 0);
+  const maxV = Math.max(...all, 1);
+  const range = maxV - minV || 1;
+
+  const padL = 50, padR = 26, padTop = 52, padBottom = xLabel ? 48 : 30;
+  const plotW = 460, plotH = 220;
+  const width = padL + plotW + padR;
+  const height = padTop + plotH + padBottom;
+  const stroke = dark ? "#f0f0f0" : "#202124";
+  const grid = dark ? "rgba(255,255,255,0.14)" : "rgba(0,0,0,0.12)";
+  const baseY = padTop + plotH;
+
+  const xAt = (i: number, n: number) =>
+    padL + (n <= 1 ? plotW / 2 : (plotW * i) / (n - 1));
+  const yAt = (v: number) => padTop + plotH - ((v - minV) / range) * plotH;
+
+  const gridLines = [0, 0.25, 0.5, 0.75, 1]
+    .map((t) => {
+      const y = (padTop + plotH - t * plotH).toFixed(1);
+      return `<line x1="${padL}" y1="${y}" x2="${padL + plotW}" y2="${y}" stroke="${grid}" stroke-width="1.5"/>`;
+    })
+    .join("");
+
+  const axis = `<path d="M ${padL} ${padTop} L ${padL} ${padTop + plotH} L ${padL + plotW} ${padTop + plotH}"
+        fill="none" stroke="${stroke}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  // Later series draw first (behind) so earlier ones read on top.
+  const seriesSvg = series
+    .map((s, si) => {
+      const color = CHART_COLORS[si % CHART_COLORS.length];
+      const n = s.points.length;
+      if (!n) return "";
+      let line = "";
+      s.points.forEach((v, i) => {
+        line += `${i === 0 ? "M" : "L"} ${xAt(i, n).toFixed(1)} ${yAt(v).toFixed(1)} `;
+      });
+      // Fill polygon: line, down to baseline, back to start.
+      const x0 = xAt(0, n).toFixed(1);
+      const xN = xAt(n - 1, n).toFixed(1);
+      const fill = `${line} L ${xN} ${baseY} L ${x0} ${baseY} Z`;
+      return `<path d="${fill}" fill="${color}" fill-opacity="0.28" stroke="none"/>` +
+        `<path d="${line}" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+    })
+    .reverse()
+    .join("");
+
+  const legend = series
+    .map((s, si) => {
+      const color = CHART_COLORS[si % CHART_COLORS.length];
+      const lx = padL + si * 140;
+      const ly = padTop - 18;
+      return `<rect x="${lx}" y="${ly - 11}" width="12" height="12" rx="2" fill="${color}" fill-opacity="0.5" stroke="${stroke}" stroke-width="2"/>
+        <text x="${lx + 18}" y="${ly}" font-family="Patrick Hand, Caveat, sans-serif"
+              font-size="15" font-weight="700" fill="${stroke}">${escape(s.label)}</text>`;
+    })
+    .join("");
+
+  const yTicks = `
+    <text x="${padL - 8}" y="${(yAt(maxV) + 5).toFixed(1)}" text-anchor="end"
+          font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(maxV)}</text>
+    <text x="${padL - 8}" y="${(yAt(minV) + 5).toFixed(1)}" text-anchor="end"
+          font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(minV)}</text>`;
+
+  const axisTitles = axisTitleSvg(xLabel, yLabel, padL, padTop, plotW, plotH, height, stroke);
+
+  return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
+        style="max-width:100%; height:auto;" role="img" aria-label="Area chart">
+    <text x="${padL}" y="26" font-family="Patrick Hand, Caveat, sans-serif"
+          font-size="24" font-weight="800" fill="${stroke}">${escape(title)}</text>
+    ${legend}
+    ${gridLines}
+    ${seriesSvg}
+    ${axis}
+    ${yTicks}
+    ${axisTitles}
+  </svg>`;
+}
+
 // ───────────────────────── Scatter plot ─────────────────────────
 
 function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean, xLabel = "", yLabel = ""): string {
@@ -630,7 +739,7 @@ function trimNum(v: number): string {
 function placeholder(dark: boolean): string {
   const c = dark ? "#aaa" : "#555";
   return `<div style="padding:18px;text-align:center;color:${c};font-family:Patrick Hand,Caveat,sans-serif;font-size:18px;">
-    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>line Loss: 0.9, 0.6</code> lines, <code>pie Cats: 30</code> slices, or <code>point: 1, 2</code> scatter dots.
+    Empty diagram — write <code>A --&gt; B</code> flows, <code>Label: 5</code> bars, <code>line Loss: 0.9, 0.6</code> lines, <code>area Users: 1, 3</code> areas, <code>pie Cats: 30</code> slices, or <code>point: 1, 2</code> scatter dots.
   </div>`;
 }
 

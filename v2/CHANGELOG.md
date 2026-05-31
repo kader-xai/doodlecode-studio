@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 172) — doodle area chart
+- **Diagram cells render filled area charts.** `area Active: 2, 5, 9`
+  draws a line filled to the baseline (28%-opacity wash + solid ink
+  edge), great for showing a quantity growing over x. Multiple `area`
+  rows stack back-to-front with a square-swatch legend; it shares the
+  `xlabel:` / `ylabel:` axis titles with the line and scatter charts,
+  is parsed before the bar rule (never mistaken for a bar), and the
+  Diagram editor gains an **▰ Area** preset button. 155 frontend tests.
+
 ### Docs (iter 171) — README refresh for the data-viz suite
 - **README now documents the full v2.6.0 data-viz suite.** New "Doodle
   charts" section with the line-syntax for flow / bar / line / pie /

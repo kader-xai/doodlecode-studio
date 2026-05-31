@@ -185,4 +185,32 @@ describe("renderDoodleDiagram", () => {
     expect(out).not.toContain("<b>x</b>");
     expect(out).toContain("&lt;b&gt;");
   });
+
+  it("parses area series (area Label: ...) (iter 172)", () => {
+    const p = parseDoodleDiagram("area Active: 2, 5, 9\narea New: 1, 2, 3");
+    expect(p.areas).toEqual([
+      { label: "Active", points: [2, 5, 9] },
+      { label: "New", points: [1, 2, 3] },
+    ]);
+  });
+
+  it("does not treat an area series as a bar (iter 172)", () => {
+    const p = parseDoodleDiagram("area Active: 2, 5, 9");
+    expect(p.charts).toEqual([]);
+  });
+
+  it("renders an area chart with a filled polygon (iter 172)", () => {
+    const out = renderDoodleDiagram("xlabel: Week\nylabel: Users\narea Active: 2, 5, 9, 14");
+    expect(out).toContain("<svg");
+    expect(out).toMatch(/aria-label="Area chart"/);
+    expect(out).toContain("fill-opacity=\"0.28\""); // the area fill
+    expect(out).toContain("Active");
+    expect(out).toContain("Week");
+  });
+
+  it("escapes an area-series label (iter 172)", () => {
+    const out = renderDoodleDiagram("area <b>x</b>: 1, 2, 3");
+    expect(out).not.toContain("<b>x</b>");
+    expect(out).toContain("&lt;b&gt;");
+  });
 });
