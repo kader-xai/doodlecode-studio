@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added (iter 186) — markdown ordered lists
+- **Text cells render numbered lists** (`1. step`, also `1)` style) —
+  the natural companion to bullet lists for step-by-step explanations.
+  The list honors its first number via the `<ol start>` attribute, so a
+  list that begins at `3.` continues 3, 4, 5. Paragraph grouping now
+  stops at an ordered-list line so a `1.` after prose starts a fresh
+  list. Still zero-dependency. 199 frontend tests.
+
 ### Added (iter 185) — markdown links
 - **Text cells now render `[label](url)` links** — useful for citing
   references in an explanation. Links open in a new tab with

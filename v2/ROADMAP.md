@@ -99,6 +99,8 @@ The accessibility & polish batch (173–177) is complete.
 
 - **184 — Markdown links** ✓ (iter 185): `[text](url)` in text cells,
   new-tab + safe-scheme guard.
+- **185 — Markdown ordered lists** ✓ (iter 186): `1. step` numbered
+  lists with `<ol start>` offset.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

@@ -6,6 +6,7 @@ import { JSX } from "react";
  * Supports:
  *   `# H1`, `## H2`, `### H3`
  *   `- item` or `* item`            (bullet list)
+ *   `1. item` or `1) item`          (ordered list)
  *   `> blockquote`
  *   `---`                           (horizontal rule)
  *   `**bold**` and `*italic*`
@@ -13,7 +14,7 @@ import { JSX } from "react";
  *   `[text](url)`                   (link — http/https/mailto/relative)
  *   blank lines separate paragraphs
  *
- * We do NOT support full CommonMark (no images, tables, ordered lists,
+ * We do NOT support full CommonMark (no images, tables, nested lists,
  * fenced code). That's intentional — v1 grew a giant markdown surface
  * and most of it went unused. Add only what users ask for.
  */
@@ -113,12 +114,35 @@ export function renderMarkdown(src: string): JSX.Element[] {
       continue;
     }
 
+    // Iter 186: ordered list — `1. item`, `2) item`. The list starts at
+    // the first number found, so `3. … 4. …` renders 3, 4 (via `start`).
+    if (/^\d+[.)]\s+/.test(line)) {
+      const items: string[] = [];
+      const startNum = parseInt(line.match(/^(\d+)/)![1], 10);
+      while (i < lines.length && /^\d+[.)]\s+/.test(lines[i])) {
+        items.push(lines[i].replace(/^\d+[.)]\s+/, ""));
+        i++;
+      }
+      out.push(
+        <ol
+          key={key++}
+          start={startNum}
+          className={`list-decimal pl-6 font-hand text-xl leading-snug space-y-0.5 ${wrap}`}
+        >
+          {items.map((it, j) => (
+            <li key={j}>{renderInline(it)}</li>
+          ))}
+        </ol>,
+      );
+      continue;
+    }
+
     // Paragraph (group consecutive non-empty non-block lines)
     const para: string[] = [];
     while (
       i < lines.length &&
       lines[i].trim() !== "" &&
-      !/^(#{1,3}\s|[-*]\s|>\s|---+\s*$)/.test(lines[i])
+      !/^(#{1,3}\s|[-*]\s|\d+[.)]\s|>\s|---+\s*$)/.test(lines[i])
     ) {
       para.push(lines[i]);
       i++;

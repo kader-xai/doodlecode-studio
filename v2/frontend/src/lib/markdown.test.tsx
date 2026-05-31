@@ -20,6 +20,20 @@ describe("renderMarkdown", () => {
     expect((html.match(/<li/g) ?? []).length).toBe(2);
   });
 
+  it("renders ordered lists with a start offset (iter 186)", () => {
+    const html = toHtml("1. first\n2. second\n3. third");
+    expect(html).toContain("<ol");
+    expect((html.match(/<li/g) ?? []).length).toBe(3);
+    const off = toHtml("3. c\n4. d");
+    expect(off).toContain('start="3"');
+  });
+
+  it("accepts `1)` ordered-list style and keeps it off paragraphs (iter 186)", () => {
+    const html = toHtml("intro line\n\n1) a\n2) b");
+    expect(html).toContain("<ol");
+    expect(html).toContain("<p");
+  });
+
   it("renders **bold** and `inline code`", () => {
     const html = toHtml("**bold** and `code`");
     expect(html).toContain("<strong>bold</strong>");
