@@ -13,6 +13,20 @@ import { useStore } from "../store";
 const DEFAULT_W = 560;
 const DEFAULT_H = 360;
 
+/**
+ * Iter 167: one-click doodle-chart snippets. Inserting a preset is
+ * the discoverability path so users never memorize the mini-syntax —
+ * each appends a working block they can then tweak. Charts coexist, so
+ * appending is non-destructive.
+ */
+const DOODLE_PRESETS: { key: string; label: string; snippet: string }[] = [
+  { key: "flow", label: "→ Flow", snippet: "Idea --> Draft\nDraft --> Ship" },
+  { key: "bar", label: "▭ Bar", snippet: "chart: Scores\nAlpha: 8\nBeta: 5\nGamma: 10" },
+  { key: "line", label: "📈 Line", snippet: "line Loss: 0.9, 0.6, 0.4, 0.25" },
+  { key: "pie", label: "◔ Pie", snippet: "pie: Share\npie Python: 60\npie Rust: 40" },
+  { key: "scatter", label: "⠿ Scatter", snippet: "scatter: Cloud\npoint: 1, 2\npoint: 3, 4\npoint: 5, 3" },
+];
+
 function escapeHtml(s: string): string {
   return s.replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#039;",
@@ -157,6 +171,20 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
     setEditing(false);
   };
 
+  // Iter 167: append a chart preset to the draft (non-destructive —
+  // doodle charts stack). Separate from existing content with a blank
+  // line, then refocus the textarea at the end.
+  const insertPreset = (snippet: string) => {
+    setDraft((prev) => {
+      const base = prev.replace(/\s+$/, "");
+      return base ? `${base}\n\n${snippet}\n` : `${snippet}\n`;
+    });
+    requestAnimationFrame(() => {
+      const ta = taRef.current;
+      if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+    });
+  };
+
   return (
     <div
       className="relative"
@@ -250,23 +278,48 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
           {!cell.collapsed && (
           <div className="relative flex-1 overflow-auto nodrag nowheel bg-white dark:bg-[#1a1d23]">
             {editing ? (
-              <textarea
-                ref={taRef}
-                value={draft}
-                onChange={(e) => setDraft(e.target.value)}
-                onBlur={commitAndClose}
-                onKeyDown={(e) => {
-                  e.stopPropagation();
-                  if (e.key === "Escape") {
-                    e.preventDefault();
-                    commitAndClose();
-                  }
-                }}
-                onClick={(e) => e.stopPropagation()}
-                onPointerDown={(e) => e.stopPropagation()}
-                spellCheck={false}
-                className="absolute inset-0 w-full h-full font-mono text-sm leading-relaxed p-2 bg-white dark:bg-[#1f2228] text-ink dark:text-white outline-none resize-none"
-              />
+              <div className="absolute inset-0 flex flex-col">
+                {/* Iter 167: chart preset bar — doodle kind only. Each
+                 *  button inserts a working snippet so the mini-syntax
+                 *  is discoverable without docs. */}
+                {(cell.diagram_kind === "doodle" || !cell.diagram_kind) && (
+                  <div className="flex flex-wrap items-center gap-1 px-2 py-1 border-b-2 border-ink/15 dark:border-white/15 bg-marker-yellow/30 dark:bg-amber-900/20 shrink-0">
+                    <span className="font-hand text-xs text-ink/60 dark:text-white/60 mr-1">Insert:</span>
+                    {DOODLE_PRESETS.map((p) => (
+                      <button
+                        key={p.key}
+                        type="button"
+                        // preventDefault on mousedown keeps the textarea
+                        // focused so its onBlur doesn't commit+close first.
+                        onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                        onPointerDown={(e) => e.stopPropagation()}
+                        onClick={(e) => { e.stopPropagation(); insertPreset(p.snippet); }}
+                        className="nodrag font-hand text-xs px-1.5 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/30 bg-white/90 dark:bg-[#262a31] text-ink dark:text-white hover:translate-y-[1px] transition"
+                        title={`Insert a ${p.key} chart sample`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <textarea
+                  ref={taRef}
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onBlur={commitAndClose}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      commitAndClose();
+                    }
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
+                  spellCheck={false}
+                  className="flex-1 w-full font-mono text-sm leading-relaxed p-2 bg-white dark:bg-[#1f2228] text-ink dark:text-white outline-none resize-none"
+                />
+              </div>
             ) : cell.diagram_kind === "doodle" || !cell.diagram_kind ? (
               <div
                 className="w-full h-full flex items-start justify-center p-3 overflow-auto"

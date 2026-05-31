@@ -32,8 +32,9 @@ one at a time (see CHANGELOG for the running log).
   opens the editor; round-trips in the .py.
 - **164 — Scatter chart** ✓ (shipped as iter 166): `point: x, y` →
   hand-drawn x/y plane with gridlines + axis ticks. For x/y intuition.
-- **165 — Diagram cell chart presets**: a chart-kind switch (bar / line /
-  pie) in the Diagram editor so users don't memorize syntax.
+- **165 — Diagram cell chart presets** ✓ (shipped as iter 167): an
+  "Insert:" bar of Flow / Bar / Line / Pie / Scatter sample buttons in
+  the Diagram editor so users don't memorize syntax.
 - **166 — Chart axis labels + gridlines** (subtle, doodle).
 - **167 — Entrance animation for revealed slides** (gentle fade/slide).
 - **168 — Release**: bundle the visual-intuition batch.

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 167) — diagram chart presets (no syntax to memorize)
+- **The Diagram editor now has one-click chart-sample buttons.** When
+  you edit a 🖍 Doodle diagram, an "Insert:" bar appears above the
+  textarea with **→ Flow · ▭ Bar · 📈 Line · ◔ Pie · ⠿ Scatter**
+  buttons. Each appends a working snippet (non-destructively — doodle
+  charts stack) you can then tweak, so the mini-syntax is fully
+  discoverable without docs. Buttons use `preventDefault` on mousedown
+  so the textarea keeps focus and the insert lands cleanly; the bar is
+  shown for the doodle kind only. 146 frontend tests.
+
 ### Added (iter 166) — doodle scatter plot
 - **Diagram cells now render scatter plots for x/y intuition.**
   `scatter: Title` sets a heading; `point: x, y` adds a dot. The result
