@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Performance (iter 181) — code-split Mermaid + KaTeX
+- **The main bundle shrank from ~1.29 MB to ~456 KB** (gzip 353 → 141
+  KB). Mermaid (~581 KB) and KaTeX (~258 KB + 29 KB CSS) were imported
+  eagerly even though only the Mermaid/Math diagram kinds need them;
+  they're now `import()`-ed lazily and split into their own chunks that
+  load on first use. Both loaders memoize the module promise (fetched at
+  most once), the math render moved from a sync `useMemo` to an async
+  effect, and a `src/vite-env.d.ts` declares the dynamic CSS import.
+  Faster first paint for everyone who isn't rendering a Mermaid/Math
+  diagram. 177 frontend tests; production build is warning-clean.
+
 ### CI / open-source (iter 180) — v2 is now gated by CI
 - **Continuous integration finally tests the v2 app.** The shared
   `.github/workflows/ci.yml` previously only ran the legacy v1

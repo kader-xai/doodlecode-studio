@@ -83,8 +83,8 @@ The accessibility & polish batch (173–177) is complete.
 ### Open-source readiness
 - **178 — CI covers v2** ✓ (iter 180): added `v2-backend` (pytest) +
   `v2-frontend` (tsc/vitest/build) jobs; CONTRIBUTING points to `v2/`.
-- **179 — Bundle code-split**: lazy-load Mermaid/KaTeX so the main
-  chunk drops well under the 500 kB warning.
+- **179 — Bundle code-split** ✓ (iter 181): Mermaid + KaTeX lazy-loaded;
+  main chunk 1.29 MB → 456 KB; build warning-clean.
 - **180 — Small-viewport responsiveness**: toolbar wraps / collapses
   into an overflow menu on narrow screens.
 

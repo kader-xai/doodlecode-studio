@@ -1,8 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
-import mermaid from "mermaid";
-import katex from "katex";
-import "katex/dist/katex.min.css";
 
 import { renderDoodleDiagram } from "../lib/doodleDiagram";
 import { resolveLiveDoodleSource, stdoutOf } from "../lib/liveChart";
@@ -38,18 +35,40 @@ function escapeHtml(s: string): string {
   }[c]!));
 }
 
-// One global init — Mermaid is a singleton. We re-themes on dark
-// toggle below by passing { theme } at render time.
+// Iter 181: Mermaid (~0.5 MB) and KaTeX (~0.3 MB) are heavy and only
+// needed by the Mermaid / Math diagram kinds, so they're code-split via
+// dynamic import — the main chunk no longer carries them. Each loader
+// memoizes the module promise so the chunk loads at most once.
+type MermaidModule = typeof import("mermaid")["default"];
+let _mermaidPromise: Promise<MermaidModule> | null = null;
 let mermaidInitialized = false;
-function initMermaid() {
-  if (mermaidInitialized) return;
-  mermaid.initialize({
-    startOnLoad: false,
-    securityLevel: "loose",
-    theme: "default",
-    fontFamily: "JetBrains Mono, ui-monospace, monospace",
-  });
-  mermaidInitialized = true;
+async function getMermaid(): Promise<MermaidModule> {
+  if (!_mermaidPromise) {
+    _mermaidPromise = import("mermaid").then((m) => m.default);
+  }
+  const mermaid = await _mermaidPromise;
+  if (!mermaidInitialized) {
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "loose",
+      theme: "default",
+      fontFamily: "JetBrains Mono, ui-monospace, monospace",
+    });
+    mermaidInitialized = true;
+  }
+  return mermaid;
+}
+
+type KatexModule = typeof import("katex")["default"];
+let _katexPromise: Promise<KatexModule> | null = null;
+async function getKatex(): Promise<KatexModule> {
+  if (!_katexPromise) {
+    _katexPromise = Promise.all([
+      import("katex"),
+      import("katex/dist/katex.min.css"),
+    ]).then(([m]) => m.default);
+  }
+  return _katexPromise;
 }
 
 let _seq = 0;
@@ -87,6 +106,9 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
   const [draft, setDraft] = useState(cell?.source ?? "");
   const [svg, setSvg] = useState<string>("");
   const [renderError, setRenderError] = useState<string | null>(null);
+  // Iter 181: KaTeX is loaded lazily, so the rendered math HTML is now
+  // async state instead of a synchronous useMemo.
+  const [mathHtml, setMathHtml] = useState<string>("");
   const taRef = useRef<HTMLTextAreaElement>(null);
 
   // F2 → rename bridge.
@@ -113,38 +135,48 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
     return renderDoodleDiagram(resolved, dark);
   }, [cell?.source, cell?.diagram_kind, dark, runtimes, cell]);
 
-  // KaTeX renders synchronously. We compute the HTML once per source
-  // change and dangerouslySet it. `throwOnError: false` makes KaTeX
-  // emit a red error span instead of crashing on bad LaTeX.
-  const mathHtml = useMemo(() => {
-    if (!cell || cell.diagram_kind !== "math") return "";
-    try {
-      return katex.renderToString(cell.source || "", {
-        displayMode: true,
-        throwOnError: false,
-        errorColor: "#c2255c",
-        strict: "ignore",
-      });
-    } catch (e: any) {
-      return `<span style="color:#c2255c;font-family:monospace;">${escapeHtml(e?.message ?? String(e))}</span>`;
-    }
+  // Iter 181: KaTeX renders after its chunk loads. `throwOnError:false`
+  // makes KaTeX emit a red error span instead of crashing on bad LaTeX.
+  useEffect(() => {
+    if (!cell || cell.diagram_kind !== "math") { setMathHtml(""); return; }
+    let cancelled = false;
+    (async () => {
+      try {
+        const katex = await getKatex();
+        if (cancelled) return;
+        setMathHtml(
+          katex.renderToString(cell.source || "", {
+            displayMode: true,
+            throwOnError: false,
+            errorColor: "#c2255c",
+            strict: "ignore",
+          }),
+        );
+      } catch (e: any) {
+        if (!cancelled) {
+          setMathHtml(`<span style="color:#c2255c;font-family:monospace;">${escapeHtml(e?.message ?? String(e))}</span>`);
+        }
+      }
+    })();
+    return () => { cancelled = true; };
   }, [cell?.source, cell?.diagram_kind, cell]);
 
   // Render Mermaid whenever source or theme changes.
   useEffect(() => {
     if (!cell || cell.diagram_kind !== "mermaid") return;
     let cancelled = false;
-    initMermaid();
-    // Theme switch is a re-init in mermaid v11.
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: "loose",
-      theme: dark ? "dark" : "default",
-      fontFamily: "JetBrains Mono, ui-monospace, monospace",
-    });
     const id = nextSvgId();
     (async () => {
       try {
+        const mermaid = await getMermaid();
+        if (cancelled) return;
+        // Theme switch is a re-init in mermaid v11.
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: "loose",
+          theme: dark ? "dark" : "default",
+          fontFamily: "JetBrains Mono, ui-monospace, monospace",
+        });
         const out = await mermaid.render(id, cell.source);
         if (!cancelled) {
           setSvg(out.svg);
