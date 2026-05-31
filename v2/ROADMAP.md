@@ -88,7 +88,15 @@ The accessibility & polish batch (173–177) is complete.
 - **180 — Small-viewport responsiveness** ✓ (iter 182): toolbar pill +
   header `flex-wrap` so controls stack instead of overflowing.
 
-Other candidate areas: new showcase features (embedded video timeline,
-animated GIF export of a slide), richer diagram presets.
+### Showcase features
+- **181 — Video start-time timestamps** ✓ (iter 183): media cells honor
+  `?t=`/`#t=` start offsets in YouTube/Vimeo links.
+- **182 — Loop / autoplay / mute toggles** on a media cell (presenter
+  ergonomics for embedded demos).
+- **183 — Animated GIF export** of a single slide (capture the canvas
+  region to a shareable loop).
+
+Other candidate areas: richer diagram presets, an in-app onboarding
+tour.
 
 This file is updated as items land or priorities shift.

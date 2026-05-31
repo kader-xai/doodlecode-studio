@@ -1,52 +1,12 @@
 import { Handle, NodeProps, Position } from "reactflow";
 import { DoodleBorder } from "./DoodleBorder";
 import { ResizeHandle } from "./ResizeHandle";
+import { videoEmbed } from "../lib/videoEmbed";
 import { useStore } from "../store";
 
 const VIDEO_EXT = /\.(mp4|webm|mov|m4v|ogg|ogv)(\?|#|$)/i;
 const DEFAULT_W = 480;
 const DEFAULT_H = 320;
-
-/** Resolve a YouTube watch URL / youtu.be short link to its
- *  embed URL. Returns null when the input isn't YouTube. */
-function youTubeEmbed(url: string): string | null {
-  try {
-    const u = new URL(url);
-    const host = u.hostname.replace(/^www\./, "");
-    // youtu.be/<id>
-    if (host === "youtu.be") {
-      const id = u.pathname.slice(1).split("/")[0];
-      return id ? `https://www.youtube.com/embed/${id}` : null;
-    }
-    // youtube.com/watch?v=<id>
-    if (host === "youtube.com" || host === "m.youtube.com") {
-      if (u.pathname === "/watch") {
-        const id = u.searchParams.get("v");
-        return id ? `https://www.youtube.com/embed/${id}` : null;
-      }
-      // youtube.com/embed/<id> — already an embed; keep as-is.
-      if (u.pathname.startsWith("/embed/")) return url;
-      // youtube.com/shorts/<id> → embed
-      const shorts = u.pathname.match(/^\/shorts\/([^/]+)/);
-      if (shorts) return `https://www.youtube.com/embed/${shorts[1]}`;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/** Vimeo link → player embed. */
-function vimeoEmbed(url: string): string | null {
-  try {
-    const u = new URL(url);
-    if (u.hostname.replace(/^www\./, "") !== "vimeo.com") return null;
-    const m = u.pathname.match(/^\/(\d+)/);
-    return m ? `https://player.vimeo.com/video/${m[1]}` : null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Media cell — frameless image or video that fills its card.
@@ -71,7 +31,7 @@ export function MediaCell({ data, selected }: NodeProps<{ cellId: string }>) {
 
   const w = cell.w ?? DEFAULT_W;
   const h = cell.h ?? DEFAULT_H;
-  const embedUrl = youTubeEmbed(cell.source) ?? vimeoEmbed(cell.source);
+  const embedUrl = videoEmbed(cell.source);
   const isEmbed = !!embedUrl;
   const isVideo = !isEmbed && VIDEO_EXT.test(cell.source);
 

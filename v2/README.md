@@ -52,7 +52,7 @@ and type `matplotlib`.
 |-------------|-----------------------------|-------------------------------------------|
 | Code        | `＋ Code` / N               | Python; runs in a persistent kernel       |
 | Text        | `＋ Text` / T               | Markdown — `#`/`-`/`**`/`` ` ``           |
-| Media       | `＋ Media` / M              | Image, video, YouTube, or Vimeo URL       |
+| Media       | `＋ Media` / M              | Image, video, YouTube, or Vimeo URL (start-time `?t=1m30s` honored) |
 | Browser     | `＋ Browser` / W            | Live website in an iframe (with proxy)    |
 | Whiteboard  | `＋ Draw` / D               | Pen + highlighter + 5 colors + 3 bgs      |
 | Diagram     | `＋ Diagram` / G            | Doodle charts (flow/bar/line/pie/scatter), Mermaid, or KaTeX math |

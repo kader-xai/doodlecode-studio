@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 183) — video start-time timestamps
+- **Media cells honor a start time in YouTube / Vimeo links**, so a
+  "jump to the demo" showcase slide opens the clip at the right moment.
+  Pasting `…watch?v=ID&t=1m30s` (or `?t=90`, `?t=90s`, `?start=90`,
+  `youtu.be/ID?t=…`, a shorts link, or Vimeo's `#t=90s`) now carries the
+  offset into the embed (`…/embed/ID?start=90`, Vimeo `…#t=90s`). The
+  embed logic moved into a pure, unit-tested `lib/videoEmbed.ts`
+  (`parseTimestamp` accepts `90`, `90s`, `1m30s`, `1h2m3s`, and `1:02:03`
+  clock form). 191 frontend tests.
+
 ### Responsiveness (iter 182) — toolbar wraps on narrow viewports
 - **The toolbar no longer runs off-screen on small windows.** The main
   button pill was a single non-wrapping row of ~20 controls, so a narrow
