@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 187) — chart reference / threshold lines
+- **Line, area, and scatter charts can draw a dashed reference line.**
+  `hline: 0.5` (or `hline Target: 0.5` with a label) marks a goal /
+  threshold across the plot — the classic "did we beat the baseline?"
+  annotation for data storytelling. Lines outside the chart's y-range
+  are skipped; the marker is drawn in marker-pink with a right-aligned
+  label. (Dashed here is a data annotation, not the cell-connector
+  structure the no-dashed rule covers.) The Line editor preset now seeds
+  an `hline Target:` so it's discoverable. 203 frontend tests.
+
 ### Added (iter 186) — markdown ordered lists
 - **Text cells render numbered lists** (`1. step`, also `1)` style) —
   the natural companion to bullet lists for step-by-step explanations.

@@ -213,4 +213,28 @@ describe("renderDoodleDiagram", () => {
     expect(out).not.toContain("<b>x</b>");
     expect(out).toContain("&lt;b&gt;");
   });
+
+  it("parses hline reference lines with optional labels (iter 187)", () => {
+    const p = parseDoodleDiagram("hline: 0.5\nhline Target: 0.3");
+    expect(p.hlines).toEqual([
+      { value: 0.5 },
+      { value: 0.3, label: "Target" },
+    ]);
+  });
+
+  it("draws a dashed reference line on a line chart in range (iter 187)", () => {
+    const out = renderDoodleDiagram("hline Goal: 0.5\nline Loss: 0.9, 0.5, 0.3");
+    expect(out).toContain('stroke-dasharray="6 4"');
+    expect(out).toContain("Goal");
+  });
+
+  it("skips a reference line outside the chart's y-range (iter 187)", () => {
+    const out = renderDoodleDiagram("hline: 99\nline L: 1, 2, 3");
+    expect(out).not.toContain('stroke-dasharray="6 4"');
+  });
+
+  it("renders a reference line on a scatter plot (iter 187)", () => {
+    const out = renderDoodleDiagram("scatter: XY\nhline: 3\npoint: 1, 2\npoint: 2, 5");
+    expect(out).toContain('stroke-dasharray="6 4"');
+  });
 });

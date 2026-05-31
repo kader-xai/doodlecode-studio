@@ -49,6 +49,8 @@ export interface AreaSeries { label: string; points: number[] }
 export interface PieSlice { label: string; value: number }
 /** Iter 166: one (x, y) dot of a scatter plot. */
 export interface ScatterPoint { x: number; y: number }
+/** Iter 187: a horizontal reference/threshold line on a y-axis chart. */
+export interface HLine { value: number; label?: string }
 
 export interface Parsed {
   flow: FlowEdge[];
@@ -57,6 +59,8 @@ export interface Parsed {
   areas: AreaSeries[];
   pies: PieSlice[];
   points: ScatterPoint[];
+  /** Iter 187: dashed reference lines, shared by line / area / scatter. */
+  hlines: HLine[];
   chartTitle: string;
   pieTitle: string;
   scatterTitle: string;
@@ -73,6 +77,7 @@ export function parseDoodleDiagram(source: string): Parsed {
   const areas: AreaSeries[] = [];
   const pies: PieSlice[] = [];
   const points: ScatterPoint[] = [];
+  const hlines: HLine[] = [];
   let chartTitle = "";
   let pieTitle = "";
   let scatterTitle = "";
@@ -100,6 +105,20 @@ export function parseDoodleDiagram(source: string): Parsed {
     if (normalized.startsWith("chart:")) {
       chartTitle = line.split(":").slice(1).join(":").trim() || "Chart";
       continue;
+    }
+
+    // Iter 187: reference line — `hline: 0.5` or `hline Target: 0.5`.
+    // A dashed threshold drawn across line / area / scatter charts.
+    if (normalized.startsWith("hline:") || normalized.startsWith("hline ")) {
+      const colon = line.indexOf(":");
+      if (colon !== -1) {
+        const label = line.slice(0, colon).replace(/^hline\b\s*/i, "").trim();
+        const value = Number(line.slice(colon + 1).trim());
+        if (Number.isFinite(value)) {
+          hlines.push(label ? { value, label } : { value });
+        }
+        continue;
+      }
     }
 
     // Iter 166: scatter title (`scatter: Title`) — checked before the
@@ -204,17 +223,50 @@ export function parseDoodleDiagram(source: string): Parsed {
     }
   }
 
-  return { flow, charts, lines: series, areas, pies, points, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
+  return { flow, charts, lines: series, areas, pies, points, hlines, chartTitle, pieTitle, scatterTitle, xLabel, yLabel };
+}
+
+/**
+ * Iter 187: render dashed horizontal reference lines + right-edge labels
+ * for any y-axis chart. `yAt` maps a data value to a pixel y; lines
+ * outside the plot's [minV, maxV] band are skipped. Dashed strokes are
+ * the conventional threshold marker — distinct from the "no dashed
+ * structure" rule, which is about cell connectors, not chart data.
+ */
+function renderHLines(
+  hlines: HLine[],
+  yAt: (v: number) => number,
+  minV: number,
+  maxV: number,
+  padL: number,
+  plotW: number,
+  stroke: string,
+): string {
+  return hlines
+    .filter((h) => h.value >= minV && h.value <= maxV)
+    .map((h) => {
+      const y = yAt(h.value).toFixed(1);
+      const line = `<line x1="${padL}" y1="${y}" x2="${padL + plotW}" y2="${y}"
+        stroke="#c2255c" stroke-width="2" stroke-dasharray="6 4" opacity="0.85"/>`;
+      const tag = h.label
+        ? `<text x="${padL + plotW - 4}" y="${(yAt(h.value) - 4).toFixed(1)}" text-anchor="end"
+            font-family="Patrick Hand, Caveat, sans-serif" font-size="13" font-weight="700"
+            fill="#c2255c">${escape(h.label)}</text>`
+        : "";
+      void stroke;
+      return line + tag;
+    })
+    .join("");
 }
 
 export function renderDoodleDiagram(source: string, dark = false): string {
   const parsed = parseDoodleDiagram(source);
   const flow = renderFlow(parsed.flow, dark);
   const chart = renderChart(parsed.charts, parsed.chartTitle || "Chart", dark);
-  const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark, parsed.xLabel, parsed.yLabel);
-  const areaChart = renderAreaChart(parsed.areas, parsed.chartTitle || "Area", dark, parsed.xLabel, parsed.yLabel);
+  const lineChart = renderLineChart(parsed.lines, parsed.chartTitle || "Trend", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
+  const areaChart = renderAreaChart(parsed.areas, parsed.chartTitle || "Area", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
   const pieChart = renderPieChart(parsed.pies, parsed.pieTitle || "Breakdown", dark);
-  const scatterChart = renderScatterChart(parsed.points, parsed.scatterTitle || "Scatter", dark, parsed.xLabel, parsed.yLabel);
+  const scatterChart = renderScatterChart(parsed.points, parsed.scatterTitle || "Scatter", dark, parsed.xLabel, parsed.yLabel, parsed.hlines);
   if (!flow && !chart && !lineChart && !areaChart && !pieChart && !scatterChart) {
     return placeholder(dark);
   }
@@ -392,7 +444,7 @@ function renderChart(items: ChartItem[], title: string, dark: boolean): string {
 
 // ───────────────────────── Line chart ───────────────────────────
 
-function renderLineChart(series: LineSeries[], title: string, dark: boolean, xLabel = "", yLabel = ""): string {
+function renderLineChart(series: LineSeries[], title: string, dark: boolean, xLabel = "", yLabel = "", hlines: HLine[] = []): string {
   if (!series.length) return "";
   const all = series.flatMap((s) => s.points);
   if (!all.length) return "";
@@ -463,6 +515,7 @@ function renderLineChart(series: LineSeries[], title: string, dark: boolean, xLa
           font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(minV)}</text>`;
 
   const axisTitles = axisTitleSvg(xLabel, yLabel, padL, padTop, plotW, plotH, height, stroke);
+  const refLines = renderHLines(hlines, yAt, minV, maxV, padL, plotW, stroke);
 
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
         style="max-width:100%; height:auto;" role="img" aria-label="Line chart">
@@ -472,6 +525,7 @@ function renderLineChart(series: LineSeries[], title: string, dark: boolean, xLa
     ${gridLines}
     ${axis}
     ${yTicks}
+    ${refLines}
     ${seriesSvg}
     ${axisTitles}
   </svg>`;
@@ -576,7 +630,7 @@ function renderPieChart(slices: PieSlice[], title: string, dark: boolean): strin
 
 // ───────────────────────── Area chart ───────────────────────────
 
-function renderAreaChart(series: AreaSeries[], title: string, dark: boolean, xLabel = "", yLabel = ""): string {
+function renderAreaChart(series: AreaSeries[], title: string, dark: boolean, xLabel = "", yLabel = "", hlines: HLine[] = []): string {
   if (!series.length) return "";
   const all = series.flatMap((s) => s.points);
   if (!all.length) return "";
@@ -645,6 +699,7 @@ function renderAreaChart(series: AreaSeries[], title: string, dark: boolean, xLa
           font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(minV)}</text>`;
 
   const axisTitles = axisTitleSvg(xLabel, yLabel, padL, padTop, plotW, plotH, height, stroke);
+  const refLines = renderHLines(hlines, yAt, minV, maxV, padL, plotW, stroke);
 
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
         style="max-width:100%; height:auto;" role="img" aria-label="Area chart">
@@ -655,13 +710,14 @@ function renderAreaChart(series: AreaSeries[], title: string, dark: boolean, xLa
     ${seriesSvg}
     ${axis}
     ${yTicks}
+    ${refLines}
     ${axisTitles}
   </svg>`;
 }
 
 // ───────────────────────── Scatter plot ─────────────────────────
 
-function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean, xLabel = "", yLabel = ""): string {
+function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean, xLabel = "", yLabel = "", hlines: HLine[] = []): string {
   if (!points.length) return "";
 
   const xs = points.map((p) => p.x);
@@ -716,6 +772,7 @@ function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean
           font-family="Patrick Hand, Caveat, sans-serif" font-size="13" fill="${stroke}">${trimNum(maxX)}</text>`;
 
   const axisTitles = axisTitleSvg(xLabel, yLabel, padL, padTop, plotW, plotH, height, stroke);
+  const refLines = renderHLines(hlines, yAt, minY, maxY, padL, plotW, stroke);
 
   return `<svg viewBox="0 0 ${width} ${height}" width="${width}" height="${height}"
         style="max-width:100%; height:auto;" role="img" aria-label="Scatter plot">
@@ -724,6 +781,7 @@ function renderScatterChart(points: ScatterPoint[], title: string, dark: boolean
     ${gridLines}
     ${axis}
     ${ticks}
+    ${refLines}
     ${dots}
     ${axisTitles}
   </svg>`;

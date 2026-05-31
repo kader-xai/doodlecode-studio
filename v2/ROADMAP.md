@@ -101,6 +101,8 @@ The accessibility & polish batch (173–177) is complete.
   new-tab + safe-scheme guard.
 - **185 — Markdown ordered lists** ✓ (iter 186): `1. step` numbered
   lists with `<ol start>` offset.
+- **186 — Chart reference lines** ✓ (iter 187): `hline: 0.5` dashed
+  threshold on line/area/scatter for "beat the baseline" storytelling.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
