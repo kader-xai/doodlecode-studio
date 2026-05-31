@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Docs (iter 171) — README refresh for the data-viz suite
+- **README now documents the full v2.6.0 data-viz suite.** New "Doodle
+  charts" section with the line-syntax for flow / bar / line / pie /
+  scatter and a kind→trigger table; the intro and Diagram cell row
+  mention every chart kind; the keyboard table gains **N** (speaker
+  note) and **🎬 / Shift+R** (reveal step); the optional-directives
+  list documents `# @reveal:` and `# @note:`; and the new
+  `examples/data_viz_demo.py` is linked as the worked example.
+
 ### Added (iter 170) — data-viz demo deck + regression fixture
 - **New `examples/data_viz_demo.py`** — a 7-slide deck that exercises
   the whole v2.6.0 suite end-to-end: a bar chart, a line chart with

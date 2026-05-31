@@ -6,10 +6,12 @@
 
 A doodle-powered Python notebook + presentation canvas. Code cells with a
 persistent Python kernel, markdown, images, YouTube embeds, live browser
-panes, a whiteboard, doodle-style flowcharts + bar charts, Mermaid,
-KaTeX math, multi-callout bubbles with images, presentation mode with
-fading pen / highlighter / fixed-pen ink — all in **one local app, one
-`.py` file per notebook**.
+panes, a whiteboard, a full suite of hand-drawn charts (flowcharts, bar,
+line, pie/donut, scatter — with axis titles), Mermaid, KaTeX math,
+multi-callout bubbles with images, live **reveal-step** code build-ups,
+per-slide **speaker notes**, and presentation mode with fading pen /
+highlighter / fixed-pen ink and a gentle slide entrance animation — all
+in **one local app, one `.py` file per notebook**.
 
 ## Quickstart
 
@@ -53,7 +55,7 @@ and type `matplotlib`.
 | Media       | `＋ Media` / M              | Image, video, YouTube, or Vimeo URL       |
 | Browser     | `＋ Browser` / W            | Live website in an iframe (with proxy)    |
 | Whiteboard  | `＋ Draw` / D               | Pen + highlighter + 5 colors + 3 bgs      |
-| Diagram     | `＋ Diagram` / G            | Doodle flow+chart, Mermaid, or KaTeX math |
+| Diagram     | `＋ Diagram` / G            | Doodle charts (flow/bar/line/pie/scatter), Mermaid, or KaTeX math |
 
 ## Keyboard
 
@@ -65,6 +67,8 @@ and type `matplotlib`.
 | Cmd/Ctrl+D                | Duplicate selected cell(s) — works on groups |
 | Backspace / Delete        | Delete selected cell(s) — works on groups |
 | C                         | Open callout editor for selected cell     |
+| N (cell selected)         | Edit the per-slide speaker note           |
+| 🎬 / Shift+R              | Reveal next code build-up step            |
 | Cmd/Ctrl+A                | Select every cell on the canvas           |
 | Shift / Cmd-click cell    | Add to current selection                  |
 | Drag empty pane (Select)  | Lasso-select multiple cells               |
@@ -106,6 +110,48 @@ Two desktop-to-canvas drops are wired:
   after a confirm prompt so unsaved work isn't clobbered. The
   filename (sans extension) becomes the new notebook name.
 
+## Doodle charts
+
+A Diagram cell set to **🖍 Doodle** compiles a tiny line-based syntax
+into hand-drawn SVG. Kinds stack — put several in one cell and they
+render top-to-bottom. While editing, the **Insert:** bar seeds a working
+sample for each kind, so there's nothing to memorize.
+
+```text
+flowchart                     # arrows between boxes
+Idea --> Draft
+Draft --> Ship
+
+chart: Scores                 # bar chart (title optional)
+Python: 8
+Rust: 4
+
+xlabel: Epoch                 # axis titles apply to line + scatter
+ylabel: Loss
+line Train: 0.9, 0.6, 0.4     # one polyline per `line` row
+line Val: 0.95, 0.7, 0.55
+
+pie: Runtime                  # pie / donut + % legend
+pie Parsing: 15
+pie Rendering: 45
+
+scatter: Size vs time         # x/y dots with gridlines
+point: 1, 2
+point: 3, 5
+```
+
+| Kind     | Trigger line(s)                        |
+|----------|----------------------------------------|
+| Flow     | any line containing `-->`              |
+| Bar      | `chart: Title` + `Label: number` rows  |
+| Line     | `line Label: n, n, n` (comma/space)    |
+| Pie      | `pie: Title` + `pie Label: number`     |
+| Scatter  | `scatter: Title` + `point: x, y`       |
+| Axis     | `xlabel: …` / `ylabel:…` (line+scatter)|
+
+See [`examples/data_viz_demo.py`](examples/data_viz_demo.py) for a deck
+that exercises every kind plus speaker notes and reveal steps.
+
 ## File format
 
 One `.py` file per notebook. Cells are separated by `# %%` headers.
@@ -140,6 +186,10 @@ Optional directives (additive — old files keep loading):
 - `# @image: data:image/png;base64,…` — embed an image in the current bubble
 - `# @link_to: <id>` — draw a sketchy line to another cell (v2.1.0+)
 - `# @collapsed: true` — render only the title strip (v2.2.0+)
+- `# @reveal: <code>` — a build-up step typed in live during a talk;
+  one directive per step, newlines escaped as `\n` (v2.6.0+)
+- `# @note: <text>` — a presenter speaker note shown only to you
+  (bottom-left HUD) while presenting; newlines escaped (v2.6.0+)
 
 Old `# @explain:` files load as `callouts[0]` automatically — files
 written by any prior version still open.

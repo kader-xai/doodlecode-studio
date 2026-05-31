@@ -50,7 +50,9 @@ one at a time (see CHANGELOG for the running log).
   `examples/data_viz_demo.py` exercises every chart kind
   (bar/line/pie/scatter + axis labels), speaker notes, and reveal steps;
   a backend test asserts coverage + round-trip so it stays honest.
-- **170 — README/docs refresh** for the v2.6.0 data-viz suite.
+- **170 — README/docs refresh** ✓ (shipped as iter 171): "Doodle
+  charts" syntax section + kind table, N / Shift+R keys, `@reveal` /
+  `@note` directives, linked the data-viz demo.
 - **171 — Area / stacked-bar chart** for part-to-whole-over-x.
 - **172 — Chart data from a code cell** (wire a cell's output into a
   diagram) — live data-driven visuals.
