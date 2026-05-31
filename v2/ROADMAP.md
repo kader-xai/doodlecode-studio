@@ -41,6 +41,17 @@ one at a time (see CHANGELOG for the running log).
 - **167 — Entrance animation for revealed slides** ✓ (shipped as iter
   169): focused slide rises + settles (translateY + fade), inner content
   only so it never fights pan/zoom; respects reduced-motion.
-- **168 — Release**: bundle the visual-intuition batch.
+- **168 — Release** ✓ (shipped as v2.6.0): bundled the visual-intuition
+  batch (speaker notes, scatter, chart presets, axis titles, slide
+  entrance animation). Lockstep bump 2.5.5 → 2.6.0, tagged.
+
+### Next batch (post-2.6.0) — ideas, prioritized
+- **169 — Visual-intuition demo deck**: a `.py` example exercising
+  every chart kind (bar/line/pie/scatter + axis labels), speaker notes,
+  and reveal steps end-to-end. Doubles as a regression fixture.
+- **170 — README/docs refresh** for the v2.6.0 data-viz suite.
+- **171 — Area / stacked-bar chart** for part-to-whole-over-x.
+- **172 — Chart data from a code cell** (wire a cell's output into a
+  diagram) — live data-driven visuals.
 
 This file is updated as items land or priorities shift.
