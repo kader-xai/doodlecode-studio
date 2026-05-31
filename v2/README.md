@@ -126,10 +126,18 @@ chart: Scores                 # bar chart (title optional)
 Python: 8
 Rust: 4
 
-xlabel: Epoch                 # axis titles apply to line + scatter
+stack: Spend by quarter       # stacked bar — part-to-whole per category
+series: Eng, Sales, Ops       # segment legend
+stack Q1: 5, 3, 2
+stack Q2: 6, 4, 3
+
+xlabel: Epoch                 # axis titles apply to line / area / scatter
 ylabel: Loss
+hline Target: 0.3             # dashed reference line (line / area / scatter)
 line Train: 0.9, 0.6, 0.4     # one polyline per `line` row
 line Val: 0.95, 0.7, 0.55
+
+area Active: 2, 5, 9, 14      # filled trend — one `area` row per series
 
 pie: Runtime                  # pie / donut + % legend
 pie Parsing: 15
@@ -140,15 +148,17 @@ point: 1, 2
 point: 3, 5
 ```
 
-| Kind     | Trigger line(s)                        |
-|----------|----------------------------------------|
-| Flow     | any line containing `-->`              |
-| Bar      | `chart: Title` + `Label: number` rows  |
-| Stacked  | `stack: Title` + `series: A, B` + `stack Cat: a, b` |
-| Line     | `line Label: n, n, n` (comma/space)    |
-| Pie      | `pie: Title` + `pie Label: number`     |
-| Scatter  | `scatter: Title` + `point: x, y`       |
-| Axis     | `xlabel: …` / `ylabel:…` (line+scatter)|
+| Kind      | Trigger line(s)                        |
+|-----------|----------------------------------------|
+| Flow      | any line containing `-->`              |
+| Bar       | `chart: Title` + `Label: number` rows  |
+| Stacked   | `stack: Title` + `series: A, B` + `stack Cat: a, b` |
+| Line      | `line Label: n, n, n` (comma/space)    |
+| Area      | `area Label: n, n, n` (filled line)    |
+| Pie       | `pie: Title` + `pie Label: number`     |
+| Scatter   | `scatter: Title` + `point: x, y`       |
+| Axis      | `xlabel: …` / `ylabel:…` (line/area/scatter) |
+| Reference | `hline: 0.5` or `hline Label: 0.5` (line/area/scatter) |
 
 See [`examples/data_viz_demo.py`](examples/data_viz_demo.py) for a deck
 that exercises every kind plus speaker notes and reveal steps.
@@ -163,6 +173,7 @@ Doodle diagram:
 counts = {"Python": 8, "Rust": 4, "Go": 6}
 print(doodle.bar(counts, title="Lines of code"))
 print(doodle.line({"Train": [0.9, 0.6, 0.4]}, xlabel="Epoch", ylabel="Loss"))
+print(doodle.area({"Active": [2, 5, 9, 14]}, xlabel="Week", ylabel="Users"))
 print(doodle.pie(counts))
 print(doodle.scatter([(1, 2), (3, 5)], xlabel="x", ylabel="y"))
 ```

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Docs (iter 191) — complete the chart-syntax reference
+- **The README "Doodle charts" section now documents every kind.** The
+  worked example and kind table gained the **Area**, **Stacked**, and
+  **Reference-line (`hline:`)** rows that had shipped without docs, and
+  the `doodle` Python-helper snippet now shows `doodle.area(...)`. Brings
+  the docs back in lockstep with the renderer (CLAUDE rule 25).
+
 ### Added (iter 190) — doodle stacked bar chart
 - **Diagram cells render stacked bars for part-to-whole across
   categories.** `stack: Title` sets a heading, `series: Eng, Sales, Ops`
