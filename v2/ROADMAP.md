@@ -124,6 +124,9 @@ The accessibility & polish batch (173–177) is complete.
   the kernel data→syntax helper can now emit stacked + grouped bar source
   from a `{category: [values]}` table, matching the renderer. 34 backend
   tests.
+- **193 — Markdown tables** ✓ (iter 196): text cells render GitHub-style
+  `| a | b |` tables with per-column alignment from the `:--:` separator;
+  inline formatting inside cells. 217 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

@@ -78,4 +78,39 @@ describe("renderMarkdown", () => {
     expect(html).not.toContain("<a");
     expect(html).toContain("[x](javascript:alert(1))");
   });
+
+  it("renders a table with a header and body rows (iter 196)", () => {
+    const html = toHtml("| A | B |\n| --- | --- |\n| 1 | 2 |\n| 3 | 4 |");
+    expect(html).toContain("<table");
+    expect((html.match(/<th[\s>]/g) ?? []).length).toBe(2); // not <thead
+    expect((html.match(/<tr[\s>]/g) ?? []).length).toBe(3); // 1 header + 2 body
+    expect((html.match(/<td/g) ?? []).length).toBe(4);
+    expect(html).toContain(">A</th>");
+    expect(html).toContain(">4</td>");
+  });
+
+  it("honors per-column alignment from the separator (iter 196)", () => {
+    const html = toHtml("| L | C | R |\n| :-- | :-: | --: |\n| a | b | c |");
+    expect(html).toContain("text-align:left");
+    expect(html).toContain("text-align:center");
+    expect(html).toContain("text-align:right");
+  });
+
+  it("renders inline formatting inside table cells (iter 196)", () => {
+    const html = toHtml("| Col |\n| --- |\n| **bold** |");
+    expect(html).toContain("<strong>bold</strong>");
+  });
+
+  it("does not treat a lone pipe line as a table (iter 196)", () => {
+    const html = toHtml("a | b without a separator row");
+    expect(html).not.toContain("<table");
+    expect(html).toContain("<p");
+  });
+
+  it("pads short body rows to the header column count (iter 196)", () => {
+    const html = toHtml("| A | B |\n| --- | --- |\n| only-one |");
+    expect(html).toContain("<table");
+    // header defines 2 columns, so the short row still emits 2 <td>.
+    expect((html.match(/<td/g) ?? []).length).toBe(2);
+  });
 });

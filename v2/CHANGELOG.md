@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 196) — markdown tables in text cells
+- **Text cells now render GitHub-style tables.** A header row of
+  `| a | b |` followed by a separator `| --- | :-: |` renders a
+  hand-drawn doodle table; colons in the separator set per-column
+  alignment (`:--` left, `:-:` center, `--:` right). Short body rows are
+  padded to the header's column count, and inline **bold** / `code` /
+  links render inside cells. A lone pipe line without a separator stays a
+  paragraph. Zero-dependency; 5 vitest cases (217 frontend tests).
+
 ### Added (iter 195) — `doodle.stack()` / `doodle.group()` kernel helpers
 - **The `doodle` data→chart-syntax helper now emits stacked and grouped
   bars.** `doodle.stack(rows, series=…, title=…)` and `doodle.group(…)`

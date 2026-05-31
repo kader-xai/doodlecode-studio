@@ -12,12 +12,41 @@ import { JSX } from "react";
  *   `**bold**` and `*italic*`
  *   `` `inline code` ``
  *   `[text](url)`                   (link — http/https/mailto/relative)
+ *   `| a | b |` + `| --- | :-: |`   (table, with column alignment)
  *   blank lines separate paragraphs
  *
- * We do NOT support full CommonMark (no images, tables, nested lists,
- * fenced code). That's intentional — v1 grew a giant markdown surface
- * and most of it went unused. Add only what users ask for.
+ * We do NOT support full CommonMark (no images, nested lists, fenced
+ * code). That's intentional — v1 grew a giant markdown surface and most
+ * of it went unused. Add only what users ask for.
  */
+/** A `| --- | :--: |` row: pipes plus dashes, only dash/colon/pipe/space. */
+function isTableSeparator(line: string): boolean {
+  return (
+    line.includes("|") &&
+    line.includes("-") &&
+    /^\s*\|?[\s:|-]+\|?\s*$/.test(line) &&
+    /\|/.test(line)
+  );
+}
+
+/** Split `| a | b |` into trimmed cells, tolerating optional edge pipes. */
+function splitTableRow(line: string): string[] {
+  let s = line.trim();
+  if (s.startsWith("|")) s = s.slice(1);
+  if (s.endsWith("|")) s = s.slice(0, -1);
+  return s.split("|").map((c) => c.trim());
+}
+
+/** Column alignment from a separator cell: `:--` left, `:-:` center, `--:` right. */
+function alignOf(seg: string): "left" | "center" | "right" {
+  const t = seg.trim();
+  const l = t.startsWith(":");
+  const r = t.endsWith(":");
+  if (l && r) return "center";
+  if (r) return "right";
+  return "left";
+}
+
 export function renderMarkdown(src: string): JSX.Element[] {
   const lines = src.split("\n");
   const out: JSX.Element[] = [];
@@ -71,6 +100,66 @@ export function renderMarkdown(src: string): JSX.Element[] {
         <hr key={key++} className="my-2 border-t-2 border-ink/40 dark:border-white/40" />,
       );
       i++;
+      continue;
+    }
+
+    // Iter 196: GitHub-style table — a header row of `| a | b |`
+    // immediately followed by a separator row `| --- | :--: |`. The
+    // separator's colons set per-column alignment. Body rows continue
+    // until a blank or non-pipe line.
+    if (
+      line.includes("|") &&
+      i + 1 < lines.length &&
+      isTableSeparator(lines[i + 1])
+    ) {
+      const headers = splitTableRow(line);
+      const aligns = splitTableRow(lines[i + 1]).map(alignOf);
+      i += 2;
+      const rows: string[][] = [];
+      while (
+        i < lines.length &&
+        lines[i].includes("|") &&
+        lines[i].trim() !== ""
+      ) {
+        rows.push(splitTableRow(lines[i]));
+        i++;
+      }
+      const cellBase =
+        "border-2 border-ink/30 dark:border-white/30 px-3 py-1 align-top";
+      out.push(
+        <div key={key++} className={`my-2 overflow-x-auto scrollbar-none ${wrap}`}>
+          <table className="border-collapse font-hand text-xl">
+            <thead>
+              <tr>
+                {headers.map((h, j) => (
+                  <th
+                    key={j}
+                    style={{ textAlign: aligns[j] ?? "left" }}
+                    className={`${cellBase} font-bold bg-ink/5 dark:bg-white/10`}
+                  >
+                    {renderInline(h)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r, ri) => (
+                <tr key={ri}>
+                  {headers.map((_, ci) => (
+                    <td
+                      key={ci}
+                      style={{ textAlign: aligns[ci] ?? "left" }}
+                      className={cellBase}
+                    >
+                      {renderInline(r[ci] ?? "")}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>,
+      );
       continue;
     }
 
