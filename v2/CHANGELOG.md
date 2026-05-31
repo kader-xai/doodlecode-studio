@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Responsiveness (iter 182) — toolbar wraps on narrow viewports
+- **The toolbar no longer runs off-screen on small windows.** The main
+  button pill was a single non-wrapping row of ~20 controls, so a narrow
+  viewport (split screen, tablet, projector preview) clipped the
+  right-hand buttons. The pill now `flex-wrap`s its buttons and the
+  header wraps the Tools / shortcuts / theme group below the main pill
+  when space runs out — every control stays reachable at any width. No
+  behavior change on wide screens. 177 frontend tests.
+
 ### Performance (iter 181) — code-split Mermaid + KaTeX
 - **The main bundle shrank from ~1.29 MB to ~456 KB** (gzip 353 → 141
   KB). Mermaid (~581 KB) and KaTeX (~258 KB + 29 KB CSS) were imported

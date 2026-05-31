@@ -85,8 +85,8 @@ The accessibility & polish batch (173–177) is complete.
   `v2-frontend` (tsc/vitest/build) jobs; CONTRIBUTING points to `v2/`.
 - **179 — Bundle code-split** ✓ (iter 181): Mermaid + KaTeX lazy-loaded;
   main chunk 1.29 MB → 456 KB; build warning-clean.
-- **180 — Small-viewport responsiveness**: toolbar wraps / collapses
-  into an overflow menu on narrow screens.
+- **180 — Small-viewport responsiveness** ✓ (iter 182): toolbar pill +
+  header `flex-wrap` so controls stack instead of overflowing.
 
 Other candidate areas: new showcase features (embedded video timeline,
 animated GIF export of a slide), richer diagram presets.

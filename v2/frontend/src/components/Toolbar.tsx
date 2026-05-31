@@ -85,9 +85,11 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
   if (presenting) return null;
 
   return (
-    <header className="absolute top-3 left-3 right-3 z-30 flex items-start justify-between pointer-events-none">
-      <div className="flex flex-col gap-1 pointer-events-auto">
-        <div className="flex items-center gap-2 bg-white/70 dark:bg-[#262a31]/70 backdrop-blur px-3 py-1.5 rounded-xl border-2 border-ink/40 dark:border-white/30 shadow-sketch">
+    <header className="absolute top-3 left-3 right-3 z-30 flex items-start justify-between gap-2 flex-wrap pointer-events-none">
+      <div className="flex flex-col gap-1 pointer-events-auto min-w-0 max-w-full">
+        {/* Iter 182: the button row wraps so a narrow viewport stacks
+         *  the controls instead of overflowing off-screen. */}
+        <div className="flex items-center flex-wrap gap-2 bg-white/70 dark:bg-[#262a31]/70 backdrop-blur px-3 py-1.5 rounded-xl border-2 border-ink/40 dark:border-white/30 shadow-sketch">
           <span className="font-hand text-3xl select-none leading-none">📓 DoodleCode</span>
           <span className="font-hand text-3xl text-[#c2255c] dark:text-[#fcc2d7] leading-none">Studio</span>
           <span className="font-mono text-xs ml-1 px-1.5 py-0.5 rounded-md border-2 border-ink/40 dark:border-white/40 bg-white/80 dark:bg-black/40">
