@@ -88,10 +88,18 @@ v2/
     the user types.
 12. **Click → select, never reset zoom.** Clicking a cell pans nothing.
     Presentation `setCenter` keeps the user's current zoom.
-13. **Presentation centering uses the bounding box (cell + callout
-    column).** Cells with no callouts center on cell midpoint; cells
-    with callouts include the `CALLOUT_GAP + BUBBLE_W` extra width in
-    the box so cell + bubble are balanced together.
+13. **Presentation centers each slide dead-center and locks the canvas.**
+    (Owner request, iter 206.) Entering presentation and every slide
+    change `setCenter`s the focused cell in the MIDDLE of the viewport on
+    both axes (horizontally on the cell + callout-column bounding box so a
+    cell+bubble pair stays balanced; the extra width is `CALLOUT_GAP +
+    BUBBLE_W`). While `presenting` the canvas is frozen — `nodesDraggable`,
+    `panOnDrag`, `panOnScroll`, `selectionOnDrag` are all `false` and each
+    node's `draggable` is forced `false` — so a slide can never drift out
+    of place. Resizing still works (the resize grip has its own pointer
+    capture). This supersedes the old "pan stays live + anchor top at 33%"
+    behavior. On first load the opening slide is centered at 100% zoom,
+    never a zoomed-out fit-everything view.
 14. **Presenter ink lives at z-9999 when active, z-25 idle.** Active
     pen MUST clear iframes / Monaco / react-flow pane (`html.ink-active`
     CSS rule sets `pointer-events: none !important` on them).

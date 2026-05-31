@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Fixed (iter 206) — presentation centering + locked canvas (owner report)
+- **Every slide now sits dead-center.** Entering presentation and each
+  slide change centers the focused cell in the MIDDLE of the viewport on
+  both axes (was anchored ~⅓ from the top), so it's always centered.
+- **The canvas is frozen while presenting.** Cells can no longer be
+  dragged and the canvas can't be panned (`nodesDraggable`, `panOnDrag`,
+  `panOnScroll`, `selectionOnDrag`, and each node's `draggable` are all
+  off) — notes/slides stay put. A latent `draggable: true` per-node
+  override (which kept slides draggable mid-talk) was removed.
+- **Resizing still works during a talk** — the resize grips on diagram /
+  media / browser / whiteboard cells use their own pointer capture, now
+  unobstructed by pan/drag.
+- **On load the opening slide is centered at 100% zoom**, never a
+  zoomed-out fit-everything view; opening a file re-centers too.
+
 ### Accessibility (iter 205) — flowchart aria summary + table header scope
 - **Flowcharts now describe their edges in the `aria-label`** ("Flowchart
   — Idea to Draft, Draft to Ship"), matching the chart data summaries from

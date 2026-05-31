@@ -1120,7 +1120,14 @@ export const useStore = create<AppState>((set, get) => {
       // shortcuts (Cmd+K, Cmd+/, Shift+Enter) work immediately —
       // without it, the user has to click first.
       const first = get().cellsInOrder()[0];
-      if (first) set({ selectedId: first.id, selectedIds: [first.id] });
+      // Bump panToTick so the canvas re-centers on the opening slide
+      // after an Open (otherwise it kept the previous viewport).
+      if (first)
+        set((s) => ({
+          selectedId: first.id,
+          selectedIds: [first.id],
+          panToTick: s.panToTick + 1,
+        }));
       autosave();
     },
 

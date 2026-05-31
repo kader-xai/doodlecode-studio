@@ -23,7 +23,6 @@ import { MediaCell } from "./MediaCell";
 import { WhiteboardCell } from "./WhiteboardCell";
 import { useStore } from "../store";
 import type { Cell } from "../types";
-import { slideCenterY } from "../lib/present";
 
 const nodeTypes: NodeTypes = {
   code: CodeCell,
@@ -40,6 +39,16 @@ const CELL_WIDTH_FALLBACK: Record<string, number> = {
   code: 580,
   markdown: 560,
   diagram: 560,
+};
+/** Approx cell heights, for vertically centering a slide when the cell
+ *  has no explicit height yet. */
+const CELL_HEIGHT_FALLBACK: Record<string, number> = {
+  code: 360,
+  markdown: 220,
+  diagram: 360,
+  media: 360,
+  browser: 480,
+  whiteboard: 420,
 };
 const CALLOUT_GAP = 40;
 /** Approximate rendered width of a callout bubble — must match the
@@ -96,9 +105,14 @@ function CanvasInner() {
   //   select (default) : drag cells to move; click empty pane deselects.
   //   hand             : drag empty pane to pan; cells locked.
   // Wheel pans in both modes (panOnScroll); Cmd/Ctrl+wheel zooms.
-  const panOnDrag = mode === "hand";
-  const nodesDraggable = mode === "select";
-  const canvasCursor = mode === "hand" ? "grab" : "default";
+  // During presentation everything is locked in place: cells can't be
+  // dragged and the canvas can't be panned, so the focused slide stays
+  // centered (owner request). Resizing still works — the resize grip has
+  // its own pointer handling. Outside presentation, the Figma-style
+  // mode truth table applies.
+  const panOnDrag = !presenting && mode === "hand";
+  const nodesDraggable = !presenting && mode === "select";
+  const canvasCursor = !presenting && mode === "hand" ? "grab" : "default";
 
   const instanceRef = useRef<ReactFlowInstance | null>(null);
 
@@ -142,15 +156,11 @@ function CanvasInner() {
 
   // Pan-to-focused-cell on presentation focus changes.
   //
-  // Horizontally we center on the **bounding box** of the cell PLUS
-  // any callout bubbles to its right, so the slide is balanced
-  // left/right whether or not it has a callout column.
-  //
-  // Vertically we DON'T center the cell's midpoint — that left every
-  // slide sitting low (mid-screen) and tall cells running off the
-  // bottom. Instead the cell's TOP is anchored ~SLIDE_TOP_FRACTION of
-  // the way down the viewport (≈33%), so each slide reads top-to-bottom
-  // from the upper third with breathing room below.
+  // The focused slide is centered DEAD-CENTER in the viewport (both
+  // axes), at the user's current zoom. Horizontally we center on the
+  // bounding box of the cell PLUS any callout bubbles to its right so a
+  // cell+callout pair reads balanced; vertically on the cell midpoint.
+  // (Per owner request: every slide sits in the middle of the screen.)
   useEffect(() => {
     if (!presenting || !focusedCellId) return;
     const inst = instanceRef.current;
@@ -158,20 +168,29 @@ function CanvasInner() {
     const cell = cells.find((c) => c.id === focusedCellId);
     if (!cell) return;
     const w = cell.w ?? CELL_WIDTH_FALLBACK[cell.kind] ?? 560;
+    const h = cell.h ?? CELL_HEIGHT_FALLBACK[cell.kind] ?? 360;
     const hasCallouts = (cell.callouts?.length ?? 0) > 0;
     const totalW = w + (hasCallouts ? CALLOUT_GAP + BUBBLE_W : 0);
     const cx = cell.x + totalW / 2;
-    const z = inst.getZoom();
-
-    // setCenter puts the given world point at the viewport CENTER (50%).
-    // To make the cell's top (cell.y) appear at SLIDE_TOP_FRACTION of
-    // the height, center a point that sits (0.5 - fraction) of a
-    // viewport-height BELOW the cell top, in world units.
-    const SLIDE_TOP_FRACTION = 0.33;
-    const viewportH = typeof window !== "undefined" ? window.innerHeight : 800;
-    const cy = slideCenterY(cell.y, viewportH, z, SLIDE_TOP_FRACTION);
-    inst.setCenter(cx, cy, { zoom: z, duration: 350 });
+    const cy = cell.y + h / 2;
+    inst.setCenter(cx, cy, { zoom: inst.getZoom(), duration: 350 });
   }, [presenting, focusedCellId, cells]);
+
+  // On first load, center the opening slide in the middle of the screen
+  // at 100% zoom — never a zoomed-out "fit everything" view. Fires once
+  // when the ReactFlow instance and cells are both ready.
+  const didInitialCenter = useRef(false);
+  useEffect(() => {
+    if (didInitialCenter.current) return;
+    const inst = instanceRef.current;
+    if (!inst || cells.length === 0) return;
+    didInitialCenter.current = true;
+    const ordered = useStore.getState().cellsInOrder();
+    const c = ordered[0] ?? cells[0];
+    const w = c.w ?? CELL_WIDTH_FALLBACK[c.kind] ?? 560;
+    const h = c.h ?? CELL_HEIGHT_FALLBACK[c.kind] ?? 360;
+    inst.setCenter(c.x + w / 2, c.y + h / 2, { zoom: 1, duration: 0 });
+  }, [cells]);
 
   // Per-cellId stable `data` object. ReactFlow passes `data` straight
   // to the user node component, and changes to its identity cause the
@@ -279,7 +298,11 @@ function CanvasInner() {
             data: dataFor(c.id),
             selected: selSet.has(c.id),
             style: cellStyle,
-            draggable: true,
+            // `undefined` defers to the global `nodesDraggable` prop
+            // (mode-aware). While presenting we force `false` so a slide
+            // can't be dragged out of place. A hardcoded `true` here used
+            // to override the global, keeping slides draggable mid-talk.
+            draggable: presenting ? false : undefined,
             // Iter 169: gentle entrance animation when this cell becomes
             // the focused slide during presentation. The class targets
             // the cell's inner content (not the ReactFlow node wrapper,
@@ -442,9 +465,9 @@ function CanvasInner() {
         // Iter 33: drag on empty pane in Select mode draws a lasso
         // that multi-selects every cell it crosses. Shift-click adds
         // cells to the selection. In Hand mode the drag pans instead.
-        selectionOnDrag={mode === "select"}
+        selectionOnDrag={!presenting && mode === "select"}
         multiSelectionKeyCode={["Shift", "Meta"]}
-        panOnScroll
+        panOnScroll={!presenting}
         zoomOnPinch
         zoomOnScroll={false}
         minZoom={0.3}
