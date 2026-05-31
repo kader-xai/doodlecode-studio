@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+## [2.8.0] — 2026-05-31
+
+Authoring + file-format hardening release. Text cells gain **markdown
+tables** and **fenced code blocks**; the `doodle` kernel helper can now
+emit **stacked + grouped bar** syntax from computed data. Two silent
+save-format corruption bugs are fixed — a literal `\n` in a
+reveal/note/callout, and a `# %%` line inside a code body — with a
+`FILE_FORMAT_VERSION` 3 → 4 bump whose decoder is version-gated, so every
+older notebook still parses exactly as before.
+
 ### Fixed (iter 199) — code body containing `# %%` no longer splits the cell
 - **A code cell whose body contains a `# %%` line round-trips as one
   cell.** The serializer wrote the body verbatim, so any line that looked

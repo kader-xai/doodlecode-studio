@@ -138,6 +138,10 @@ The accessibility & polish batch (173–177) is complete.
   containing a Jupyter-style `# %%` marker (or a deck explaining this
   format) no longer splits into two cells — v4 escapes/peels marker-like
   body lines reversibly. 39 backend tests.
+- **197 — Release v2.8.0** ✓ (iter 200): bundled markdown tables + fenced
+  code, `doodle.stack/group` helpers, and the two file-format round-trip
+  fixes (FILE_FORMAT_VERSION 3→4). Lockstep bump 2.7.0 → 2.8.0, tagged.
+  CI-equivalent green (tsc, 222 FE tests, build, 39 BE tests).
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
