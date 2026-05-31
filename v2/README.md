@@ -51,11 +51,32 @@ and type `matplotlib`.
 | Cell        | Add via                     | Body content                              |
 |-------------|-----------------------------|-------------------------------------------|
 | Code        | `＋ Code` / N               | Python; runs in a persistent kernel       |
-| Text        | `＋ Text` / T               | Markdown — `#`/`-`/`**`/`` ` ``/`[link](url)` |
+| Text        | `＋ Text` / T               | Markdown (see [below](#markdown-in-text-cells)) |
 | Media       | `＋ Media` / M              | Image, video, YouTube, or Vimeo URL (`?t=1m30s` start + `&autoplay=1&mute=1&loop=1` flags honored) |
 | Browser     | `＋ Browser` / W            | Live website in an iframe (with proxy)    |
 | Whiteboard  | `＋ Draw` / D               | Pen + highlighter + 5 colors + 3 bgs      |
 | Diagram     | `＋ Diagram` / G            | Doodle charts (flow/bar/line/pie/scatter), Mermaid, or KaTeX math |
+
+## Markdown in text cells
+
+Text cells render a small, zero-dependency markdown dialect — enough for
+technical and educational writing, nothing more:
+
+| Syntax                          | Renders                                |
+|---------------------------------|----------------------------------------|
+| `# H1` `## H2` `### H3`         | hand-drawn headings                    |
+| `- item` / `* item`             | bullet list                            |
+| `- [ ] todo` / `- [x] done`     | task list (read-only checkbox)         |
+| `1. item` / `1) item`           | ordered list (keeps the start number)  |
+| `> quote`                       | blockquote                             |
+| `---`                           | horizontal rule                        |
+| `**bold**` `*italic*` `` `code` `` | inline emphasis + code              |
+| ```` ```lang … ``` ````         | fenced code block (literal, optional language) |
+| `[text](url)`                   | link (http/https/mailto/relative only) |
+| `\| a \| b \|` + `\| --- \| :-: \|` | table with per-column alignment    |
+
+Not supported (by design): images, nested lists, raw HTML. Use a Media
+cell for images and a Diagram cell for charts/flow/math.
 
 ## Keyboard
 

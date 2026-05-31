@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Docs (iter 202) — document the text-cell markdown dialect
+- **The README now has a "Markdown in text cells" reference table** —
+  headings, bullet / task / ordered lists, blockquotes, rules, inline
+  emphasis + code, fenced code, links, and tables — matching exactly what
+  the renderer supports, plus an explicit "not supported (by design)"
+  note. The Cell-types table's stale inline syntax hint links here
+  instead. Docs in lockstep with the renderer (CLAUDE rule 25).
+
 ### Added (iter 201) — markdown task lists in text cells
 - **`- [ ]` / `- [x]` render read-only checkboxes.** Task-list items in a
   text cell show a checkbox (capital `[X]` accepted); done items strike
