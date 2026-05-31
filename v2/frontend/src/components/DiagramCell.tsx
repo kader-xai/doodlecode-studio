@@ -5,6 +5,7 @@ import katex from "katex";
 import "katex/dist/katex.min.css";
 
 import { renderDoodleDiagram } from "../lib/doodleDiagram";
+import { resolveLiveDoodleSource, stdoutOf } from "../lib/liveChart";
 import { DoodleBorder } from "./DoodleBorder";
 import { EditableTitle } from "./EditableTitle";
 import { ResizeHandle } from "./ResizeHandle";
@@ -26,6 +27,9 @@ const DOODLE_PRESETS: { key: string; label: string; snippet: string }[] = [
   { key: "area", label: "▰ Area", snippet: "xlabel: Week\nylabel: Users\narea Active: 2, 5, 9, 14, 20" },
   { key: "pie", label: "◔ Pie", snippet: "pie: Share\npie Python: 60\npie Rust: 40" },
   { key: "scatter", label: "⠿ Scatter", snippet: "scatter: Cloud\nxlabel: Width\nylabel: Height\npoint: 1, 2\npoint: 3, 4\npoint: 5, 3" },
+  // Iter 174: live data — replace the id with a code cell that prints
+  // doodle-chart syntax (e.g. `print(doodle.bar({...}))`).
+  { key: "live", label: "🔌 Live", snippet: "live: CODE_CELL_ID" },
 ];
 
 function escapeHtml(s: string): string {
@@ -75,6 +79,9 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
   const toggleCollapse = useStore((s) => s.toggleCollapse);
   const dark = useStore((s) => s.theme === "dark");
   const renameTick = useStore((s) => s.renameTick[cellId] ?? 0);
+  // Iter 174: subscribe to runtimes so `live: <id>` charts re-render
+  // when the referenced code cell produces new stdout.
+  const runtimes = useStore((s) => s.runtimes);
 
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(cell?.source ?? "");
@@ -98,10 +105,13 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
   }, [cell?.source, editing]);
 
   // Render the doodle SVG synchronously — it's just string templating.
+  // Iter 174: `live: <id>` lines are first substituted with that code
+  // cell's current stdout, so the chart tracks live data.
   const doodleSvg = useMemo(() => {
     if (!cell || cell.diagram_kind !== "doodle") return "";
-    return renderDoodleDiagram(cell.source, dark);
-  }, [cell?.source, cell?.diagram_kind, dark, cell]);
+    const resolved = resolveLiveDoodleSource(cell.source, (id) => stdoutOf(runtimes[id]));
+    return renderDoodleDiagram(resolved, dark);
+  }, [cell?.source, cell?.diagram_kind, dark, runtimes, cell]);
 
   // KaTeX renders synchronously. We compute the HTML once per source
   // change and dangerouslySet it. `throwOnError: false` makes KaTeX

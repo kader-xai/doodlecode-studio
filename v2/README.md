@@ -171,6 +171,17 @@ each taking a dict (or list of pairs) and returning ready-to-paste
 syntax. Ints stay ints, floats are trimmed, non-positive pie slices are
 dropped.
 
+**Skip the paste — go live.** A Doodle diagram can pull a code cell's
+output directly with a `live: <codeCellId>` line. Whenever that code
+cell runs and prints chart syntax, the diagram re-renders:
+
+```text
+live: c3          # c3 is a code cell that prints doodle.bar(...)
+```
+
+Static chart lines can sit alongside `live:` blocks in the same
+diagram. (The cell id shows in the 🔍 Cmd/Ctrl+K palette.)
+
 ## File format
 
 One `.py` file per notebook. Cells are separated by `# %%` headers.

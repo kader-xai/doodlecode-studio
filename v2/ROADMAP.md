@@ -58,7 +58,7 @@ one at a time (see CHANGELOG for the running log).
 - **172 — Chart data from a code cell** — live data-driven visuals.
   - *Slice A ✓ (iter 173):* kernel `doodle` helper turns Python data
     into chart syntax to `print()` and paste.
-  - *Slice B (next):* a Doodle diagram renders a linked code cell's
-    stdout live (subscribe to `runtimes[id]`), so no paste step.
+  - *Slice B ✓ (iter 174):* a Doodle diagram renders a linked code
+    cell's stdout live via a `live: <id>` directive — no paste step.
 
 This file is updated as items land or priorities shift.

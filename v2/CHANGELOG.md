@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added (iter 174) — live data-driven doodle charts
+- **A Doodle diagram can render a code cell's output live.** Put a
+  `live: <codeCellId>` line in the diagram source and it's replaced with
+  that code cell's current stdout before the chart compiles — so a code
+  cell that `print()`s `doodle.bar(...)` drives the chart with no paste
+  step, re-rendering each time the cell runs. Static chart lines may sit
+  alongside `live:` blocks; an unrun / unknown cell just blanks out
+  (renders the empty-diagram hint). Pure `lib/liveChart.ts`
+  (`resolveLiveDoodleSource` / `stdoutOf`), DiagramCell subscribes to
+  `runtimes`, and a **🔌 Live** editor preset makes it discoverable.
+  Closes the code→chart loop (slice B). 161 frontend tests.
+
 ### Added (iter 173) — `doodle` helper: data → chart syntax in code cells
 - **Every code cell's kernel now exposes a `doodle` namespace** (no
   import) that turns Python data into doodle-chart source:
