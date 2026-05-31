@@ -51,7 +51,7 @@ and type `matplotlib`.
 | Cell        | Add via                     | Body content                              |
 |-------------|-----------------------------|-------------------------------------------|
 | Code        | `＋ Code` / N               | Python; runs in a persistent kernel       |
-| Text        | `＋ Text` / T               | Markdown — `#`/`-`/`**`/`` ` ``           |
+| Text        | `＋ Text` / T               | Markdown — `#`/`-`/`**`/`` ` ``/`[link](url)` |
 | Media       | `＋ Media` / M              | Image, video, YouTube, or Vimeo URL (`?t=1m30s` start + `&autoplay=1&mute=1&loop=1` flags honored) |
 | Browser     | `＋ Browser` / W            | Live website in an iframe (with proxy)    |
 | Whiteboard  | `＋ Draw` / D               | Pen + highlighter + 5 colors + 3 bgs      |

@@ -45,4 +45,23 @@ describe("renderMarkdown", () => {
     expect(boldHtml).toContain("<strong>strong</strong>");
     expect(boldHtml).not.toContain("<em");
   });
+
+  it("renders a [text](url) link, new tab + noopener (iter 185)", () => {
+    const html = toHtml("see [the docs](https://example.com/x)");
+    expect(html).toContain('href="https://example.com/x"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain("noopener");
+    expect(html).toContain(">the docs</a>");
+  });
+
+  it("allows mailto and relative links (iter 185)", () => {
+    expect(toHtml("[mail](mailto:a@b.com)")).toContain('href="mailto:a@b.com"');
+    expect(toHtml("[anchor](#section)")).toContain('href="#section"');
+  });
+
+  it("refuses a javascript: href and leaves it literal (iter 185)", () => {
+    const html = toHtml("[x](javascript:alert(1))");
+    expect(html).not.toContain("<a");
+    expect(html).toContain("[x](javascript:alert(1))");
+  });
 });

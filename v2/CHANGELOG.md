@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 185) — markdown links
+- **Text cells now render `[label](url)` links** — useful for citing
+  references in an explanation. Links open in a new tab with
+  `rel="noopener noreferrer"`. The renderer only accepts safe schemes
+  (`http`, `https`, `mailto`, and relative/anchor links); a
+  `javascript:` href is left as literal text, so user markdown can't
+  smuggle in an XSS payload. The zero-dependency renderer stays tiny —
+  links were the one piece of CommonMark users kept asking for.
+  197 frontend tests (incl. the refused-`javascript:` case).
+
 ### Added (iter 184) — video playback flags (loop / autoplay / mute)
 - **Media cells carry playback flags from the pasted URL into the
   embed.** Add `&autoplay=1`, `&mute=1`, `&loop=1`, or `&controls=0` to a

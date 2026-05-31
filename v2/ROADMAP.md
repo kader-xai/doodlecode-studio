@@ -97,7 +97,10 @@ The accessibility & polish batch (173–177) is complete.
 - **183 — Animated GIF export** of a single slide (capture the canvas
   region to a shareable loop).
 
+- **184 — Markdown links** ✓ (iter 185): `[text](url)` in text cells,
+  new-tab + safe-scheme guard.
+
 Other candidate areas: richer diagram presets, an in-app onboarding
-tour.
+tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
 
 This file is updated as items land or priorities shift.
