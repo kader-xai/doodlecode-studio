@@ -8,7 +8,7 @@
 
 # The DoodleCode data-viz suite 📊
 
-One `.py` file, six hand-drawn chart kinds, speaker notes, and code you
+One `.py` file, seven hand-drawn chart kinds, speaker notes, and code you
 build live. Everything below round-trips through this single file.
 
 1. **Bar** — compare categories
@@ -16,7 +16,8 @@ build live. Everything below round-trips through this single file.
 3. **Area** — a quantity growing over x
 4. **Pie / donut** — part-to-whole
 5. **Scatter** — x/y relationships
-6. **Reveal steps** — type code in during the talk
+6. **Stacked bar** — part-to-whole across categories
+7. **Reveal steps** — type code in during the talk
 
 Press **F5 / Shift+P** to present, **→** to advance. Press **N** on any
 cell to read its speaker note (only you see it, bottom-left).
@@ -73,7 +74,7 @@ pie Idle: 15
 # @title: Scatter — x/y intuition
 # @diagram_kind: doodle
 # @note: Gesture along the diagonal — the upward drift IS the correlation.
-# @link_to: c6
+# @link_to: c8
 
 scatter: Cell size vs render time
 xlabel: Cells
@@ -85,7 +86,19 @@ point: 4, 6
 point: 5, 8
 point: 6, 9
 
-# %% kind=code id=c6 x=120.0 y=2640.0 w=600.0
+# %% kind=diagram id=c8 x=120.0 y=2640.0 w=640.0 h=380.0
+# @title: Stacked — part-to-whole over time
+# @diagram_kind: doodle
+# @note: Read the legend first, then trace one band across the rows to show it growing.
+# @link_to: c6
+
+stack: Engineering hours by quarter
+series: Features, Bugs, Docs
+stack Q1: 18, 9, 4
+stack Q2: 22, 7, 6
+stack Q3: 27, 6, 8
+
+# %% kind=code id=c6 x=120.0 y=3100.0 w=600.0
 # @title: Build it live (press ✨ Reveal)
 # @note: Run the base first. Reveal the helper, then the loop. Narrate each line.
 # @explain: Run shows the base. Press ✨ Reveal (or Shift+R) to add each step.
@@ -96,13 +109,13 @@ point: 6, 9
 # We'll turn the pie numbers into percentages, live.
 print("Base ready — press ✨ Reveal")
 
-# %% kind=markdown id=c7 x=120.0 y=3020.0 w=640.0
+# %% kind=markdown id=c7 x=120.0 y=3560.0 w=640.0
 # @title: Recap
 
-## Six charts, one file 🎉
+## Seven charts, one file 🎉
 
-- **Bar / Line / Area / Pie / Scatter** cover every shape of question;
-  add `hline:` for a target and `xlabel:` / `ylabel:` for axes.
+- **Bar / Line / Area / Pie / Scatter / Stacked** cover every shape of
+  question; add `hline:` for a target and `xlabel:` / `ylabel:` for axes.
 - **Speaker notes** (press **N**) kept the script off the slide.
 - **Reveal steps** built the code up one line at a time.
 

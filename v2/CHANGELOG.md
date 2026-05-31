@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 192) — stacked bar in the data-viz demo deck
+- **`examples/data_viz_demo.py` now showcases the stacked bar chart.** A
+  new "Stacked — part-to-whole over time" slide (Engineering hours by
+  quarter, split Features/Bugs/Docs) sits between scatter and the live
+  code cell, with a speaker note and the reveal chain rewired through it.
+  The intro and recap copy now say *seven* charts; the backend coverage
+  test asserts 9 cells / 6 diagrams and the `stack`/`series:` directives,
+  so the demo can't silently drift from the renderer.
+
 ### Docs (iter 191) — complete the chart-syntax reference
 - **The README "Doodle charts" section now documents every kind.** The
   worked example and kind table gained the **Area**, **Stacked**, and

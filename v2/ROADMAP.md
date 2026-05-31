@@ -105,6 +105,12 @@ The accessibility & polish batch (173–177) is complete.
   threshold on line/area/scatter for "beat the baseline" storytelling.
 - **187 — Stacked bar chart** ✓ (iter 190): `stack Cat: a, b` + `series:`
   legend for part-to-whole across categories.
+- **188 — Chart reference docs** ✓ (iter 191): README example + kind table
+  gained Area / Stacked / `hline:` rows; `doodle.area(...)` in the helper
+  snippet — docs back in lockstep with the renderer.
+- **189 — Stacked bar in the demo deck** ✓ (iter 192): a stacked slide in
+  `examples/data_viz_demo.py` (Engineering hours by quarter); coverage
+  test now asserts 9 cells / 6 diagrams and the `stack`/`series:` lines.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
