@@ -144,6 +144,9 @@ export function CellPalette() {
       <div
         className="relative w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Cell palette"
       >
         <DoodleBorder
           stroke="var(--doodle-stroke, #2a2a2a)"
@@ -155,6 +158,7 @@ export function CellPalette() {
           <input
             ref={inputRef}
             type="text"
+            aria-label="Filter cells"
             value={q}
             onChange={(e) => { setQ(e.target.value); setIdx(0); }}
             onKeyDown={(e) => {

@@ -61,4 +61,16 @@ one at a time (see CHANGELOG for the running log).
   - *Slice B ✓ (iter 174):* a Doodle diagram renders a linked code
     cell's stdout live via a `live: <id>` directive — no paste step.
 
+### Accessibility & polish (toward open-source-readiness)
+- **173 — Modal dialog semantics** ✓ (iter 175): `role="dialog"` +
+  `aria-modal` + `aria-label` on all six overlays; labelled palette
+  input.
+- **174 — Focus management for modals**: focus the first field on open,
+  return focus to the trigger on close, trap Tab within the dialog.
+- **175 — Icon-button labels sweep**: ensure every icon-only control
+  (toolbar, presenter bar, cell headers) has an accessible name.
+- **176 — Reduced-motion audit**: confirm ambient drift + connectors +
+  effects all honor `prefers-reduced-motion`.
+- **177 — Color-contrast pass** on callout palettes + chart colors.
+
 This file is updated as items land or priorities shift.

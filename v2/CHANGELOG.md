@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Accessibility (iter 175) — modal dialog semantics
+- **Every modal now announces itself to assistive tech.** The callout
+  editor, reveal-steps editor, speaker-note editor, install modal,
+  keyboard-shortcuts overlay, and the Cmd/Ctrl+K cell palette gained
+  `role="dialog"` + `aria-modal="true"` + a descriptive `aria-label`,
+  and the palette's filter box has an `aria-label`. First pass of an
+  accessibility sweep toward open-source-readiness; no visual change.
+
 ### Added (iter 174) — live data-driven doodle charts
 - **A Doodle diagram can render a code cell's output live.** Put a
   `live: <codeCellId>` line in the diagram source and it's replaced with

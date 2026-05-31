@@ -50,7 +50,13 @@ export function NoteEditor() {
       className="fixed inset-0 z-[100] bg-black/40 backdrop-blur-sm flex items-center justify-center p-6"
       onClick={cancel}
     >
-      <div className="relative max-w-xl w-full" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="relative max-w-xl w-full"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Speaker note"
+      >
         <DoodleBorder
           stroke="var(--doodle-stroke, #2a2a2a)"
           fill="var(--doodle-help-fill, #fff8e1)"

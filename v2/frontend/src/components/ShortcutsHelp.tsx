@@ -61,6 +61,9 @@ export function ShortcutsHelp({ onClose }: { onClose: () => void }) {
       <div
         className="relative p-6 max-w-lg w-full"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Keyboard shortcuts"
       >
         <DoodleBorder
           stroke="var(--doodle-stroke, #2a2a2a)"

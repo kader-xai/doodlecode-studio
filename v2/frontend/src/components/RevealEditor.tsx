@@ -76,6 +76,9 @@ export function RevealEditor() {
       <div
         className="relative max-w-2xl w-full max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Reveal steps editor"
       >
         <DoodleBorder
           stroke="var(--doodle-stroke, #2a2a2a)"
