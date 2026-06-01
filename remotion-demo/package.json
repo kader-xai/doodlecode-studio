@@ -1,0 +1,23 @@
+{
+  "name": "doodlecode-demo-tour",
+  "version": "1.0.0",
+  "private": true,
+  "description": "60s silent feature-tour of DoodleCode Studio, built with Remotion.",
+  "scripts": {
+    "start": "remotion studio",
+    "build": "remotion render DoodleTour out/doodlecode-tour.mp4",
+    "build:webm": "remotion render DoodleTour out/doodlecode-tour.webm --codec=vp8",
+    "build:gif": "remotion render DoodleTour out/doodlecode-tour.gif --codec=gif --every-nth-frame=2 --width=960",
+    "upgrade": "remotion upgrade"
+  },
+  "dependencies": {
+    "@remotion/cli": "^4.0.200",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.200"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.1",
+    "typescript": "^5.4.0"
+  }
+}
