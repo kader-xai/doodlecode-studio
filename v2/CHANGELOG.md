@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [2.9.0] — 2026-06-01
+
+Presentation + content release. Jump to any slide by number (`1`–`9`)
+while presenting; text cells gain `~~strikethrough~~` and autolink bare
+`https://…` URLs; and a direct video file (`.mp4`/`.webm`) honors the
+same `?controls/autoplay/mute/loop/t` playback flags as the YouTube /
+Vimeo embeds — a silent loop by default, a real player on demand.
+
 ### Added (iter 213) — direct-video playback flags (controls / audio)
 - **A direct video file (`.mp4`/`.webm`/…) in a Media cell now honors the
   same `?controls=…&autoplay=…&mute=…&loop=…&t=…` URL flags as the

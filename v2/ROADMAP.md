@@ -177,6 +177,10 @@ The accessibility & polish batch (173–177) is complete.
 - **208 — Direct-video playback flags** ✓ (iter 213): `.mp4`/`.webm` in a
   Media cell honors `?controls/autoplay/mute/loop/t` like the embeds —
   silent loop by default, real player on demand. 247 frontend tests.
+- **209 — Release v2.9.0** ✓ (iter 214): bundled jump-to-slide,
+  strikethrough, bare-URL autolink, and direct-video playback flags.
+  Lockstep bump 2.8.1 → 2.9.0, tagged. CI-equivalent green (tsc, 247 FE
+  tests, build, 44 BE tests).
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
