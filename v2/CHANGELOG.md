@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Tests (iter 243) — Lock the demo tour's shape
+- **Added a regression guard for `examples/demo.py`** — the deck behind
+  File ▸ Load demo, the first thing every user sees (and which has needed
+  fixing twice). Asserts it parses as format v4, is a single connected
+  column (one x, ≥ N-1 chain links), covers every cell type (markdown,
+  code, media, browser, whiteboard, diagram, animation) incl. all three
+  diagram subtypes (doodle / mermaid / math) and a valid animation
+  transition, and round-trips exactly. 72 backend tests.
+
 ## [2.12.1] — 2026-06-01 — golden-stable
 
 Stability patch on top of v2.12.0, marked the **golden-stable** baseline

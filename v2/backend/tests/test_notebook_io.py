@@ -396,6 +396,42 @@ def test_markdown_showcase_parses_and_round_trips():
         )
 
 
+def test_demo_tour_is_a_clean_connected_column():
+    """Iter 243: the demo tour (File ▸ Load demo) is the first thing every
+    user sees and has needed fixing twice. Guard its shape: parses as v4,
+    a single connected column (one x, chained top-to-bottom), and covers
+    every cell type incl. all three diagram kinds + an animation cell."""
+    src = (_EXAMPLES / "demo.py").read_text()
+    nb, ver = notebook_io.parse(src)
+    assert ver == 4
+    assert len(nb.cells) >= 12
+
+    # Single column — every cell shares one x.
+    assert len({c.x for c in nb.cells}) == 1
+
+    # Connected line — consecutive cells are chained (N-1 forward links,
+    # so the directive count equals at least cells-1).
+    assert sum(len(c.links) for c in nb.cells) >= len(nb.cells) - 1
+
+    # Coverage of every cell type the tour advertises.
+    kinds = {c.kind for c in nb.cells}
+    assert {"markdown", "code", "media", "browser", "whiteboard",
+            "diagram", "animation"} <= kinds
+
+    # All three diagram subtypes + a real animation transition.
+    dkinds = {c.diagram_kind for c in nb.cells if c.kind == "diagram"}
+    assert {"doodle", "mermaid", "math"} <= dkinds
+    anim = [c for c in nb.cells if c.kind == "animation"]
+    assert anim and anim[0].transition in {"fade", "slide", "pop", "draw-on"}
+
+    # Exact round-trip of the format-stable fields.
+    nb2, _ = notebook_io.parse(notebook_io.serialize(nb))
+    for a, b in zip(nb.cells, nb2.cells):
+        assert (a.id, a.kind, a.title, a.transition, a.source) == (
+            b.id, b.kind, b.title, b.transition, b.source
+        )
+
+
 def test_animation_showcase_parses_and_round_trips():
     """Iter 228: the animation showcase deck is living documentation for the
     `kind=animation` cell — it must parse (format v4), carry frames in the
