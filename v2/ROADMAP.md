@@ -19,6 +19,32 @@ one at a time (see CHANGELOG for the running log).
 5. **Doodle visual treat** — two-pass sketch borders ✓, ambient themes ✓,
    sketchy connectors ✓; (▢) hand-drawn chart axes, (▢) entrance anims.
 
+## In flight — Animation module (new cell type, iters 224+)
+
+A dedicated **`kind="animation"`** cell that renders a transition *inside
+the slide* during a talk: it holds an ordered list of frames and, on
+Space/→, transitions from one to the next (fade / slide / draw-on / pop)
+without leaving the slide. Reuses the generic `revealStep` step engine
+and the `.slide-enter` CSS pattern; round-trips through the one `.py`.
+
+- **224 — Foundation** *(this iter)*: `animation` kind in the parser
+  whitelist + `CellPayload.transition` field + `# @transition:` directive
+  round-trip; `CellKind`/`Cell.transition` in `types.ts`. Frames live in
+  the cell `source` (one per line) so they round-trip with no new
+  per-frame directive. Backend round-trip tests; tsc clean.
+- **225 — Node component**: `AnimationCell.tsx` renders the current frame;
+  in present mode shows `revealStep[id]` frames; in edit mode shows the
+  whole script. Add-menu entry + store `addCell` support.
+- **226 — Step engine generalization**: `revealNext`/`revealStep` work for
+  animation cells (frame count = source line count), not code-only.
+- **227 — Transitions**: CSS-keyframe fade / slide / draw-on / pop keyed
+  off the active transition style; `prefers-reduced-motion` jumps to the
+  final frame. Tests for the pure frame/step helpers.
+- **228 — Authoring modal**: `AnimationEditor.tsx` (modeled on
+  `RevealEditor`) to add/reorder frames + pick the transition style.
+- **229 — Docs + release**: README + FILE_FORMAT + example deck; bundle as
+  a MINOR release.
+
 ## Iteration plan (next up)
 
 - **160 — Doodle line charts** *(in progress)*: `line Loss: 0.9, 0.6, …`

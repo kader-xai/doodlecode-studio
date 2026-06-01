@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added (iter 224) — Animation module: data-model + file-format foundation
+- **New `kind="animation"` cell type** (foundation slice of the in-slide
+  transition module). A `CellPayload.transition` field + `Cell.transition`
+  in `types.ts` carry the transition style (fade / slide / draw-on / pop);
+  frames live in the cell `source`, one per line, so they round-trip with
+  no new per-frame directive. Persists as a `# @transition:` directive;
+  the `animation` kind is whitelisted in the parser (older readers still
+  fall back unknown kinds to `code`). 2 round-trip pytest cases
+  (68 backend tests). UI (node component, editor, transitions) lands in
+  the following iterations per ROADMAP.
+
 ### Fixed (iter 223) — Markdown export follows canvas reading order
 - **The Markdown export now emits cells in spatial reading order**
   (top-to-bottom, left-to-right, y bucketed at 40px then x) — the same

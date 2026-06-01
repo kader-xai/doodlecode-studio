@@ -288,6 +288,35 @@ def test_note_round_trips():
     assert out.cells[1].note is None  # omitted, not empty string
 
 
+def test_animation_cell_round_trips():
+    """Iter 224: animation cell kind + transition style + frames (in
+    source, one per line) survive serialize → parse."""
+    nb = NotebookPayload(name="N", cells=[
+        CellPayload(
+            id="a0", kind="animation", x=0, y=0,
+            title="How a request flows",
+            transition="fade",
+            source="Client sends request\nServer validates\nDB returns rows",
+        ),
+    ])
+    out = _roundtrip(nb)
+    cell = out.cells[0]
+    assert cell.kind == "animation"
+    assert cell.transition == "fade"
+    assert cell.source.split("\n") == [
+        "Client sends request", "Server validates", "DB returns rows",
+    ]
+
+
+def test_transition_omitted_when_unset():
+    nb = NotebookPayload(name="N", cells=[
+        CellPayload(id="c0", kind="code", source="x=1", x=0, y=0),
+    ])
+    text = notebook_io.serialize(nb)
+    assert "@transition" not in text
+    assert _roundtrip(nb).cells[0].transition is None
+
+
 def test_old_files_without_note_default_none():
     text = (
         "# doodlecode format-version: 3\n"

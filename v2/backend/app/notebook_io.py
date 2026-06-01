@@ -124,6 +124,10 @@ def serialize(nb: NotebookPayload) -> str:
             out.append(f"# @title: {c.title}")
         if c.diagram_kind:
             out.append(f"# @diagram_kind: {c.diagram_kind}")
+        # Iter 224: Animation cell transition style. Single token, no
+        # escaping needed; emitted only when set.
+        if c.transition:
+            out.append(f"# @transition: {c.transition}")
         # Iter 45: cell→cell links emit one directive per target.
         for target in c.links:
             out.append(f"# @link_to: {target}")
@@ -212,6 +216,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
         collapsed: bool = False
         reveals: list[str] = []
         note: str | None = None
+        transition: str | None = None
         callouts: list[CalloutPayload] = []
         # `current` points at the callout being edited. Starts implicit
         # at index 0 so an `# @explain:` before any `# @callout` marker
@@ -259,6 +264,9 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
             elif key == "note":
                 # Iter 165: presenter speaker note (un-escape newlines).
                 note = unescape(val)
+            elif key == "transition":
+                # Iter 224: Animation cell transition style.
+                transition = val.strip() or None
             # Unknown directives silently ignored — keeps forward-compat.
             i += 1
 
@@ -276,7 +284,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
             i += 1
 
         raw_kind = attrs.get("kind") or "code"
-        kind = raw_kind if raw_kind in ("code", "markdown", "media", "browser", "whiteboard", "diagram") else "code"
+        kind = raw_kind if raw_kind in ("code", "markdown", "media", "browser", "whiteboard", "diagram", "animation") else "code"
         w = float(attrs["w"]) if "w" in attrs else None
         h = float(attrs["h"]) if "h" in attrs else None
         cells.append(
@@ -296,6 +304,7 @@ def parse(text: str) -> tuple[NotebookPayload, int]:
                 collapsed=collapsed,
                 reveals=reveals,
                 note=note,
+                transition=transition,
             )
         )
 

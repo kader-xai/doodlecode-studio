@@ -21,7 +21,7 @@ export interface ExecuteResponse {
   outputs: CellOutput[];
 }
 
-export type CellKind = "code" | "markdown" | "media" | "browser" | "whiteboard" | "diagram";
+export type CellKind = "code" | "markdown" | "media" | "browser" | "whiteboard" | "diagram" | "animation";
 
 export interface Cell {
   id: string;
@@ -64,6 +64,12 @@ export interface Cell {
    *  ephemeral `revealStep` in the store — it is NOT persisted and
    *  resets to 0 on load. */
   reveals?: string[];
+  /** Iter 224: Animation cell transition style — "fade" | "slide" |
+   *  "draw-on" | "pop". Only meaningful when kind === "animation".
+   *  Frames live in `source`, one per line; in presentation each
+   *  Space/→ advances `revealStep` to the next frame with this
+   *  transition. Round-trips as a `# @transition:` directive. */
+  transition?: string;
 }
 
 export interface Callout {

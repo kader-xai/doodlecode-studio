@@ -41,7 +41,7 @@ class ExecuteResponse(BaseModel):
 
 # ─── Notebook serialization ────────────────────────────────────────
 
-CellKind = Literal["code", "markdown", "media", "browser", "whiteboard", "diagram"]
+CellKind = Literal["code", "markdown", "media", "browser", "whiteboard", "diagram", "animation"]
 
 
 class CalloutPayload(BaseModel):
@@ -85,6 +85,10 @@ class CellPayload(BaseModel):
     # Iter 165: presenter-only speaker note. Shown in the presenter HUD,
     # never on the slide. Persisted as `# @note:` (newlines escaped).
     note: Optional[str] = None
+    # Iter 224: Animation cell transition style (fade / slide / draw-on /
+    # pop). Only meaningful for kind="animation"; other cells leave it None.
+    # Persisted as `# @transition:`. Frames live in `source`, one per line.
+    transition: Optional[str] = None
 
 
 class NotebookPayload(BaseModel):
