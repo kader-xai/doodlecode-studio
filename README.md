@@ -8,7 +8,23 @@
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/)
 [![Node 18+](https://img.shields.io/badge/node-18+-brightgreen.svg)](https://nodejs.org/)
 [![Status: golden-stable](https://img.shields.io/badge/status-golden%20stable-gold.svg)](#status)
-[![Version](https://img.shields.io/badge/version-v1.4.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v2.12.1-blue.svg)](v2/CHANGELOG.md)
+
+> ### 👉 Now shipping **DoodleCode Studio v2** (golden-stable `v2.12.1`)
+> The current app lives in [**`v2/`**](v2/). One command launches it:
+> ```bash
+> ./start.sh          # builds the UI + serves on http://localhost:8001
+> ```
+> v2 adds code / markdown / **media (YouTube · Vimeo · GIF)** / **live
+> browser** / **whiteboard** / **diagram (Mermaid · doodle charts · KaTeX)**
+> / **animation** cells, a presentation mode with a talk timer + pen ink,
+> a persistent Python kernel with inline matplotlib, `pip install` from the
+> canvas, and Markdown export. See [`v2/README.md`](v2/README.md) and the
+> [`v2/CHANGELOG.md`](v2/CHANGELOG.md).
+>
+> 🎬 **60-second feature tour:** a silent, doodle-styled Remotion video (+ a
+> timed voiceover script) lives in [`remotion-demo/`](remotion-demo/) —
+> `cd remotion-demo && npm i && npm start`.
 
 DoodleCode Studio turns a Python file into a colorful whiteboard of code
 cards and explanation bubbles you can run, edit, present, and export — all

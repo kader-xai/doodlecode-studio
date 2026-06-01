@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Docs (iter 244) — Root README points at v2 + the demo-tour video
+- **The repo's front-page README now leads with v2.** It still described
+  the v1 app (ports 5173/8000, the old `kind=function` format); added a
+  prominent banner — run `./start.sh` → http://localhost:8001, the v2 app
+  lives in `v2/`, with the full cell-type list, and links to
+  `v2/README.md` + `v2/CHANGELOG.md`. Version badge bumped to v2.12.1.
+  Also surfaces the new `remotion-demo/` 60-second feature-tour video +
+  voiceover script (previously undiscoverable).
+
 ### Tests (iter 243) — Lock the demo tour's shape
 - **Added a regression guard for `examples/demo.py`** — the deck behind
   File ▸ Load demo, the first thing every user sees (and which has needed
