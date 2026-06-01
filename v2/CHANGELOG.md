@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Fixed (iter 234) — New cells line up with the tidy column
+- **`spawnPosition` now uses the same column x (80) as the seed cell, the
+  demo, and ⤵ Tidy** — it was 120, so a cell added after Tidy sat 40px off
+  the column. `tidyLayout` references the shared origin constant so the two
+  can't drift again. 2 store vitest cases (267 frontend); two iter-188
+  assertions updated to the unified x.
+
+### Fixed (iter 233) — Tidy layout + single-column demo (scrambled-boxes fix)
+- **New ⤵ Tidy toolbar button** re-lays every cell into one clean vertical
+  column in reading order and chains consecutive cells with links, so a
+  scrambled deck becomes a connected line in one click. Row spacing
+  accounts for stacked callouts (which extend to the right) so nothing
+  overlaps. Unlike Space mode it persists (a real cleanup). Root cause of
+  the reported overlap: a multi-column layout put left-column callouts on
+  top of right-column cells.
+- **`examples/demo.py` rewritten** as a single connected column (+ a new
+  animation cell), round-tripping as format v4. 2 store vitest cases.
+
 ### Fixed (iter 232) — Animation cells replay when you navigate back
 - **Arriving at an animation slide now rewinds it to frame 0** so its
   build replays (Keynote/PowerPoint behavior) instead of showing the last

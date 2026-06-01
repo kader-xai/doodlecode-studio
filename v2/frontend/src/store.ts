@@ -323,8 +323,12 @@ function newId(): string {
  * Falls back to diagonal stepping ONLY if the resulting slot is
  * already occupied (edge case after a load + manual rearrange).
  */
-const CANVAS_ORIGIN_X = 120;
-const CANVAS_ORIGIN_Y = 100;
+// One shared column origin so the SEED cell, every newly-added cell
+// (spawnPosition), and ⤵ Tidy all line up at the SAME x. Previously
+// spawnPosition used x=120 while the seed/tidy/demo used x=80, so a cell
+// added after Tidy sat 40px off the column. (iter 234)
+const CANVAS_ORIGIN_X = 80;
+const CANVAS_ORIGIN_Y = 80;
 const COLUMN_GAP_Y = 80; // pixels between the bottom of one cell and the top of the next
 
 /** Best-effort cell height when `h` hasn't been measured yet. */
@@ -659,8 +663,8 @@ export const useStore = create<AppState>((set, get) => {
         code: 360, markdown: 220, diagram: 360, media: 360,
         browser: 480, whiteboard: 420, animation: 240,
       };
-      const X = 80, GAP = 72, CALLOUT_ROW = 210;
-      let y = 80;
+      const X = CANVAS_ORIGIN_X, GAP = 72, CALLOUT_ROW = 210;
+      let y = CANVAS_ORIGIN_Y;
       const pos = new Map<string, { x: number; y: number }>();
       for (const c of ordered) {
         pos.set(c.id, { x: X, y });

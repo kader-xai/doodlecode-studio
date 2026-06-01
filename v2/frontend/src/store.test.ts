@@ -101,8 +101,9 @@ describe("store: cell CRUD", () => {
     });
     const id = useStore.getState().addCell();
     const added = useStore.getState().cells.find((c) => c.id === id)!;
-    // Always the fixed origin x — NOT inherited from a moved cell.
-    expect(added.x).toBe(120);
+    // Always the fixed column origin x (iter 234: unified to 80) — NOT
+    // inherited from a moved cell.
+    expect(added.x).toBe(80);
     // Below the lowest bottom edge: max(100+300, 500+300) + 80 = 880.
     expect(added.y).toBe(880);
   });
@@ -125,7 +126,7 @@ describe("store: cell CRUD", () => {
       ...useStore.getState().cells.filter((c) => c.id !== id).map((c) => c.y + (c.h ?? 200)),
     );
     expect(added.y).toBeGreaterThanOrEqual(maxBottom);
-    expect(added.x).toBe(120);
+    expect(added.x).toBe(80);
   });
 
   it("moveCell updates x/y", () => {
@@ -1138,5 +1139,30 @@ describe("store: tidyLayout (iter 233)", () => {
     useStore.setState({ cells: [] });
     expect(() => useStore.getState().tidyLayout()).not.toThrow();
     expect(useStore.getState().cells).toEqual([]);
+  });
+});
+
+describe("store: new cells stay in the column (iter 234)", () => {
+  beforeEach(() => freshNotebook());
+
+  it("addCell places the new cell at the same x as the tidy column (80)", () => {
+    // Seed cell is at x=80; a new cell should land directly below it, same x.
+    const id = useStore.getState().addCell();
+    const added = useStore.getState().cells.find((c) => c.id === id)!;
+    expect(added.x).toBe(80);
+  });
+
+  it("tidyLayout and addCell agree on the column x", () => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "markdown", source: "A", title: "A", x: 500, y: 30 },
+        { id: "b", kind: "code", source: "B", title: "B", x: 900, y: 700 },
+      ],
+    });
+    useStore.getState().tidyLayout();
+    const tidyX = useStore.getState().cells[0].x;
+    const id = useStore.getState().addCell();
+    const added = useStore.getState().cells.find((c) => c.id === id)!;
+    expect(added.x).toBe(tidyX);
   });
 });
