@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [2.8.1] — 2026-06-01
+
+Accessibility + presentation polish. Doodle charts, flowcharts, and
+markdown tables now describe their data to screen readers, and the
+owner-reported presentation issues are fixed: every slide centers
+dead-center, the canvas is locked while presenting (no drift), resize
+still works, and the opening slide loads centered at 100% — not a
+zoomed-out fit view.
+
 ### Fixed (iter 208) — resizing a slide mid-talk no longer janks the view
 - **The presentation re-center effect now keys on the focused cell's
   position, not the whole `cells` array.** Resizing the focused slide

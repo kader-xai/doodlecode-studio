@@ -162,6 +162,10 @@ The accessibility & polish batch (173–177) is complete.
   report): slides center dead-center, canvas frozen while presenting,
   resize still works, opening slide centered at 100%. `slideCenter`
   helper extracted + tested (iter 207); resize-jank fixed (iter 208).
+- **204 — Release v2.8.1** ✓ (iter 209): a11y polish (chart/flow/table
+  screen-reader semantics) + the owner-reported presentation fixes.
+  Lockstep bump 2.8.0 → 2.8.1, tagged. CI-equivalent green (tsc, 235 FE
+  tests, build, 44 BE tests).
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
