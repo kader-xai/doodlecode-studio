@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added (iter 212) — autolink bare URLs in text cells
+- **A bare `https://…` URL in a text cell now becomes a clickable link**
+  (new tab, safe-scheme guarded) — no need to wrap it in `[](…)`. Explicit
+  `[text](url)` links still win the match, and trailing sentence
+  punctuation (`see https://x.io.`) is left out of the link. 3 vitest
+  cases.
+
 ### Added (iter 211) — `~~strikethrough~~` in text cells
 - **Inline `~~strikethrough~~` renders as `<del>`.** Rounds out the inline
   markdown set (bold / italic / strike / code / links) — handy for "old →

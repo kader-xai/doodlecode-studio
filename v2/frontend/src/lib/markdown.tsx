@@ -314,7 +314,10 @@ function renderInline(s: string): (string | JSX.Element)[] {
   // One regex with several alternatives. Links come first so their text
   // isn't parsed as emphasis; `bold` precedes `italic` so `**x**` isn't
   // first parsed as `*` + `*x*` + `*`; `~~strike~~` is unambiguous.
-  const re = /(\[[^\]]+\]\([^)\s]+\)|\*\*[^*]+\*\*|~~[^~]+~~|\*[^*\n]+\*|`[^`]+`)/g;
+  // Bare `https://…` URLs autolink (last alternative, so an explicit
+  // `[text](url)` link always wins the match first).
+  const re =
+    /(\[[^\]]+\]\([^)\s]+\)|\*\*[^*]+\*\*|~~[^~]+~~|\*[^*\n]+\*|`[^`]+`|https?:\/\/[^\s<>]+)/g;
   let last = 0;
   let m: RegExpExecArray | null;
   let key = 0;
@@ -356,6 +359,33 @@ function renderInline(s: string): (string | JSX.Element)[] {
           {tok.slice(1, -1)}
         </code>,
       );
+    } else if (/^https?:\/\//i.test(tok)) {
+      // Bare URL autolink. Peel trailing sentence punctuation off the
+      // match so "see https://x.io." doesn't link the period.
+      let url = tok;
+      let trail = "";
+      const tm = url.match(/[.,!?;:]+$/);
+      if (tm) {
+        trail = tm[0];
+        url = url.slice(0, url.length - trail.length);
+      }
+      const href = safeHref(url);
+      if (href) {
+        out.push(
+          <a
+            key={key++}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#1971c2] dark:text-[#74c0fc] underline decoration-2 underline-offset-2 hover:opacity-80"
+          >
+            {url}
+          </a>,
+        );
+        if (trail) out.push(trail);
+      } else {
+        out.push(tok);
+      }
     } else {
       out.push(<em key={key++}>{tok.slice(1, -1)}</em>);
     }

@@ -108,6 +108,26 @@ describe("renderMarkdown", () => {
     expect(toHtml("[anchor](#section)")).toContain('href="#section"');
   });
 
+  it("autolinks a bare https:// URL (iter 212)", () => {
+    const html = toHtml("see https://example.com/docs for more");
+    expect(html).toContain('href="https://example.com/docs"');
+    expect(html).toContain('target="_blank"');
+    expect(html).toContain(">https://example.com/docs</a>");
+  });
+
+  it("does not swallow trailing punctuation into a bare URL (iter 212)", () => {
+    const html = toHtml("visit https://x.io.");
+    expect(html).toContain('href="https://x.io"');
+    expect(html).not.toContain('href="https://x.io."');
+    expect(html).toContain("</a>."); // the period stays as text
+  });
+
+  it("leaves an explicit [text](url) link untouched by autolink (iter 212)", () => {
+    const html = toHtml("[docs](https://example.com)");
+    expect((html.match(/<a /g) ?? []).length).toBe(1);
+    expect(html).toContain(">docs</a>");
+  });
+
   it("refuses a javascript: href and leaves it literal (iter 185)", () => {
     const html = toHtml("[x](javascript:alert(1))");
     expect(html).not.toContain("<a");

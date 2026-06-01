@@ -171,6 +171,9 @@ The accessibility & polish batch (173–177) is complete.
   overlay. For non-linear presenting. 238 frontend tests.
 - **206 — Markdown strikethrough** ✓ (iter 211): inline `~~strike~~` →
   `<del>`, completing the inline set. 240 frontend tests.
+- **207 — Bare-URL autolinking** ✓ (iter 212): a plain `https://…` in a
+  text cell becomes a safe clickable link; trailing punctuation excluded.
+  243 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
