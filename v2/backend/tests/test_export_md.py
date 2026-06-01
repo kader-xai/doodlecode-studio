@@ -82,6 +82,33 @@ def test_blank_reveals_skipped():
     assert "Step" not in md
 
 
+def test_callout_image_exported_with_text_alt():
+    nb = _nb(
+        CellPayload(
+            id="c",
+            kind="markdown",
+            source="Body",
+            callouts=[CalloutPayload(text="See the chart", image="data:image/png;base64,XYZ")],
+        ),
+    )
+    md = to_markdown(nb)
+    assert "> See the chart" in md
+    assert "![See the chart](data:image/png;base64,XYZ)" in md
+
+
+def test_image_only_callout_still_exports():
+    nb = _nb(
+        CellPayload(
+            id="c",
+            kind="markdown",
+            source="Body",
+            callouts=[CalloutPayload(text="", image="https://x.io/a.png")],
+        ),
+    )
+    md = to_markdown(nb)
+    assert "![callout](https://x.io/a.png)" in md
+
+
 def test_data_url_image_detected():
     nb = _nb(CellPayload(id="i", kind="media", source="data:image/png;base64,AAAA"))
     assert "![media](data:image/png;base64,AAAA)" in to_markdown(nb)

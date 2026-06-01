@@ -70,4 +70,10 @@ def to_markdown(nb: NotebookPayload) -> str:
             if co.text and co.text.strip():
                 out.append(_blockquote(co.text.strip()))
                 out.append("")
+            if co.image and co.image.strip():
+                # Keep the annotation image in the handout (callouts can be
+                # text, image, or both). Alt text reuses the callout text.
+                alt = (co.text or "callout").strip().split("\n")[0] or "callout"
+                out.append(f"![{alt}]({co.image.strip()})")
+                out.append("")
     return "\n".join(out).rstrip() + "\n"

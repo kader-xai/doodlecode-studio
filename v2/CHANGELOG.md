@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added (iter 221) — Markdown export keeps callout images
+- **Callout images now survive the Markdown export.** A callout can be
+  text, image, or both; the exporter emits `![alt](src)` for the image
+  (alt = the callout's first text line, or `callout`) alongside the
+  blockquote — so image-annotated and image-only callouts both make it
+  into the handout instead of silently vanishing. 2 pytest cases
+  (64 backend tests).
+
 ### Added (iter 220) — Markdown export includes code-walkthrough reveals
 - **The Markdown export now emits each code cell's `reveals`** (the live
   build-up steps of a walkthrough) as labeled `*Step N:*` fenced blocks
