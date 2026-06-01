@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Fixed (iter 242) — Mermaid render reliability + presentation auto-recenter
+- **Mermaid diagrams no longer flash a render error.** The render effect
+  depended on the whole `cell` object, so it re-fired on every store
+  update (pan, animation, selection) and overlapped async mermaid renders
+  — the source of the intermittent "render error" box in the demo. Now it
+  only re-renders on source/kind/theme, and cleans up mermaid's leftover
+  temp render container so a stale one can't collide with the next render.
+- **Presentation now re-centers the focused cell when it resizes or grows.**
+  A `ResizeObserver` on the focused cell watches its rendered size; resize
+  the box (the grip still works mid-talk) or run code that prints output,
+  and the cell re-centers (using ReactFlow's measured size, debounced) so
+  it never drifts out of frame.
+
 ## [2.12.0] — 2026-06-01
 
 Headline: a **layout + presentation polish** release driven by owner

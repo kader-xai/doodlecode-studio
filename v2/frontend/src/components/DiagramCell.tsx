@@ -189,10 +189,20 @@ export function DiagramCell({ data, selected }: NodeProps<{ cellId: string }>) {
           setSvg("");
           setRenderError(e?.message ?? String(e));
         }
+      } finally {
+        // mermaid v11 leaves its temp render container (id `d<id>`) in the
+        // DOM on error; remove it so a stale one can't collide with the
+        // next render (an overlapping-render source of intermittent fails).
+        document.getElementById(`d${id}`)?.remove();
       }
     })();
     return () => { cancelled = true; };
-  }, [cell?.source, cell?.diagram_kind, dark, cell]);
+    // NOTE: do NOT depend on the whole `cell` object — it changes identity
+    // on every store update (pan/animation/selection), which re-fired this
+    // effect constantly and overlapped async mermaid renders → flaky
+    // "render error" boxes. Only re-render on the source/kind/theme. (iter 242)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cell?.source, cell?.diagram_kind, dark]);
 
   useEffect(() => {
     if (editing) {

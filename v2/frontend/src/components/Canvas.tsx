@@ -195,6 +195,36 @@ function CanvasInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presenting, focusedCellId, focusedX, focusedY]);
 
+  // Iter 242: while presenting, RE-center the focused cell whenever its
+  // rendered size changes — i.e. the user resizes it, or code output
+  // appears and grows it. A ResizeObserver on the focused cell's DOM node
+  // catches both; we re-center on ReactFlow's MEASURED size so a tall
+  // output stays centered, debounced so a burst of growth fires once.
+  useEffect(() => {
+    if (!presenting || !focusedCellId) return;
+    const inst = instanceRef.current;
+    if (!inst) return;
+    const el = document.querySelector(
+      `.react-flow__node[data-id="${CSS.escape(focusedCellId)}"]`,
+    );
+    if (!el) return;
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const recenter = () => {
+      const c = useStore.getState().cells.find((x) => x.id === focusedCellId);
+      if (!c) return;
+      const node = inst.getNode(focusedCellId);
+      const w = node?.width ?? cellDisplayWidth(c);
+      const h = node?.height ?? c.h ?? CELL_HEIGHT_FALLBACK[c.kind] ?? 360;
+      inst.setCenter(c.x + w / 2, c.y + h / 2, { zoom: inst.getZoom(), duration: 300 });
+    };
+    const ro = new ResizeObserver(() => {
+      clearTimeout(t);
+      t = setTimeout(recenter, 140);
+    });
+    ro.observe(el);
+    return () => { ro.disconnect(); clearTimeout(t); };
+  }, [presenting, focusedCellId]);
+
   // On first load, center the opening slide in the middle of the screen
   // at 100% zoom — never a zoomed-out "fit everything" view. Re-runs when
   // the ReactFlow instance becomes ready (`rfReady`), because `onInit`
