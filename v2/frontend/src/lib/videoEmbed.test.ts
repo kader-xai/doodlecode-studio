@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  directVideoFlags,
   parseTimestamp,
   videoEmbed,
   vimeoEmbed,
@@ -101,5 +102,39 @@ describe("videoEmbed (iter 183)", () => {
     expect(videoEmbed("https://youtu.be/x")).toContain("youtube.com/embed/x");
     expect(videoEmbed("https://vimeo.com/9")).toContain("player.vimeo.com/video/9");
     expect(videoEmbed("https://example.com/clip.mp4")).toBeNull();
+  });
+});
+
+describe("directVideoFlags (iter 213)", () => {
+  it("defaults a bare .mp4 to a silent background loop", () => {
+    expect(directVideoFlags("https://x.io/demo.mp4")).toEqual({
+      autoplay: true,
+      loop: true,
+      muted: true,
+      controls: false,
+      start: null,
+    });
+  });
+
+  it("lets URL flags turn it into a controllable, audible player", () => {
+    const f = directVideoFlags(
+      "https://x.io/demo.mp4?controls=1&mute=0&autoplay=0&loop=0",
+    );
+    expect(f.controls).toBe(true);
+    expect(f.muted).toBe(false);
+    expect(f.autoplay).toBe(false);
+    expect(f.loop).toBe(false);
+  });
+
+  it("accepts true/false spellings and reads a start time", () => {
+    const f = directVideoFlags("https://x.io/demo.mp4?controls=true&t=1m30s");
+    expect(f.controls).toBe(true);
+    expect(f.start).toBe(90);
+  });
+
+  it("ignores an unknown flag value (keeps the default)", () => {
+    expect(
+      directVideoFlags("https://x.io/demo.mp4?controls=maybe").controls,
+    ).toBe(false);
   });
 });

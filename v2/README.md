@@ -52,7 +52,7 @@ and type `matplotlib`.
 |-------------|-----------------------------|-------------------------------------------|
 | Code        | `＋ Code` / N               | Python; runs in a persistent kernel       |
 | Text        | `＋ Text` / T               | Markdown (see [below](#markdown-in-text-cells)) |
-| Media       | `＋ Media` / M              | Image, video, YouTube, or Vimeo URL (`?t=1m30s` start + `&autoplay=1&mute=1&loop=1` flags honored) |
+| Media       | `＋ Media` / M              | Image, direct video (`.mp4`/`.webm`/…), YouTube, or Vimeo URL. `?t=1m30s` start + `?autoplay=…&mute=…&loop=…&controls=…` flags honored on all video types (direct files default to a silent background loop; add `?controls=1&mute=0` for a real player) |
 | Browser     | `＋ Browser` / W            | Live website in an iframe (with proxy)    |
 | Whiteboard  | `＋ Draw` / D               | Pen + highlighter + 5 colors + 3 bgs      |
 | Diagram     | `＋ Diagram` / G            | Doodle charts (flow/bar/line/pie/scatter), Mermaid, or KaTeX math |

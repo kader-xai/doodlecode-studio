@@ -56,6 +56,49 @@ const VIMEO_PASS: Record<string, string> = {
   controls: "controls",
 };
 
+/** Iter 213: playback settings for a DIRECT video file (`.mp4`, etc.)
+ *  played in a `<video>` tag. Defaults reproduce the old "silent
+ *  background loop" behavior (autoplay + loop + muted, no controls); URL
+ *  flags override them so a narrated demo can show controls + audio:
+ *    demo.mp4?controls=1&mute=0&autoplay=0&loop=0
+ *  Accepts `1`/`true`/`yes`/`0`/`false`/`no` (anything else → default). */
+export interface VideoFlags {
+  autoplay: boolean;
+  loop: boolean;
+  muted: boolean;
+  controls: boolean;
+  start: number | null;
+}
+export function directVideoFlags(url: string): VideoFlags {
+  const def: VideoFlags = {
+    autoplay: true,
+    loop: true,
+    muted: true,
+    controls: false,
+    start: null,
+  };
+  let u: URL;
+  try {
+    u = new URL(url, "http://_"); // base lets relative URLs parse
+  } catch {
+    return def;
+  }
+  const flag = (key: string, fallback: boolean): boolean => {
+    const v = u.searchParams.get(key);
+    if (v == null) return fallback;
+    if (/^(1|true|yes)$/i.test(v)) return true;
+    if (/^(0|false|no)$/i.test(v)) return false;
+    return fallback;
+  };
+  return {
+    autoplay: flag("autoplay", def.autoplay),
+    loop: flag("loop", def.loop),
+    muted: flag("mute", def.muted),
+    controls: flag("controls", def.controls),
+    start: startSecondsOf(u),
+  };
+}
+
 /** YouTube watch / youtu.be / shorts / embed URL → embed URL. */
 export function youTubeEmbed(url: string): string | null {
   try {

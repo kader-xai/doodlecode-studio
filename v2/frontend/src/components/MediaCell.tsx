@@ -1,7 +1,7 @@
 import { Handle, NodeProps, Position } from "reactflow";
 import { DoodleBorder } from "./DoodleBorder";
 import { ResizeHandle } from "./ResizeHandle";
-import { videoEmbed } from "../lib/videoEmbed";
+import { videoEmbed, directVideoFlags } from "../lib/videoEmbed";
 import { useStore } from "../store";
 
 const VIDEO_EXT = /\.(mp4|webm|mov|m4v|ogg|ogv)(\?|#|$)/i;
@@ -87,15 +87,25 @@ export function MediaCell({ data, selected }: NodeProps<{ cellId: string }>) {
               style={{ display: "block", width: "100%", height: "100%", border: "0", background: "#000" }}
             />
           ) : isVideo ? (
-            <video
-              src={cell.source}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="auto"
-              style={{ display: "block", width: "100%", height: "100%", objectFit: "contain", background: "#000" }}
-            />
+            (() => {
+              const f = directVideoFlags(cell.source);
+              return (
+                <video
+                  src={
+                    f.start && !cell.source.includes("#")
+                      ? `${cell.source}#t=${f.start}`
+                      : cell.source
+                  }
+                  autoPlay={f.autoplay}
+                  loop={f.loop}
+                  muted={f.muted}
+                  controls={f.controls}
+                  playsInline
+                  preload="auto"
+                  style={{ display: "block", width: "100%", height: "100%", objectFit: "contain", background: "#000" }}
+                />
+              );
+            })()
           ) : (
             <img
               src={cell.source}

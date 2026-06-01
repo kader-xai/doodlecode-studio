@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 213) — direct-video playback flags (controls / audio)
+- **A direct video file (`.mp4`/`.webm`/…) in a Media cell now honors the
+  same `?controls=…&autoplay=…&mute=…&loop=…&t=…` URL flags as the
+  YouTube/Vimeo embeds.** Defaults are unchanged (a silent autoplay loop,
+  good for ambient background clips); add `?controls=1&mute=0` to turn it
+  into a real player with a scrubber and audio — what a narrated demo
+  needs. Parsed by a pure `directVideoFlags()` helper; 4 vitest cases
+  (247 frontend tests).
+
 ### Added (iter 212) — autolink bare URLs in text cells
 - **A bare `https://…` URL in a text cell now becomes a clickable link**
   (new tab, safe-scheme guarded) — no need to wrap it in `[](…)`. Explicit

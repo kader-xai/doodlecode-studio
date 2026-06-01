@@ -174,6 +174,9 @@ The accessibility & polish batch (173–177) is complete.
 - **207 — Bare-URL autolinking** ✓ (iter 212): a plain `https://…` in a
   text cell becomes a safe clickable link; trailing punctuation excluded.
   243 frontend tests.
+- **208 — Direct-video playback flags** ✓ (iter 213): `.mp4`/`.webm` in a
+  Media cell honors `?controls/autoplay/mute/loop/t` like the embeds —
+  silent loop by default, real player on demand. 247 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
