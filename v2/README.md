@@ -114,6 +114,7 @@ cell for images and a Diagram cell for charts/flow/math.
 | → / Space / PageDown      | Next slide (in present)                   |
 | ← / PageUp                | Previous slide                            |
 | Home / End                | First / last slide                        |
+| 1 – 9                     | Jump to slide N (in present)              |
 | R                         | Run focused code cell (in present)        |
 | P / H / X                 | Pen / Highlighter / Fixed-pen ink         |
 | E                         | Erase all ink                             |

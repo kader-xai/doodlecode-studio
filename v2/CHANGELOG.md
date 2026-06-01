@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Docs (iter 216) — README lists the jump-to-slide shortcut
+- **The README Keyboard table now lists `1`–`9` → "Jump to slide N".**
+  It shipped in the in-app Shortcuts overlay (iter 210) but was missing
+  from the README — docs back in lockstep (CLAUDE rule 24). A wider sweep
+  confirmed the rest of the README (charts, `live:`, markdown, media
+  flags) already matches the code.
+
 ### Tests (iter 215) — lock down the proxy SSRF guard
 - **Added `tests/test_proxy.py` covering `_is_public_ip`** — the security
   boundary for the browser-cell proxy. Asserts it refuses loopback,
