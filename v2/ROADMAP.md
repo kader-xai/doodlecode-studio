@@ -184,6 +184,9 @@ The accessibility & polish batch (173–177) is complete.
 - **210 — Proxy SSRF-guard tests** ✓ (iter 215): `tests/test_proxy.py`
   locks `_is_public_ip` against loopback / private / link-local /
   cloud-metadata / unresolvable hosts. 51 backend tests.
+- **211 — Markdown showcase deck** ✓ (iter 217): `examples/
+  markdown_showcase.py` demonstrates every text-cell construct + serves
+  as a format-v4 round-trip fixture. 52 backend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

@@ -337,3 +337,31 @@ def test_data_viz_demo_parses_and_round_trips():
         assert (a.id, a.kind, a.title, a.note, a.reveals, a.source) == (
             b.id, b.kind, b.title, b.note, b.reveals, b.source
         )
+
+
+def test_markdown_showcase_parses_and_round_trips():
+    """Iter 217: the markdown showcase deck is living documentation for the
+    text-cell dialect — it must keep parsing (as format v4) and exercise
+    every block construct, with an exact round-trip including the fenced
+    code body (which contains `# `-comment lines and `**` markup)."""
+    src = (_EXAMPLES / "markdown_showcase.py").read_text()
+    nb, ver = notebook_io.parse(src)
+    assert ver == 4
+    assert len(nb.cells) == 5
+    assert all(c.kind == "markdown" for c in nb.cells)
+    assert all(c.title for c in nb.cells)
+
+    blob = "\n".join(c.source for c in nb.cells)
+    assert "~~struck-through~~" in blob          # strikethrough
+    assert "https://github.com" in blob          # bare-URL autolink
+    assert "- [x]" in blob and "- [ ]" in blob    # task list
+    assert "| Feature" in blob and ":------:" in blob  # table + alignment
+    assert "```python" in blob                    # fenced code block
+
+    # Exact round-trip — the fenced `def greet` body and `# @`-looking
+    # comment lines must survive byte-for-byte (format-v4 escaping).
+    nb2, _ = notebook_io.parse(notebook_io.serialize(nb))
+    for a, b in zip(nb.cells, nb2.cells):
+        assert (a.id, a.kind, a.title, a.note, a.source) == (
+            b.id, b.kind, b.title, b.note, b.source
+        )

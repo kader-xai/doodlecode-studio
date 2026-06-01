@@ -78,6 +78,10 @@ technical and educational writing, nothing more:
 Not supported (by design): images, nested lists, raw HTML. Use a Media
 cell for images and a Diagram cell for charts/flow/math.
 
+See [`examples/markdown_showcase.py`](examples/markdown_showcase.py) for a
+deck that exercises every construct above (and round-trips through the
+parser, asserted in the backend tests).
+
 ## Keyboard
 
 | Key                       | Action                                    |

@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Docs (iter 217) — markdown showcase example deck
+- **Added `examples/markdown_showcase.py`** — a 5-slide deck exercising
+  every text-cell construct (headings, bold/italic/strike/code, named +
+  bare links, bullet/ordered/task lists, an aligned table, a fenced code
+  block, a blockquote, a rule). Living documentation for the markdown
+  dialect, **and** a realistic format-v4 round-trip fixture (the fenced
+  body contains `# `-comment and `**`-markup lines that must survive
+  byte-for-byte). Linked from the README; backend round-trip test
+  asserts it (52 backend tests).
+
 ### Docs (iter 216) — README lists the jump-to-slide shortcut
 - **The README Keyboard table now lists `1`–`9` → "Jump to slide N".**
   It shipped in the in-app Shortcuts overlay (iter 210) but was missing
