@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Fixed (iter 239) — Connector lines now touch the cells/callouts (no gap)
+- **The gap between a cell and its callout/link line is fixed.** Code,
+  markdown, and animation cells render at a FIXED card width and ignore
+  `cell.w`, but the callout placement and connector geometry read `cell.w`
+  directly — so a stored 720 on a 560-wide card floated the bubble + line
+  ~160px past the card. New `lib/cellSize.ts:cellDisplayWidth/Height` is
+  the single source of truth for on-screen size; Canvas (callout
+  placement) and ConnectionsLayer (both callout + cell↔cell lines) now use
+  it. Connectors also overlap a few px into both boxes so they always
+  visibly touch even when an auto-grow cell's height is only estimated.
+  4 vitest cases (275 frontend tests).
+
 ### Changed (iter 238) — Space mode leaves a full page between cells
 - **📐 Space now puts a whole empty page between cells.** It used to map
   each cell one viewport apart *top-to-top*, so a tall cell almost touched

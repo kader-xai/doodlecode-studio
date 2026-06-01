@@ -24,6 +24,7 @@ import { MediaCell } from "./MediaCell";
 import { WhiteboardCell } from "./WhiteboardCell";
 import { useStore } from "../store";
 import { slideCenter } from "../lib/present";
+import { cellDisplayWidth } from "../lib/cellSize";
 import type { Cell } from "../types";
 
 const nodeTypes: NodeTypes = {
@@ -260,7 +261,9 @@ function CanvasInner() {
   const calloutNodesFor = (c: Cell, parentX: number, parentY: number): Node[] => {
     const list = c.callouts ?? [];
     if (!list.length) return [];
-    const cellW = c.w ?? CELL_WIDTH_FALLBACK[c.kind] ?? 560;
+    // Real rendered width (iter 239) — code/markdown/animation are fixed
+    // width and ignore c.w, so c.w would float the bubble off the card.
+    const cellW = cellDisplayWidth(c);
     const x = parentX + cellW + CALLOUT_GAP;
     const STACK_DY = 200; // approximate; each bubble is ~180-200px tall
     return list.map((_, idx) => ({

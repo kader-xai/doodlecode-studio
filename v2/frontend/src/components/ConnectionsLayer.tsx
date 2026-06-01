@@ -1,5 +1,6 @@
 import { useViewport } from "reactflow";
 import { useStore } from "../store";
+import { cellDisplayHeight, cellDisplayWidth } from "../lib/cellSize";
 
 /**
  * SVG overlay that draws dashed dot-flow connectors between cells
@@ -21,23 +22,6 @@ import { useStore } from "../store";
  * the first callout (calloutX, calloutY + bubbleHeight / 2). For
  * cells with multiple callouts each bubble chains to the previous.
  */
-const FALLBACK_W: Record<string, number> = {
-  code: 580,
-  markdown: 560,
-  diagram: 560,
-  browser: 720,
-  whiteboard: 640,
-  animation: 560,
-};
-const FALLBACK_H: Record<string, number> = {
-  code: 260,
-  markdown: 240,
-  diagram: 360,
-  browser: 480,
-  whiteboard: 420,
-  media: 320,
-  animation: 240,
-};
 const CALLOUT_GAP = 40;
 const BUBBLE_W = 280;
 const BUBBLE_H_APPROX = 140; // matches CalloutBubble visual height
@@ -76,10 +60,13 @@ export function ConnectionsLayer() {
       const b = byId.get(tid);
       if (!b) continue;
       drawn.add(key);
-      const aW = a.w ?? FALLBACK_W[a.kind] ?? 560;
-      const aH = a.h ?? FALLBACK_H[a.kind] ?? 280;
-      const bW = b.w ?? FALLBACK_W[b.kind] ?? 560;
-      const bH = b.h ?? FALLBACK_H[b.kind] ?? 280;
+      // Use the REAL rendered size — code/markdown/animation render at a
+      // fixed width regardless of cell.w, so reading cell.w directly left
+      // the line floating away from the card. (iter 239)
+      const aW = cellDisplayWidth(a);
+      const aH = cellDisplayHeight(a);
+      const bW = cellDisplayWidth(b);
+      const bH = cellDisplayHeight(b);
       // Pick edge midpoints from whichever face the centers are closest to.
       const aCx = a.x + aW / 2, aCy = a.y + aH / 2;
       const bCx = b.x + bW / 2, bCy = b.y + bH / 2;
@@ -112,8 +99,8 @@ export function ConnectionsLayer() {
   for (const c of cells) {
     const list = c.callouts ?? [];
     if (!list.length) continue;
-    const cellW = c.w ?? FALLBACK_W[c.kind] ?? 560;
-    const cellH = c.h ?? FALLBACK_H[c.kind] ?? 280;
+    const cellW = cellDisplayWidth(c);
+    const cellH = cellDisplayHeight(c);
     const cellRightX = c.x + cellW;
     const bubbleX = c.x + cellW + CALLOUT_GAP;
 
@@ -141,6 +128,20 @@ export function ConnectionsLayer() {
         });
       }
     }
+  }
+
+  // Extend every connector a few px INTO the boxes at both ends so it
+  // always visibly touches them, even when an auto-grow cell's height is
+  // only estimated. The overlap tucks under / over the card edge. (iter 239)
+  const OVER = 10;
+  for (const s of segments) {
+    const len = Math.hypot(s.x2 - s.x1, s.y2 - s.y1) || 1;
+    const ux = (s.x2 - s.x1) / len;
+    const uy = (s.y2 - s.y1) / len;
+    s.x1 -= ux * OVER;
+    s.y1 -= uy * OVER;
+    s.x2 += ux * OVER;
+    s.y2 += uy * OVER;
   }
 
   if (!segments.length) return null;
