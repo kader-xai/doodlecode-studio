@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+## [2.11.0] — 2026-06-01
+
+Headline: **the Animation cell** — a new `kind=animation` module that
+reveals frames one at a time *in the slide* during a talk. Author one
+frame per line; **→ / Space** transitions to the next (fade / slide /
+pop / draw-on, cycled with the 🎞 chip) before advancing the deck. Plus
+the Markdown export now follows canvas reading order. Frames + transition
+round-trip through the one `.py` (`# @transition:`), backward-compatible.
+
 ### Docs (iter 228) — Animation module: example deck + docs
 - **Added `examples/animation_showcase.py`** — a 4-slide deck (markdown
   intro + three animation cells in fade / draw-on / pop) that doubles as a

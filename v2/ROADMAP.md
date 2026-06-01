@@ -19,7 +19,7 @@ one at a time (see CHANGELOG for the running log).
 5. **Doodle visual treat** — two-pass sketch borders ✓, ambient themes ✓,
    sketchy connectors ✓; (▢) hand-drawn chart axes, (▢) entrance anims.
 
-## In flight — Animation module (new cell type, iters 224+)
+## Shipped — Animation module (new cell type, iters 224–229) ✓ v2.11.0
 
 A dedicated **`kind="animation"`** cell that renders a transition *inside
 the slide* during a talk: it holds an ordered list of frames and, on
@@ -42,8 +42,10 @@ and the `.slide-enter` CSS pattern; round-trips through the one `.py`.
   final frame. Tests for the pure frame/step helpers.
 - **228 — Authoring modal**: `AnimationEditor.tsx` (modeled on
   `RevealEditor`) to add/reorder frames + pick the transition style.
-- **229 — Docs + release**: README + FILE_FORMAT + example deck; bundle as
-  a MINOR release.
+- **229 — Release** ✓ (v2.11.0): bundled the Animation module + the
+  Markdown reading-order fix. Lockstep bump 2.10.0 → 2.11.0, tagged.
+  (The standalone authoring modal was deferred — inline editing + the
+  click-to-cycle 🎞 chip already cover authoring.)
 
 ## Iteration plan (next up)
 
