@@ -120,6 +120,9 @@ function CanvasInner() {
   const canvasCursor = !presenting && mode === "hand" ? "grab" : "default";
 
   const instanceRef = useRef<ReactFlowInstance | null>(null);
+  // Flips true once ReactFlow's `onInit` fires, so the first-load centering
+  // effect re-runs when the instance is actually available (iter 236).
+  const [rfReady, setRfReady] = useState(false);
 
   // Iter 62: pan to a cell when the palette picks it. The store
   // bumps `panToTick` on every pick; this effect centers on the new
@@ -197,21 +200,31 @@ function CanvasInner() {
   }, [presenting, focusedCellId, focusedX, focusedY]);
 
   // On first load, center the opening slide in the middle of the screen
-  // at 100% zoom — never a zoomed-out "fit everything" view. Fires once
-  // when the ReactFlow instance and cells are both ready.
+  // at 100% zoom — never a zoomed-out "fit everything" view. Re-runs when
+  // the ReactFlow instance becomes ready (`rfReady`), because `onInit`
+  // often fires AFTER this effect's first pass — without that dependency
+  // the instance is still null, the effect bails, and (since cells loaded
+  // from localStorage never change again) the deck is left pinned at the
+  // canvas origin / far-left. (iter 236)
   const didInitialCenter = useRef(false);
-  useEffect(() => {
+  const centerFirstCell = useCallback(() => {
     if (didInitialCenter.current) return;
     const inst = instanceRef.current;
-    if (!inst || cells.length === 0) return;
+    const cs = useStore.getState().cells;
+    if (!inst || cs.length === 0) return;
     didInitialCenter.current = true;
     const ordered = useStore.getState().cellsInOrder();
-    const c = ordered[0] ?? cells[0];
+    const c = ordered[0] ?? cs[0];
     const w = c.w ?? CELL_WIDTH_FALLBACK[c.kind] ?? 560;
     const h = c.h ?? CELL_HEIGHT_FALLBACK[c.kind] ?? 360;
     const { cx, cy } = slideCenter(c.x, c.y, w, h);
-    inst.setCenter(cx, cy, { zoom: 1, duration: 0 });
-  }, [cells]);
+    // Defer one frame so the flow container has its real width/height —
+    // setCenter divides by them, and they can read 0 at the init tick.
+    requestAnimationFrame(() => inst.setCenter(cx, cy, { zoom: 1, duration: 0 }));
+  }, []);
+  useEffect(() => {
+    centerFirstCell();
+  }, [cells, rfReady, centerFirstCell]);
 
   // Per-cellId stable `data` object. ReactFlow passes `data` straight
   // to the user node component, and changes to its identity cause the
@@ -476,7 +489,7 @@ function CanvasInner() {
         nodes={nodes}
         nodeTypes={nodeTypes}
         edges={[]}
-        onInit={(inst) => { instanceRef.current = inst; }}
+        onInit={(inst) => { instanceRef.current = inst; setRfReady(true); }}
         onNodesChange={onNodesChange}
         onPaneClick={() => setSelected(null)}
         nodesConnectable={false}

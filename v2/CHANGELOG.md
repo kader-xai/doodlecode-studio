@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Fixed (iter 236) — Center the deck on page load (was pinned far-left)
+- **On load the opening cell is now reliably centered** in the viewport at
+  100% zoom. The centering effect only re-ran when `cells` changed, but
+  ReactFlow's `onInit` usually fires *after* that first pass — so the
+  instance was still null, the effect bailed, and (since localStorage
+  cells never change again) the deck stayed pinned at the canvas origin /
+  far-left. Now an `rfReady` flag re-runs the centering once the instance
+  exists, deferred one frame so the container has real dimensions.
+
 ### Added (iter 235) — Talk timer in the presentation corner
 - **A live elapsed-time clock appears top-right while presenting** (`⏱
   MM:SS`, switching to `H:MM:SS` past an hour). Starts at zero when the
