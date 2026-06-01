@@ -108,6 +108,10 @@ describe("renderMarkdown", () => {
     expect(toHtml("[anchor](#section)")).toContain('href="#section"');
   });
 
+  it("allows tel: links for contact slides (iter 218)", () => {
+    expect(toHtml("[call](tel:+15551234)")).toContain('href="tel:+15551234"');
+  });
+
   it("autolinks a bare https:// URL (iter 212)", () => {
     const html = toHtml("see https://example.com/docs for more");
     expect(html).toContain('href="https://example.com/docs"');

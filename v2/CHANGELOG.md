@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added (iter 218) — `tel:` links in text cells
+- **Markdown links now accept the `tel:` scheme** (e.g.
+  `[Call us](tel:+15551234)`) alongside http/https/mailto/relative —
+  handy for contact and CTA slides. The `javascript:`/other-scheme XSS
+  guard is unchanged. 1 vitest case (248 frontend tests).
+
 ### Docs (iter 217) — markdown showcase example deck
 - **Added `examples/markdown_showcase.py`** — a 5-slide deck exercising
   every text-cell construct (headings, bold/italic/strike/code, named +

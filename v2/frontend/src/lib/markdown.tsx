@@ -13,7 +13,7 @@ import { JSX } from "react";
  *   `**bold**`, `*italic*`, `~~strikethrough~~`
  *   `` `inline code` ``
  *   ```` ```fenced code``` ````     (literal block, optional language)
- *   `[text](url)`                   (link — http/https/mailto/relative)
+ *   `[text](url)`                   (link — http/https/mailto/tel/relative)
  *   `| a | b |` + `| --- | :-: |`   (table, with column alignment)
  *   blank lines separate paragraphs
  *
@@ -299,10 +299,11 @@ export function renderMarkdown(src: string): JSX.Element[] {
 
 /** Iter 185: only allow safe link schemes — a `javascript:` href in
  *  user markdown would be an XSS vector. Relative links and http(s) /
- *  mailto are fine; anything else renders as plain `[text](url)`. */
+ *  mailto / tel (iter 218 — contact slides) are fine; anything else
+ *  renders as plain `[text](url)`. */
 function safeHref(url: string): string | null {
   const u = url.trim();
-  if (/^(https?:|mailto:)/i.test(u)) return u;
+  if (/^(https?:|mailto:|tel:)/i.test(u)) return u;
   if (/^[/#.]/.test(u)) return u; // relative / anchor / fragment
   return null;
 }

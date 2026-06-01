@@ -72,7 +72,7 @@ technical and educational writing, nothing more:
 | `---`                           | horizontal rule                        |
 | `**bold**` `*italic*` `~~strike~~` `` `code` `` | inline emphasis + code  |
 | ```` ```lang … ``` ````         | fenced code block (literal, optional language) |
-| `[text](url)`                   | link (http/https/mailto/relative only) |
+| `[text](url)`                   | link (http/https/mailto/tel/relative only) |
 | `\| a \| b \|` + `\| --- \| :-: \|` | table with per-column alignment    |
 
 Not supported (by design): images, nested lists, raw HTML. Use a Media

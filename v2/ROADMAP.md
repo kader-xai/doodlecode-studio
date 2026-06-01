@@ -187,6 +187,8 @@ The accessibility & polish batch (173–177) is complete.
 - **211 — Markdown showcase deck** ✓ (iter 217): `examples/
   markdown_showcase.py` demonstrates every text-cell construct + serves
   as a format-v4 round-trip fixture. 52 backend tests.
+- **212 — `tel:` markdown links** ✓ (iter 218): contact/CTA-slide phone
+  links allowed; XSS guard intact. 248 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
