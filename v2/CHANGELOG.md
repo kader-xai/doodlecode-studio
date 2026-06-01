@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Tests (iter 215) — lock down the proxy SSRF guard
+- **Added `tests/test_proxy.py` covering `_is_public_ip`** — the security
+  boundary for the browser-cell proxy. Asserts it refuses loopback,
+  private, link-local, cloud-metadata (`169.254.169.254`,
+  `100.100.100.200`), unspecified, and multicast addresses, fails closed
+  on unresolvable hosts, and allows genuine public IPs. 7 cases
+  (51 backend tests). No behavior change — regression coverage for an
+  untested security control.
+
 ## [2.9.0] — 2026-06-01
 
 Presentation + content release. Jump to any slide by number (`1`–`9`)

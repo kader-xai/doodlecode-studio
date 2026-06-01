@@ -181,6 +181,9 @@ The accessibility & polish batch (173–177) is complete.
   strikethrough, bare-URL autolink, and direct-video playback flags.
   Lockstep bump 2.8.1 → 2.9.0, tagged. CI-equivalent green (tsc, 247 FE
   tests, build, 44 BE tests).
+- **210 — Proxy SSRF-guard tests** ✓ (iter 215): `tests/test_proxy.py`
+  locks `_is_public_ip` against loopback / private / link-local /
+  cloud-metadata / unresolvable hosts. 51 backend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
