@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+## [2.12.0] — 2026-06-01
+
+Headline: a **layout + presentation polish** release driven by owner
+feedback. **⤵ Tidy** re-stacks any deck into one connected column;
+connectors now reliably touch their cells/callouts (no floating gap);
+new cells line up on the column; the deck opens centered (not pinned
+far-left); presentation centers the focused cell (not the cell+callout
+pair, so wide cells stop drifting to a corner); **📐 Space** leaves a full
+page between cells; the seven ＋ buttons fold into one **➕ Add ▾** menu;
+and a **⏱ talk timer** sits in the corner during a presentation. Plus
+the Markdown export renders animation frames and follows reading order.
+
 ### Fixed (iter 240) — Presentation centers the cell, not the cell+callout pair
 - **Cells with a callout no longer get shoved to a corner during a talk.**
   Centering balanced the cell+callout bounding box, so a wide (560/580px)
