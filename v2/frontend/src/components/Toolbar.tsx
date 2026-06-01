@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useStore } from "../store";
 import { resetKernel } from "../api";
+import { AddMenu } from "./AddMenu";
 import { AmbientPicker } from "./AmbientPicker";
 import { FileMenu } from "./FileMenu";
 import { EditableTitle } from "./EditableTitle";
@@ -22,13 +23,6 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
   const tidyLayout = useStore((s) => s.tidyLayout);
   const mode = useStore((s) => s.interactionMode);
   const setMode = useStore((s) => s.setInteractionMode);
-  const addCell = useStore((s) => s.addCell);
-  const addMarkdownCell = useStore((s) => s.addMarkdownCell);
-  const addMediaCell = useStore((s) => s.addMediaCell);
-  const addBrowserCell = useStore((s) => s.addBrowserCell);
-  const addWhiteboardCell = useStore((s) => s.addWhiteboardCell);
-  const addDiagramCell = useStore((s) => s.addDiagramCell);
-  const addAnimationCell = useStore((s) => s.addAnimationCell);
   const deleteCell = useStore((s) => s.deleteCell);
   const openCalloutEditor = useStore((s) => s.openCalloutEditor);
   const resizeCell = useStore((s) => s.resizeCell);
@@ -149,64 +143,7 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
             🎬 Present
           </button>
 
-          <button
-            onClick={() => addCell()}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-sky dark:bg-[#1864ab] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Add a new code cell (N)"
-          >
-            ＋ Code
-          </button>
-          <button
-            onClick={() => addMarkdownCell()}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-yellow dark:bg-amber-700 text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Add a new text / markdown cell (T)"
-          >
-            ＋ Text
-          </button>
-          <button
-            onClick={() => {
-              const url = window.prompt(
-                "Image or video URL\n(.png, .jpg, .gif, .mp4, .webm, .mov, YouTube, Vimeo…)",
-                "",
-              );
-              if (url != null && url.trim()) addMediaCell(url);
-            }}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-violet dark:bg-[#5f3dc4] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Add an image or video cell from a URL (M)"
-          >
-            ＋ Media
-          </button>
-          <button
-            onClick={() => {
-              const url = window.prompt("Website URL", "https://example.com");
-              if (url != null && url.trim()) addBrowserCell(url);
-            }}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-peach dark:bg-[#9a4f10] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Add a browser cell (live website) (W)"
-          >
-            ＋ Browser
-          </button>
-          <button
-            onClick={() => addWhiteboardCell()}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-mint dark:bg-[#2b8a3e] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Add a whiteboard cell (draw + highlight) (D)"
-          >
-            ＋ Draw
-          </button>
-          <button
-            onClick={() => addDiagramCell()}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-pink dark:bg-[#a61e4d] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Add a Mermaid diagram cell (G)"
-          >
-            ＋ Diagram
-          </button>
-          <button
-            onClick={() => addAnimationCell()}
-            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-yellow dark:bg-[#9a7a10] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
-            title="Add an animation cell (frame-by-frame transitions)"
-          >
-            ＋ Animate
-          </button>
+          <AddMenu />
 
           <span className="mx-1 h-6 w-px bg-ink/30 dark:bg-white/30" />
 

@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Changed (iter 237) — Add-cell buttons collapsed into an Add ▾ menu; clearer connectors
+- **The seven inline ＋ buttons are now one `➕ Add ▾` dropdown** (Code /
+  Text / Media / Browser / Draw / Diagram / Animation, each with its
+  keyboard-shortcut hint). The N/T/M/W/D/G shortcuts still work. New
+  `AddMenu` component; the toolbar is far less crowded.
+- **Connectors are now clearly visible.** The cell→callout dotted line was
+  `"1 10"` (a 1px dot every 11px — read as nothing); it's now a denser,
+  higher-contrast `"2 5"` dash that runs roughly horizontal into the
+  bubble, so callouts visibly connect to their cell. Added the missing
+  `animation` fallback size so its connectors anchor correctly. Cell→cell
+  links stay solid (use ⤵ Tidy or link cells to draw them).
+
 ### Fixed (iter 236) — Center the deck on page load (was pinned far-left)
 - **On load the opening cell is now reliably centered** in the viewport at
   100% zoom. The centering effect only re-ran when `cells` changed, but

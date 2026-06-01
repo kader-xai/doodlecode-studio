@@ -27,6 +27,7 @@ const FALLBACK_W: Record<string, number> = {
   diagram: 560,
   browser: 720,
   whiteboard: 640,
+  animation: 560,
 };
 const FALLBACK_H: Record<string, number> = {
   code: 260,
@@ -35,6 +36,7 @@ const FALLBACK_H: Record<string, number> = {
   browser: 480,
   whiteboard: 420,
   media: 320,
+  animation: 240,
 };
 const CALLOUT_GAP = 40;
 const BUBBLE_W = 280;
@@ -113,16 +115,19 @@ export function ConnectionsLayer() {
     const cellW = c.w ?? FALLBACK_W[c.kind] ?? 560;
     const cellH = c.h ?? FALLBACK_H[c.kind] ?? 280;
     const cellRightX = c.x + cellW;
-    const cellMidY = c.y + cellH / 2;
     const bubbleX = c.x + cellW + CALLOUT_GAP;
 
     for (let i = 0; i < list.length; i++) {
       const bubbleY = c.y + i * STACK_DY;
       const bubbleMidY = bubbleY + BUBBLE_H_APPROX / 2;
       if (i === 0) {
+        // Anchor the cell end at the bubble's height (clamped inside the
+        // cell) so the connector runs roughly horizontal into the bubble
+        // instead of slanting up from the cell's vertical middle.
+        const y1 = Math.max(c.y + 12, Math.min(bubbleMidY, c.y + cellH - 12));
         segments.push({
           key: `${c.id}-c-${i}`,
-          x1: cellRightX, y1: cellMidY,
+          x1: cellRightX, y1,
           x2: bubbleX,    y2: bubbleMidY,
           kind: "callout",
         });
@@ -173,16 +178,20 @@ export function ConnectionsLayer() {
               opacity={0.85}
             />
           ) : (
+            // Callout connector — a clearly-visible dotted line from the
+            // cell's edge to its bubble. Denser dashes (was "1 10", which
+            // read as nearly nothing) so it actually looks connected.
             <line
               key={s.key}
               x1={s.x1}
               y1={s.y1}
               x2={s.x2}
               y2={s.y2}
-              stroke={dark ? "#aaa" : "#555"}
+              stroke={dark ? "#d9c79f" : "#4a4a4a"}
               strokeWidth={2.5}
               strokeLinecap="round"
-              strokeDasharray="1 10"
+              strokeDasharray="2 5"
+              opacity={0.9}
               className="doodle-connector"
             />
           ),
