@@ -19,6 +19,7 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
   const spaced = useStore((s) => s.originalPositions !== null);
   const spaceForPresentation = useStore((s) => s.spaceForPresentation);
   const rollbackLayout = useStore((s) => s.rollbackLayout);
+  const tidyLayout = useStore((s) => s.tidyLayout);
   const mode = useStore((s) => s.interactionMode);
   const setMode = useStore((s) => s.setInteractionMode);
   const addCell = useStore((s) => s.addCell);
@@ -132,6 +133,13 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
             title={spaced ? "Pack cells together (S)" : "Spread cells one-per-slide for presenting (S)"}
           >
             {spaced ? "🔗 Together" : "📐 Space"}
+          </button>
+          <button
+            onClick={() => tidyLayout()}
+            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-sky dark:bg-[#1565a0] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
+            title="Tidy: stack every cell in one clean vertical line and connect them"
+          >
+            ⤵ Tidy
           </button>
           <button
             onClick={() => setPresenting(true)}

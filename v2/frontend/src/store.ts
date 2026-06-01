@@ -132,6 +132,10 @@ export interface AppState {
   spaceForPresentation: (slideHeight?: number) => void;
   /** Restore positions saved by `spaceForPresentation`. No-op if not spaced. */
   rollbackLayout: () => void;
+  /** Iter 233: permanently re-lay all cells into one vertical column in
+   *  reading order and chain consecutive cells. A real cleanup (persists),
+   *  unlike the Space-mode presentation toggle. */
+  tidyLayout: () => void;
   setSelected: (id: string | null) => void;
   moveCell: (id: string, x: number, y: number) => void;
   addCell: (partial?: Partial<Cell>) => string;
@@ -638,6 +642,47 @@ export const useStore = create<AppState>((set, get) => {
           const p = newPos.get(c.id);
           return p ? { ...c, x: p.x, y: p.y } : c;
         }),
+      });
+      autosave();
+    },
+    tidyLayout: () => {
+      // Iter 233: permanently re-lay every cell into ONE clean vertical
+      // column in reading order, and chain consecutive cells with links
+      // so the deck reads as a connected line. Row height accounts for the
+      // cell's own height AND its stacked callouts (which extend to the
+      // right) so nothing overlaps. Unlike Space mode this WRITES the
+      // positions (it's a real cleanup, not a presentation toggle).
+      const s = get();
+      const ordered = s.cellsInOrder();
+      if (!ordered.length) return;
+      const HEIGHTS: Record<string, number> = {
+        code: 360, markdown: 220, diagram: 360, media: 360,
+        browser: 480, whiteboard: 420, animation: 240,
+      };
+      const X = 80, GAP = 72, CALLOUT_ROW = 210;
+      let y = 80;
+      const pos = new Map<string, { x: number; y: number }>();
+      for (const c of ordered) {
+        pos.set(c.id, { x: X, y });
+        const h = c.h ?? HEIGHTS[c.kind] ?? 320;
+        const calloutH = (c.callouts?.length ?? 0) * CALLOUT_ROW;
+        y += Math.max(h, calloutH) + GAP;
+      }
+      // Chain consecutive cells (symmetric, rule 21c; merge with existing).
+      const linkOf = new Map<string, Set<string>>(
+        ordered.map((c) => [c.id, new Set(c.links ?? [])]),
+      );
+      for (let i = 0; i < ordered.length - 1; i++) {
+        linkOf.get(ordered[i].id)!.add(ordered[i + 1].id);
+        linkOf.get(ordered[i + 1].id)!.add(ordered[i].id);
+      }
+      set({
+        originalPositions: null, // this is the new base layout
+        cells: s.cells.map((c) => {
+          const p = pos.get(c.id);
+          return p ? { ...c, x: p.x, y: p.y, links: Array.from(linkOf.get(c.id) ?? []) } : c;
+        }),
+        panToTick: s.panToTick + 1,
       });
       autosave();
     },

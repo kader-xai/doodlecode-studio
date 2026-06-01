@@ -1105,3 +1105,38 @@ describe("store: animation rewinds on slide arrival (iter 232)", () => {
     expect(useStore.getState().revealStep["c"]).toBe(1); // persists
   });
 });
+
+describe("store: tidyLayout (iter 233)", () => {
+  beforeEach(() => freshNotebook());
+
+  it("stacks all cells in one column (same x, increasing y) and chains them", () => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "markdown", source: "A", title: "A", x: 80, y: 80 },
+        { id: "b", kind: "code", source: "B", title: "B", x: 720, y: 80 },   // right column
+        { id: "c", kind: "markdown", source: "C", title: "C", x: 80, y: 500 },
+      ],
+      originalPositions: { a: { x: 1, y: 2 } },
+    });
+    useStore.getState().tidyLayout();
+    const cells = useStore.getState().cells;
+    const xs = cells.map((c) => c.x);
+    expect(new Set(xs).size).toBe(1); // single column
+    // Reading order a (top-left), b (top-right same row), c (below).
+    const byId = Object.fromEntries(cells.map((c) => [c.id, c]));
+    expect(byId.a.y).toBeLessThan(byId.b.y);
+    expect(byId.b.y).toBeLessThan(byId.c.y);
+    // Consecutive cells are linked (symmetric).
+    expect(byId.a.links).toContain("b");
+    expect(byId.b.links).toEqual(expect.arrayContaining(["a", "c"]));
+    expect(byId.c.links).toContain("b");
+    // Snapshot cleared — tidy is the new base layout.
+    expect(useStore.getState().originalPositions).toBeNull();
+  });
+
+  it("is a no-op on an empty notebook", () => {
+    useStore.setState({ cells: [] });
+    expect(() => useStore.getState().tidyLayout()).not.toThrow();
+    expect(useStore.getState().cells).toEqual([]);
+  });
+});
