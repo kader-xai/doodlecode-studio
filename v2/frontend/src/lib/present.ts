@@ -70,3 +70,18 @@ export function progressFraction(index: number, total: number): number {
   const i = Math.max(0, Math.min(index, total - 1));
   return (i + 1) / total;
 }
+
+/**
+ * Iter 235: format an elapsed presentation time (in ms) for the corner
+ * timer. `MM:SS`, or `H:MM:SS` once past an hour. Negative / NaN clamps
+ * to `00:00`. Pure so it unit-tests without a clock.
+ */
+export function formatDuration(ms: number): string {
+  const totalSec = Number.isFinite(ms) ? Math.max(0, Math.floor(ms / 1000)) : 0;
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
+}

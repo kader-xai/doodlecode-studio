@@ -4,7 +4,25 @@ import {
   slideCenterY,
   topFractionOf,
   progressFraction,
+  formatDuration,
 } from "./present";
+
+describe("formatDuration (iter 235 — presentation timer)", () => {
+  it("formats seconds and minutes as MM:SS", () => {
+    expect(formatDuration(0)).toBe("00:00");
+    expect(formatDuration(5_000)).toBe("00:05");
+    expect(formatDuration(65_000)).toBe("01:05");
+    expect(formatDuration(599_000)).toBe("09:59");
+  });
+  it("switches to H:MM:SS past an hour", () => {
+    expect(formatDuration(3_600_000)).toBe("1:00:00");
+    expect(formatDuration(3_661_000)).toBe("1:01:01");
+  });
+  it("clamps negative / NaN to 00:00", () => {
+    expect(formatDuration(-1000)).toBe("00:00");
+    expect(formatDuration(NaN)).toBe("00:00");
+  });
+});
 
 describe("slideCenter (iter 206 — dead-center both axes)", () => {
   it("centers on the cell midpoint with no callouts", () => {

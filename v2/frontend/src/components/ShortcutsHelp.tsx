@@ -17,6 +17,7 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "E", what: "Erase all presenter ink", when: "presenting" },
   { keys: "F", what: "Toggle fullscreen", when: "presenting" },
   { keys: "R", what: "Run focused code cell", when: "presenting" },
+  { keys: "⏱ click", what: "Reset the talk timer (top-right corner)", when: "presenting" },
   { keys: "＋ Code / N", what: "Add a new code cell", when: "anywhere" },
   { keys: "＋ Text / T", what: "Add a new text/markdown cell", when: "anywhere" },
   { keys: "＋ Media / M", what: "Add an image/video cell (prompts for URL)", when: "anywhere" },

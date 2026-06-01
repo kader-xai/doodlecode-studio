@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added (iter 235) — Talk timer in the presentation corner
+- **A live elapsed-time clock appears top-right while presenting** (`⏱
+  MM:SS`, switching to `H:MM:SS` past an hour). Starts at zero when the
+  talk begins, ticks every half-second, and **click it to reset**. Hidden
+  outside presentation and reset on exit so each talk starts fresh. New
+  `PresenterTimer` component (z-30, only the chip is clickable) + pure
+  `formatDuration` helper with 3 vitest cases (270 frontend tests).
+
 ### Fixed (iter 234) — New cells line up with the tidy column
 - **`spawnPosition` now uses the same column x (80) as the seed cell, the
   demo, and ⤵ Tidy** — it was 120, so a cell added after Tidy sat 40px off

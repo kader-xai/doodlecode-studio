@@ -10,6 +10,7 @@ import { EmptyNotebookHint } from "./components/EmptyNotebookHint";
 import { InstallModal } from "./components/InstallModal";
 import { PresenterBar } from "./components/PresenterBar";
 import { PresenterProgress } from "./components/PresenterProgress";
+import { PresenterTimer } from "./components/PresenterTimer";
 import { PresenterOverlay } from "./components/PresenterOverlay";
 import { ShortcutsHelp } from "./components/ShortcutsHelp";
 import { Toolbar } from "./components/Toolbar";
@@ -485,6 +486,7 @@ export function App() {
       <InstallModal />
       <PresenterBar />
       <PresenterProgress />
+      <PresenterTimer />
       <PresenterNotes />
       <PresenterOverlay />
 
