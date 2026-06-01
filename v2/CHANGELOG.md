@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added (iter 225) — Animation module: node component + Add button
+- **The Animation cell now renders on the canvas.** New
+  `AnimationCell.tsx` shows the numbered frame sequence in edit mode, the
+  single active frame in presentation (re-keyed by step so the entrance
+  re-fires on each advance), a transition-style chip, and frame-position
+  dots. ✏️ Edit opens an inline textarea (one frame per line).
+- New pure `lib/animation.ts` (`parseFrames` / `frameAt` / `frameCount` /
+  `normalizeTransition`) with 8 vitest cases. Registered in Canvas
+  `nodeTypes` + size fallbacks; store `addAnimationCell()` seeds a 4-frame
+  fade demo; toolbar **＋ Animate** button. Baseline `doodle-anim-frame`
+  fade-rise keyframe (reduced-motion-safe); richer transition variants
+  land in iter 227, and frame-stepping in present mode lands in iter 226.
+  256 frontend tests; tsc + build clean.
+
 ### Added (iter 224) — Animation module: data-model + file-format foundation
 - **New `kind="animation"` cell type** (foundation slice of the in-slide
   transition module). A `CellPayload.transition` field + `Cell.transition`

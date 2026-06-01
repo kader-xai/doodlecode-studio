@@ -27,6 +27,7 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
   const addBrowserCell = useStore((s) => s.addBrowserCell);
   const addWhiteboardCell = useStore((s) => s.addWhiteboardCell);
   const addDiagramCell = useStore((s) => s.addDiagramCell);
+  const addAnimationCell = useStore((s) => s.addAnimationCell);
   const deleteCell = useStore((s) => s.deleteCell);
   const openCalloutEditor = useStore((s) => s.openCalloutEditor);
   const resizeCell = useStore((s) => s.resizeCell);
@@ -190,6 +191,13 @@ export function Toolbar({ version, onHelp }: { version: string | null; onHelp: (
             title="Add a Mermaid diagram cell (G)"
           >
             ＋ Diagram
+          </button>
+          <button
+            onClick={() => addAnimationCell()}
+            className="font-hand text-xl px-3 py-0.5 rounded-lg border-2 border-ink dark:border-white/70 bg-marker-yellow dark:bg-[#9a7a10] text-ink dark:text-white shadow-sketch hover:translate-y-[1px] transition"
+            title="Add an animation cell (frame-by-frame transitions)"
+          >
+            ＋ Animate
           </button>
 
           <span className="mx-1 h-6 w-px bg-ink/30 dark:bg-white/30" />

@@ -13,6 +13,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 
+import { AnimationCell } from "./AnimationCell";
 import { BrowserCell } from "./BrowserCell";
 import { CalloutBubble } from "./CalloutBubble";
 import { CodeCell } from "./CodeCell";
@@ -32,6 +33,7 @@ const nodeTypes: NodeTypes = {
   browser: BrowserCell,
   whiteboard: WhiteboardCell,
   diagram: DiagramCell,
+  animation: AnimationCell,
   callout: CalloutBubble,
 };
 
@@ -40,6 +42,7 @@ const CELL_WIDTH_FALLBACK: Record<string, number> = {
   code: 580,
   markdown: 560,
   diagram: 560,
+  animation: 560,
 };
 /** Approx cell heights, for vertically centering a slide when the cell
  *  has no explicit height yet. */
@@ -50,6 +53,7 @@ const CELL_HEIGHT_FALLBACK: Record<string, number> = {
   media: 360,
   browser: 480,
   whiteboard: 420,
+  animation: 240,
 };
 const CALLOUT_GAP = 40;
 /** Approximate rendered width of a callout bubble — must match the

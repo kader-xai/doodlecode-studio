@@ -78,4 +78,17 @@ html.ink-highlighter, html.ink-highlighter * {
   .react-flow__node.slide-enter > * { animation: none; }
   .doodle-connector { animation: none; }
   .doodle-drift-shape { animation: none !important; }
+  .anim-frame { animation: none !important; }
+}
+
+/* Iter 225: Animation-cell frame transition. The active frame is re-keyed
+ * by step so this entrance re-fires on every Space/→ advance. Baseline is
+ * a gentle fade-rise; the per-style variants (slide / draw-on / pop) are
+ * filled in by iter 227. */
+@keyframes doodle-anim-frame {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim-frame {
+  animation: doodle-anim-frame 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }

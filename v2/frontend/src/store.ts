@@ -137,6 +137,7 @@ export interface AppState {
   addBrowserCell: (url: string) => string | null;
   addWhiteboardCell: () => string;
   addDiagramCell: () => string;
+  addAnimationCell: () => string;
   duplicateCell: (id: string) => string | null;
   resizeCell: (id: string, w: number, h: number) => void;
 
@@ -759,6 +760,22 @@ export const useStore = create<AppState>((set, get) => {
           "Ship: 10",
         w: 720,
         h: 520,
+      });
+    },
+    addAnimationCell: () => {
+      // Iter 225: a frame-script cell. Each line is one frame; in
+      // presentation Space/→ advances to the next with a transition.
+      return get().addCell({
+        kind: "animation",
+        title: "Animation",
+        transition: "fade",
+        source:
+          "First, the idea\n" +
+          "Then, a sketch\n" +
+          "Build it\n" +
+          "Ship it ✨",
+        w: 560,
+        h: 240,
       });
     },
     resizeCell: (id, w, h) => {
