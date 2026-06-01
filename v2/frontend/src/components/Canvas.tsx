@@ -57,10 +57,6 @@ const CELL_HEIGHT_FALLBACK: Record<string, number> = {
   animation: 240,
 };
 const CALLOUT_GAP = 40;
-/** Approximate rendered width of a callout bubble — must match the
- *  `BUBBLE_W` constant in CalloutBubble.tsx. Used to grow the
- *  presentation-centering bounding box when callouts exist. */
-const BUBBLE_W = 280;
 
 /**
  * Infinite canvas. ReactFlow drives drag/selection UX; the store is
@@ -186,16 +182,15 @@ function CanvasInner() {
     if (!inst) return;
     const cell = cells.find((c) => c.id === focusedCellId);
     if (!cell) return;
-    const w = cell.w ?? CELL_WIDTH_FALLBACK[cell.kind] ?? 560;
+    // Iter 240: center the CELL itself in the viewport, NOT the
+    // cell+callout bounding box. Balancing to the pair pushed a wide cell
+    // to the left and its bubble to the right (the "corners" complaint).
+    // Use the REAL rendered width (a markdown card is 560 even if cell.w
+    // says 720) so the cell lands dead-center; the bubble sits just right
+    // of it and still fits on a normal screen.
+    const w = cellDisplayWidth(cell);
     const h = cell.h ?? CELL_HEIGHT_FALLBACK[cell.kind] ?? 360;
-    const hasCallouts = (cell.callouts?.length ?? 0) > 0;
-    const { cx, cy } = slideCenter(
-      cell.x,
-      cell.y,
-      w,
-      h,
-      hasCallouts ? CALLOUT_GAP + BUBBLE_W : 0,
-    );
+    const { cx, cy } = slideCenter(cell.x, cell.y, w, h, 0);
     inst.setCenter(cx, cy, { zoom: inst.getZoom(), duration: 350 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presenting, focusedCellId, focusedX, focusedY]);

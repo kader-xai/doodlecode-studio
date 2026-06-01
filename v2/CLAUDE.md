@@ -90,11 +90,15 @@ v2/
 12. **Click → select, never reset zoom.** Clicking a cell pans nothing.
     Presentation `setCenter` keeps the user's current zoom.
 13. **Presentation centers each slide dead-center and locks the canvas.**
-    (Owner request, iter 206.) Entering presentation and every slide
-    change `setCenter`s the focused cell in the MIDDLE of the viewport on
-    both axes (horizontally on the cell + callout-column bounding box so a
-    cell+bubble pair stays balanced; the extra width is `CALLOUT_GAP +
-    BUBBLE_W`). While `presenting` the canvas is frozen — `nodesDraggable`,
+    (Owner request, iter 206; centering target revised iter 240.) Entering
+    presentation and every slide change `setCenter`s the focused **cell**
+    in the MIDDLE of the viewport on both axes, using the cell's REAL
+    rendered width (`cellDisplayWidth` — code/markdown/animation are
+    fixed-width and ignore `cell.w`). It centers the cell itself, NOT the
+    cell+callout bounding box: balancing to the pair pushed a wide cell to
+    the left and its bubble to the right ("the cell goes to the corner"),
+    so the callout now simply sits just right of the centered cell. While
+    `presenting` the canvas is frozen — `nodesDraggable`,
     `panOnDrag`, `panOnScroll`, `selectionOnDrag` are all `false` and each
     node's `draggable` is forced `false` — so a slide can never drift out
     of place. Resizing still works (the resize grip has its own pointer

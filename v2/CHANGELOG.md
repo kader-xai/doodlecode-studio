@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Fixed (iter 240) — Presentation centers the cell, not the cell+callout pair
+- **Cells with a callout no longer get shoved to a corner during a talk.**
+  Centering balanced the cell+callout bounding box, so a wide (560/580px)
+  cell with a bubble landed in the left third with the bubble in the right
+  third. It now centers the **cell itself** (using its real rendered
+  width, so a stored `w=720` on a 560 card no longer over-shifts); the
+  callout sits just to its right. (Owner report; CLAUDE rule 13 updated.)
+
 ### Fixed (iter 239) — Connector lines now touch the cells/callouts (no gap)
 - **The gap between a cell and its callout/link line is fixed.** Code,
   markdown, and animation cells render at a FIXED card width and ignore
