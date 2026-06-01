@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added (iter 230) — Markdown export renders animation frames
+- **The Markdown export now handles `kind=animation` cells** — frames
+  (one per line) render as a bullet list, so a static handout captures
+  the full build sequence instead of dumping raw lines. Empty animation
+  cells emit nothing. Composes the two v2.10/v2.11 features (export +
+  Animation cell). 2 pytest cases (71 backend tests).
+
 ## [2.11.0] — 2026-06-01
 
 Headline: **the Animation cell** — a new `kind=animation` module that

@@ -136,5 +136,23 @@ def test_same_row_jitter_stays_left_to_right():
     assert md.index("Left") < md.index("Right")
 
 
+def test_animation_frames_become_a_bullet_list():
+    nb = _nb(
+        CellPayload(
+            id="a", kind="animation", title="Build", transition="pop",
+            source="First\nSecond\nThird",
+        ),
+    )
+    md = to_markdown(nb)
+    assert "## Build" in md
+    assert "- First\n- Second\n- Third" in md
+
+
+def test_empty_animation_emits_nothing():
+    nb = _nb(CellPayload(id="a", kind="animation", source="  \n \n"))
+    md = to_markdown(nb)
+    assert md.strip() == "# Deck"  # title only, no stray bullets
+
+
 def test_empty_notebook_just_the_title():
     assert to_markdown(NotebookPayload(name="Empty", cells=[])) == "# Empty\n"

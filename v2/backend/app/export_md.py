@@ -42,6 +42,11 @@ def _cell_body(c: CellPayload) -> str:
         # The doodle/mermaid source is human-readable; fence it as text so
         # a reader sees the chart's data definition even without a render.
         return f"```text\n{src}\n```" if src else ""
+    if c.kind == "animation":
+        # Frames (one per line) are a build sequence — render them as a
+        # bullet list so a static handout captures every reveal step.
+        frames = [ln.strip() for ln in src.split("\n") if ln.strip()]
+        return "\n".join(f"- {f}" for f in frames)
     if c.kind == "media":
         if not src:
             return ""
