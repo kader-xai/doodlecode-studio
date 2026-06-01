@@ -1062,3 +1062,46 @@ describe("store: animation reveal stepping (iter 226)", () => {
     expect(useStore.getState().revealNext("a")).toBe(0);
   });
 });
+
+describe("store: animation rewinds on slide arrival (iter 232)", () => {
+  beforeEach(() => freshNotebook());
+
+  it("focusCell rewinds an arriving animation cell to frame 0", () => {
+    useStore.setState({
+      cells: [
+        { id: "m", kind: "markdown", source: "intro", title: "M", x: 0, y: 0 },
+        { id: "a", kind: "animation", source: "f1\nf2\nf3", title: "A", x: 0, y: 200 },
+      ],
+      revealStep: { a: 2 },
+      focusedCellId: "m",
+    });
+    useStore.getState().focusCell("a");
+    expect(useStore.getState().revealStep["a"]).toBe(0);
+  });
+
+  it("navigating back to an animation slide replays it", () => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "animation", source: "f1\nf2", title: "A", x: 0, y: 0 },
+        { id: "b", kind: "markdown", source: "next", title: "B", x: 0, y: 200 },
+      ],
+      revealStep: {},
+      focusedCellId: "a",
+    });
+    useStore.getState().revealNext("a"); // step to frame 1
+    expect(useStore.getState().revealStep["a"]).toBe(1);
+    useStore.getState().nextCell();      // → b
+    useStore.getState().prevCell();      // back to a — should rewind
+    expect(useStore.getState().revealStep["a"]).toBe(0);
+  });
+
+  it("does not touch a code cell's reveal step", () => {
+    useStore.setState({
+      cells: [{ id: "c", kind: "code", source: "x=1", reveals: ["y=2"], title: "C", x: 0, y: 0 }],
+      revealStep: { c: 1 },
+      focusedCellId: null,
+    });
+    useStore.getState().focusCell("c");
+    expect(useStore.getState().revealStep["c"]).toBe(1); // persists
+  });
+});

@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed (iter 232) — Animation cells replay when you navigate back
+- **Arriving at an animation slide now rewinds it to frame 0** so its
+  build replays (Keynote/PowerPoint behavior) instead of showing the last
+  frame. A shared `animRewindPatch` folds into `focusCell` / `nextCell` /
+  `prevCell` / `goToSlide`; code-cell reveals deliberately still persist.
+  3 store vitest cases (263 frontend tests).
+
 ### Changed (iter 231) — Surface the Animation cell in palette + shortcuts
 - **The Cmd+K palette now shows a 🎞 icon for animation cells** (was a
   generic bullet), and the **Shortcuts overlay** lists ＋ Animate and notes

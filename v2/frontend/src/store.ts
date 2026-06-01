@@ -378,6 +378,17 @@ export const useStore = create<AppState>((set, get) => {
     );
   };
 
+  // Iter 232: when navigation arrives at an animation cell, rewind it to
+  // frame 0 so its build replays (Keynote/PowerPoint-style). Returns a
+  // partial state patch to fold into the same `set` as the focus change.
+  // Code-cell reveals deliberately persist, so only animation cells reset.
+  const animRewindPatch = (id: string | null) => {
+    if (!id) return {};
+    const cell = get().cells.find((c) => c.id === id);
+    if (cell?.kind !== "animation") return {};
+    return { revealStep: { ...get().revealStep, [id]: 0 } };
+  };
+
   return {
     theme,
     setTheme: (t) => {
@@ -557,7 +568,7 @@ export const useStore = create<AppState>((set, get) => {
     },
     focusCell: (id) =>
       // Iter 78: rule 21e — primary mirrors into selectedIds.
-      set({ focusedCellId: id, selectedId: id, selectedIds: id ? [id] : [] }),
+      set({ focusedCellId: id, selectedId: id, selectedIds: id ? [id] : [], ...animRewindPatch(id) }),
     cellsInOrder: () => {
       // Sort by row (y bucketed) first, then x. Bucket width tolerates
       // small vertical jitter so two cells "on the same row" stay
@@ -575,16 +586,16 @@ export const useStore = create<AppState>((set, get) => {
       if (!ordered.length) return;
       const idx = ordered.findIndex((c) => c.id === get().focusedCellId);
       const next = idx < 0 ? ordered[0] : ordered[Math.min(ordered.length - 1, idx + 1)];
-      // Iter 78: rule 21e.
-      set({ focusedCellId: next.id, selectedId: next.id, selectedIds: [next.id] });
+      // Iter 78: rule 21e. Iter 232: rewind an arriving animation cell.
+      set({ focusedCellId: next.id, selectedId: next.id, selectedIds: [next.id], ...animRewindPatch(next.id) });
     },
     prevCell: () => {
       const ordered = get().cellsInOrder();
       if (!ordered.length) return;
       const idx = ordered.findIndex((c) => c.id === get().focusedCellId);
       const prev = idx <= 0 ? ordered[0] : ordered[idx - 1];
-      // Iter 78: rule 21e.
-      set({ focusedCellId: prev.id, selectedId: prev.id, selectedIds: [prev.id] });
+      // Iter 78: rule 21e. Iter 232: rewind an arriving animation cell.
+      set({ focusedCellId: prev.id, selectedId: prev.id, selectedIds: [prev.id], ...animRewindPatch(prev.id) });
     },
     goToSlide: (index) => {
       const ordered = get().cellsInOrder();
@@ -592,7 +603,8 @@ export const useStore = create<AppState>((set, get) => {
       const i = Math.max(0, Math.min(index, ordered.length - 1));
       const cell = ordered[i];
       // Iter 78: rule 21e — keep selectedId ⊂ selectedIds.
-      set({ focusedCellId: cell.id, selectedId: cell.id, selectedIds: [cell.id] });
+      // Iter 232: rewind an arriving animation cell.
+      set({ focusedCellId: cell.id, selectedId: cell.id, selectedIds: [cell.id], ...animRewindPatch(cell.id) });
     },
 
     presenterTool: "none",
