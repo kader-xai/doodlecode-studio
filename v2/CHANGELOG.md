@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Fixed (iter 223) — Markdown export follows canvas reading order
+- **The Markdown export now emits cells in spatial reading order**
+  (top-to-bottom, left-to-right, y bucketed at 40px then x) — the same
+  order presentation Prev/Next walks the deck — instead of raw array
+  order. A deck rearranged spatially without reordering the underlying
+  array now exports in the sequence it actually reads. Pure helper
+  `_reading_order` mirrors `store.cellsInOrder`; 2 pytest cases
+  (66 backend tests).
+
 ## [2.10.0] — 2026-06-01
 
 Headline: **Export a deck to a shareable Markdown handout** (File ▸ Export

@@ -114,5 +114,27 @@ def test_data_url_image_detected():
     assert "![media](data:image/png;base64,AAAA)" in to_markdown(nb)
 
 
+def test_cells_emitted_in_canvas_reading_order():
+    # Stored array order is scrambled; spatial layout is A(top-left),
+    # B(top-right, same row), C(below). Export must read A, B, C.
+    nb = _nb(
+        CellPayload(id="c", kind="markdown", source="Third", x=0, y=300),
+        CellPayload(id="b", kind="markdown", source="Second", x=600, y=20),
+        CellPayload(id="a", kind="markdown", source="First", x=0, y=0),
+    )
+    md = to_markdown(nb)
+    assert md.index("First") < md.index("Second") < md.index("Third")
+
+
+def test_same_row_jitter_stays_left_to_right():
+    # y differs by < 40px (one bucket) → treated as the same row, ordered by x.
+    nb = _nb(
+        CellPayload(id="r", kind="markdown", source="Right", x=500, y=15),
+        CellPayload(id="l", kind="markdown", source="Left", x=0, y=0),
+    )
+    md = to_markdown(nb)
+    assert md.index("Left") < md.index("Right")
+
+
 def test_empty_notebook_just_the_title():
     assert to_markdown(NotebookPayload(name="Empty", cells=[])) == "# Empty\n"

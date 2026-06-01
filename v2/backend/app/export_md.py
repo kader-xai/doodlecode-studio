@@ -54,11 +54,19 @@ def _cell_body(c: CellPayload) -> str:
     return src
 
 
+def _reading_order(cells: list[CellPayload]) -> list[CellPayload]:
+    """Top-to-bottom, left-to-right — the same spatial order the canvas uses
+    to navigate slides (store.cellsInOrder: y bucketed at 40px, then x).
+    Python's sort is stable, so cells in the same cell tie-break on input
+    order, matching the frontend."""
+    return sorted(cells, key=lambda c: (round((c.y or 0) / 40), c.x or 0))
+
+
 def to_markdown(nb: NotebookPayload) -> str:
     """Render the whole notebook as a single Markdown document. Cells are
-    emitted in their stored order (which is reading order after a Save)."""
+    emitted in canvas reading order so the handout matches the slide flow."""
     out: list[str] = [f"# {nb.name}".rstrip(), ""]
-    for c in nb.cells:
+    for c in _reading_order(nb.cells):
         if c.title:
             out.append(f"## {c.title}")
             out.append("")
