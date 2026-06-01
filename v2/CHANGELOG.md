@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added (iter 220) — Markdown export includes code-walkthrough reveals
+- **The Markdown export now emits each code cell's `reveals`** (the live
+  build-up steps of a walkthrough) as labeled `*Step N:*` fenced blocks
+  after the base code, so an exported handout captures the full
+  progression — the actual teaching content of a code explanation. Blank
+  reveals are skipped; reveal indentation is preserved (no `strip()` on
+  the body). 2 pytest cases (62 backend tests).
+
 ### Added (iter 219) — Export deck → Markdown handout
 - **File ▸ "Export Markdown…" downloads the deck as a shareable `.md`
   document.** Titles become `##` headings, code → fenced ```python

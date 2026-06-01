@@ -29,7 +29,15 @@ def _cell_body(c: CellPayload) -> str:
     if c.kind == "markdown":
         return src
     if c.kind == "code":
-        return f"```python\n{src}\n```" if src else ""
+        blocks = [f"```python\n{src}\n```"] if src else []
+        # Reveals are the live build-up steps of a code walkthrough — the
+        # teaching content. Emit each as its own labeled fenced block so a
+        # handout captures the full progression, not just the base.
+        for i, rev in enumerate(c.reveals or [], 1):
+            step = (rev or "").rstrip("\n")
+            if step.strip():  # skip blank reveals; keep indentation otherwise
+                blocks.append(f"*Step {i}:*\n\n```python\n{step}\n```")
+        return "\n\n".join(blocks)
     if c.kind == "diagram":
         # The doodle/mermaid source is human-readable; fence it as text so
         # a reader sees the chart's data definition even without a render.

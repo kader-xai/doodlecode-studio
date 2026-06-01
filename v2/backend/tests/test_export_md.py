@@ -61,6 +61,27 @@ def test_callouts_become_blockquotes_notes_omitted():
     assert "Presenter only" not in md  # speaker notes stay private
 
 
+def test_code_reveals_become_labeled_step_blocks():
+    nb = _nb(
+        CellPayload(
+            id="c",
+            kind="code",
+            source="def f():",
+            reveals=["    return 1", "    return 2"],
+        ),
+    )
+    md = to_markdown(nb)
+    assert "```python\ndef f():\n```" in md
+    assert "*Step 1:*\n\n```python\n    return 1\n```" in md
+    assert "*Step 2:*\n\n```python\n    return 2\n```" in md
+
+
+def test_blank_reveals_skipped():
+    nb = _nb(CellPayload(id="c", kind="code", source="x = 1", reveals=["", "   "]))
+    md = to_markdown(nb)
+    assert "Step" not in md
+
+
 def test_data_url_image_detected():
     nb = _nb(CellPayload(id="i", kind="media", source="data:image/png;base64,AAAA"))
     assert "![media](data:image/png;base64,AAAA)" in to_markdown(nb)
