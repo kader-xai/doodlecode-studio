@@ -1,5 +1,27 @@
 import { describe, expect, it } from "vitest";
-import { slideCenterY, topFractionOf, progressFraction } from "./present";
+import {
+  slideCenter,
+  slideCenterY,
+  topFractionOf,
+  progressFraction,
+} from "./present";
+
+describe("slideCenter (iter 206 — dead-center both axes)", () => {
+  it("centers on the cell midpoint with no callouts", () => {
+    expect(slideCenter(120, 100, 560, 360)).toEqual({ cx: 400, cy: 280 });
+  });
+
+  it("shifts the horizontal center right to balance a callout column", () => {
+    const plain = slideCenter(0, 0, 600, 400);
+    const withCallout = slideCenter(0, 0, 600, 400, 300);
+    expect(withCallout.cx).toBe(plain.cx + 150); // half the extra width
+    expect(withCallout.cy).toBe(plain.cy); // vertical unchanged
+  });
+
+  it("is independent of zoom (pure geometry)", () => {
+    expect(slideCenter(50, 50, 200, 100)).toEqual({ cx: 150, cy: 100 });
+  });
+});
 
 describe("progressFraction (iter 163 — deck progress bar)", () => {
   it("fills to (index+1)/total so the last slide is 100%", () => {

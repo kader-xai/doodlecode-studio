@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Internal (iter 207) — extract + test the slide-center geometry
+- **The iter-206 dead-center math is now a pure, unit-tested helper.**
+  `lib/present.ts:slideCenter(x, y, w, h, calloutExtra)` returns the
+  `{cx, cy}` world point to feed `setCenter`; Canvas uses it for both the
+  presentation focus effect and the on-load center. 3 vitest cases lock
+  the centering + callout-balance behavior so it can't silently regress
+  (235 frontend tests).
+
 ### Fixed (iter 206) — presentation centering + locked canvas (owner report)
 - **Every slide now sits dead-center.** Entering presentation and each
   slide change centers the focused cell in the MIDDLE of the viewport on

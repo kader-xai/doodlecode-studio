@@ -1,5 +1,27 @@
 /**
+ * Iter 206: the focused slide is centered DEAD-CENTER in the viewport on
+ * both axes (owner request — every slide sits in the middle of the
+ * screen). Horizontally we center on the bounding box of the cell PLUS
+ * any callout column to its right (`calloutExtra` = `CALLOUT_GAP +
+ * BUBBLE_W` when callouts exist, else 0) so a cell+bubble pair reads
+ * balanced; vertically on the cell midpoint. `setCenter(cx, cy)` then
+ * puts that point at the viewport center. Pure + zoom-independent.
+ */
+export function slideCenter(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  calloutExtra = 0,
+): { cx: number; cy: number } {
+  return { cx: x + (w + calloutExtra) / 2, cy: y + h / 2 };
+}
+
+/**
  * Iter 162: presentation vertical framing.
+ *
+ * @deprecated since iter 206 — slides now center dead-center via
+ * `slideCenter`. Kept for the existing test + back-reference.
  *
  * ReactFlow's `setCenter(x, y)` places the world point (x, y) at the
  * viewport's vertical CENTER (50%). The old code passed the cell's

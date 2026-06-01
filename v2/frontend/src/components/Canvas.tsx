@@ -22,6 +22,7 @@ import { MarkdownCell } from "./MarkdownCell";
 import { MediaCell } from "./MediaCell";
 import { WhiteboardCell } from "./WhiteboardCell";
 import { useStore } from "../store";
+import { slideCenter } from "../lib/present";
 import type { Cell } from "../types";
 
 const nodeTypes: NodeTypes = {
@@ -170,9 +171,13 @@ function CanvasInner() {
     const w = cell.w ?? CELL_WIDTH_FALLBACK[cell.kind] ?? 560;
     const h = cell.h ?? CELL_HEIGHT_FALLBACK[cell.kind] ?? 360;
     const hasCallouts = (cell.callouts?.length ?? 0) > 0;
-    const totalW = w + (hasCallouts ? CALLOUT_GAP + BUBBLE_W : 0);
-    const cx = cell.x + totalW / 2;
-    const cy = cell.y + h / 2;
+    const { cx, cy } = slideCenter(
+      cell.x,
+      cell.y,
+      w,
+      h,
+      hasCallouts ? CALLOUT_GAP + BUBBLE_W : 0,
+    );
     inst.setCenter(cx, cy, { zoom: inst.getZoom(), duration: 350 });
   }, [presenting, focusedCellId, cells]);
 
@@ -189,7 +194,8 @@ function CanvasInner() {
     const c = ordered[0] ?? cells[0];
     const w = c.w ?? CELL_WIDTH_FALLBACK[c.kind] ?? 560;
     const h = c.h ?? CELL_HEIGHT_FALLBACK[c.kind] ?? 360;
-    inst.setCenter(c.x + w / 2, c.y + h / 2, { zoom: 1, duration: 0 });
+    const { cx, cy } = slideCenter(c.x, c.y, w, h);
+    inst.setCenter(cx, cy, { zoom: 1, duration: 0 });
   }, [cells]);
 
   // Per-cellId stable `data` object. ReactFlow passes `data` straight
