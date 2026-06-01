@@ -394,3 +394,27 @@ def test_markdown_showcase_parses_and_round_trips():
         assert (a.id, a.kind, a.title, a.note, a.source) == (
             b.id, b.kind, b.title, b.note, b.source
         )
+
+
+def test_animation_showcase_parses_and_round_trips():
+    """Iter 228: the animation showcase deck is living documentation for the
+    `kind=animation` cell — it must parse (format v4), carry frames in the
+    body and the transition style as `# @transition:`, and round-trip the
+    format-stable fields exactly."""
+    src = (_EXAMPLES / "animation_showcase.py").read_text()
+    nb, ver = notebook_io.parse(src)
+    assert ver == 4
+
+    anims = [c for c in nb.cells if c.kind == "animation"]
+    assert len(anims) == 3
+    # Every transition style the showcase advertises is present.
+    assert {c.transition for c in anims} == {"fade", "draw-on", "pop"}
+    # Frames live in the body, one per line — the first cell has 5.
+    first = next(c for c in anims if c.transition == "fade")
+    assert len(first.source.split("\n")) == 5
+
+    nb2, _ = notebook_io.parse(notebook_io.serialize(nb))
+    for a, b in zip(nb.cells, nb2.cells):
+        assert (a.id, a.kind, a.title, a.transition, a.source) == (
+            b.id, b.kind, b.title, b.transition, b.source
+        )

@@ -56,6 +56,7 @@ and type `matplotlib`.
 | Browser     | `＋ Browser` / W            | Live website in an iframe (with proxy)    |
 | Whiteboard  | `＋ Draw` / D               | Pen + highlighter + 5 colors + 3 bgs      |
 | Diagram     | `＋ Diagram` / G            | Doodle charts (flow/bar/line/pie/scatter), Mermaid, or KaTeX math |
+| Animation   | `＋ Animate`                | One frame per line; **→ / Space** transitions to the next frame *in place* during a talk (fade / slide / pop / draw-on). Cycle the style with the 🎞 chip. See [`examples/animation_showcase.py`](examples/animation_showcase.py) |
 
 ## Markdown in text cells
 
@@ -267,6 +268,9 @@ Optional directives (additive — old files keep loading):
   one directive per step, newlines escaped as `\n` (v2.6.0+)
 - `# @note: <text>` — a presenter speaker note shown only to you
   (bottom-left HUD) while presenting; newlines escaped (v2.6.0+)
+- `# @transition: <style>` — animation-cell frame transition
+  (`fade` / `slide` / `pop` / `draw-on`); frames live in the body, one
+  per line (v2.11.0+)
 
 Old `# @explain:` files load as `callouts[0]` automatically — files
 written by any prior version still open.

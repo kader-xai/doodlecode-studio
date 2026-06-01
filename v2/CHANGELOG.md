@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Docs (iter 228) — Animation module: example deck + docs
+- **Added `examples/animation_showcase.py`** — a 4-slide deck (markdown
+  intro + three animation cells in fade / draw-on / pop) that doubles as a
+  format-v4 round-trip fixture; a backend test asserts it parses, carries
+  frames in the body + the style as `# @transition:`, and round-trips
+  exactly (69 backend tests). README documents the Animation cell row and
+  the `# @transition:` directive. (The standalone authoring modal planned
+  as 228 is deferred — inline frame editing + the click-to-cycle 🎞 chip
+  already cover authoring.)
+
 ### Added (iter 227) — Animation module: four transition styles
 - **Four frame transitions** now render on each Space/→ advance — `fade`
   (rise), `slide` (in from the left), `pop` (overshoot scale), and
