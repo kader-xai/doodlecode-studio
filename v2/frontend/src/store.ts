@@ -63,6 +63,8 @@ export interface AppState {
   setSource: (id: string, source: string) => void;
   setTitle: (id: string, title: string) => void;
   setDiagramKind: (id: string, kind: string) => void;
+  /** Iter 227: animation-cell transition style (fade/slide/draw-on/pop). */
+  setTransition: (id: string, transition: string) => void;
   /** null clears the first callout (or removes it entirely). Empty string is treated the same. */
   setExplain: (id: string, text: string | null) => void;
   setCallouts: (id: string, callouts: Callout[]) => void;
@@ -439,6 +441,10 @@ export const useStore = create<AppState>((set, get) => {
     },
     setDiagramKind: (id, kind) => {
       set((s) => ({ cells: s.cells.map((c) => (c.id === id ? { ...c, diagram_kind: kind } : c)) }));
+      autosave();
+    },
+    setTransition: (id, transition) => {
+      set((s) => ({ cells: s.cells.map((c) => (c.id === id ? { ...c, transition } : c)) }));
       autosave();
     },
 

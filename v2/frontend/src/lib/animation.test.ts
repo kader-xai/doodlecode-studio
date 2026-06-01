@@ -5,6 +5,7 @@ import {
   frameCount,
   normalizeTransition,
   parseFrames,
+  transitionClass,
 } from "./animation";
 
 describe("parseFrames", () => {
@@ -47,5 +48,18 @@ describe("normalizeTransition", () => {
   it("falls back for unknown/undefined", () => {
     expect(normalizeTransition(undefined)).toBe(DEFAULT_TRANSITION);
     expect(normalizeTransition("sparkle")).toBe(DEFAULT_TRANSITION);
+  });
+});
+
+describe("transitionClass", () => {
+  it("maps each known style to its anim-* class", () => {
+    expect(transitionClass("fade")).toBe("anim-fade");
+    expect(transitionClass("slide")).toBe("anim-slide");
+    expect(transitionClass("pop")).toBe("anim-pop");
+    expect(transitionClass("draw-on")).toBe("anim-draw-on");
+  });
+  it("falls back to the default class for unknown values", () => {
+    expect(transitionClass("nope")).toBe(`anim-${DEFAULT_TRANSITION}`);
+    expect(transitionClass(undefined)).toBe(`anim-${DEFAULT_TRANSITION}`);
   });
 });

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Handle, NodeProps, Position } from "reactflow";
 import { DoodleBorder } from "./DoodleBorder";
 import { EditableTitle } from "./EditableTitle";
-import { frameAt, normalizeTransition, parseFrames } from "../lib/animation";
+import { TRANSITIONS, frameAt, normalizeTransition, parseFrames, transitionClass } from "../lib/animation";
 import { useStore } from "../store";
 
 const CARD_WIDTH = 560;
@@ -25,6 +25,7 @@ export function AnimationCell({ data, selected }: NodeProps<{ cellId: string }>)
   const setSource = useStore((s) => s.setSource);
   const setTitle = useStore((s) => s.setTitle);
   const setSelected = useStore((s) => s.setSelected);
+  const setTransition = useStore((s) => s.setTransition);
   const toggleCollapse = useStore((s) => s.toggleCollapse);
   const theme = useStore((s) => s.theme);
   const presenting = useStore((s) => s.presenting);
@@ -104,12 +105,20 @@ export function AnimationCell({ data, selected }: NodeProps<{ cellId: string }>)
               forceEdit={forceEditTitle}
               className="font-hand text-2xl truncate text-ink dark:text-white flex-1 min-w-0"
             />
-            <span
-              className="font-hand text-xs px-2 py-0.5 rounded-full border-2 border-ink/30 dark:border-white/30 text-ink/60 dark:text-white/60 shrink-0"
-              title="Transition style"
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const i = TRANSITIONS.indexOf(transition);
+                setTransition(cellId, TRANSITIONS[(i + 1) % TRANSITIONS.length]);
+              }}
+              onPointerDown={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="nodrag font-hand text-xs px-2 py-0.5 rounded-full border-2 border-ink/30 dark:border-white/30 text-ink/60 dark:text-white/60 hover:bg-marker-yellow/40 dark:hover:bg-amber-700/30 transition shrink-0"
+              title="Transition style — click to cycle"
             >
               🎞 {transition}
-            </span>
+            </button>
             {!cell.collapsed && (
               <button
                 onMouseDown={(e) => { e.preventDefault(); e.stopPropagation(); }}
@@ -163,7 +172,7 @@ export function AnimationCell({ data, selected }: NodeProps<{ cellId: string }>)
             <div className="px-1 min-h-[120px] flex items-center justify-center">
               <div
                 key={activeIdx}
-                className={`anim-frame anim-${transition} font-hand text-3xl text-center text-ink dark:text-white`}
+                className={`anim-frame ${transitionClass(transition)} font-hand text-3xl text-center text-ink dark:text-white`}
               >
                 {frameAt(frames, step)}
               </div>

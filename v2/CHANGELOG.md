@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added (iter 227) — Animation module: four transition styles
+- **Four frame transitions** now render on each Space/→ advance — `fade`
+  (rise), `slide` (in from the left), `pop` (overshoot scale), and
+  `draw-on` (marker-style left-to-right clip-path wipe). Each is a doodle
+  keyframe in `index.css`; reduced-motion collapses them all to an instant
+  show. The cell's 🎞 chip is now a **click-to-cycle** button (store
+  `setTransition`, round-trips via `# @transition:`), so every style is
+  reachable before the authoring modal lands. Tested via pure
+  `transitionClass` mapping (260 frontend tests); tsc + build clean.
+
 ### Added (iter 226) — Animation module: frame stepping in presentation
 - **Space / → now advances animation-cell frames in place** before moving
   to the next slide — the in-slide build. The store's `revealNext` step

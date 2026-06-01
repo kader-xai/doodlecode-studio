@@ -78,17 +78,37 @@ html.ink-highlighter, html.ink-highlighter * {
   .react-flow__node.slide-enter > * { animation: none; }
   .doodle-connector { animation: none; }
   .doodle-drift-shape { animation: none !important; }
-  .anim-frame { animation: none !important; }
+  /* All animation-cell frame entrances collapse to an instant show. */
+  .anim-frame { animation: none !important; clip-path: none !important; }
 }
 
-/* Iter 225: Animation-cell frame transition. The active frame is re-keyed
- * by step so this entrance re-fires on every Space/→ advance. Baseline is
- * a gentle fade-rise; the per-style variants (slide / draw-on / pop) are
- * filled in by iter 227. */
-@keyframes doodle-anim-frame {
+/* Iter 225/227: Animation-cell frame transitions. The active frame is
+ * re-keyed by step so the chosen entrance re-fires on every Space/→
+ * advance. `.anim-frame` is the shared base; the per-style `.anim-*`
+ * classes (driven by lib/animation.ts:transitionClass) pick the keyframe.
+ * Declared AFTER `.anim-frame` so they win on equal specificity. */
+.anim-frame {
+  animation: doodle-anim-fade 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes doodle-anim-fade {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.anim-frame {
-  animation: doodle-anim-frame 360ms cubic-bezier(0.22, 1, 0.36, 1) both;
+@keyframes doodle-anim-slide {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
+@keyframes doodle-anim-pop {
+  0%   { opacity: 0; transform: scale(0.7); }
+  60%  { opacity: 1; transform: scale(1.06); }
+  100% { opacity: 1; transform: scale(1); }
+}
+/* "draw-on": a marker-style left-to-right wipe (clip-path inset). */
+@keyframes doodle-anim-draw {
+  from { opacity: 0.25; clip-path: inset(0 100% 0 0); }
+  to   { opacity: 1;    clip-path: inset(0 0 0 0); }
+}
+.anim-fade    { animation: doodle-anim-fade  360ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-slide   { animation: doodle-anim-slide 400ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+.anim-pop     { animation: doodle-anim-pop   440ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.anim-draw-on { animation: doodle-anim-draw  560ms cubic-bezier(0.4, 0, 0.2, 1) both; }

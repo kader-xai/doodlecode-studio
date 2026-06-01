@@ -39,3 +39,10 @@ export function normalizeTransition(t: string | undefined): TransitionKind {
     ? (t as TransitionKind)
     : DEFAULT_TRANSITION;
 }
+
+/** CSS class that drives the per-style frame entrance keyframe (see
+ *  index.css `.anim-*`). Always returns a known, normalized class so an
+ *  old/garbage transition value can't render an unstyled frame. */
+export function transitionClass(t: string | undefined): string {
+  return `anim-${normalizeTransition(t)}`;
+}
