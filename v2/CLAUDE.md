@@ -11,8 +11,9 @@ v2/
 ├─ backend/                       FastAPI on :8001
 │  └─ app/
 │     ├─ main.py                  routes — /api/{ping,execute,save,open,
-│     │                                    kernel/reset,install,proxy,
-│     │                                    tools/ppt-to-png,demo}
+│     │                                    export/markdown,kernel/reset,
+│     │                                    install,proxy,tools/ppt-to-png,demo}
+│     ├─ export_md.py             notebook → Markdown handout (pure)
 │     ├─ kernel.py + runner.py    persistent Python child process
 │     │                           (JSON-line protocol over stdin/stdout,
 │     │                           threading.Lock, timeout reaper)

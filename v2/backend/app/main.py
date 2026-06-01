@@ -14,9 +14,11 @@ from fastapi.staticfiles import StaticFiles
 from . import __version__
 from .executor import execute as run_python, interrupt as interrupt_kernel, reset as reset_kernel
 from . import notebook_io
+from .export_md import to_markdown
 from .models import (
     ExecuteRequest,
     ExecuteResponse,
+    ExportMarkdownResponse,
     OpenRequest,
     OpenResponse,
     SaveRequest,
@@ -100,6 +102,13 @@ def save(req: SaveRequest) -> SaveResponse:
 def open_notebook(req: OpenRequest) -> OpenResponse:
     nb, version = notebook_io.parse(req.text)
     return OpenResponse(notebook=nb, format_version=version)
+
+
+@app.post("/api/export/markdown", response_model=ExportMarkdownResponse)
+def export_markdown(req: SaveRequest) -> ExportMarkdownResponse:
+    """Render the deck as a shareable Markdown handout. Reuses SaveRequest
+    (just `{notebook}`); the frontend downloads the returned text as .md."""
+    return ExportMarkdownResponse(text=to_markdown(req.notebook))
 
 
 # X-Frame-Options bypass for the Browser cell. Registered as an

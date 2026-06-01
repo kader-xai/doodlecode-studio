@@ -1,0 +1,242 @@
+{
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/__test-setup.ts": {
+    "mtime": 1780001490.4113204,
+    "ast_hash": "4972d622b972fd4d39952580a61914ce",
+    "semantic_hash": "4972d622b972fd4d39952580a61914ce"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/App.tsx": {
+    "mtime": 1780220968.6564312,
+    "ast_hash": "4c378fcb2d598276ce28f062ac9858a1",
+    "semantic_hash": "4c378fcb2d598276ce28f062ac9858a1"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/store.test.ts": {
+    "mtime": 1780221115.1833973,
+    "ast_hash": "4068af45011b0785ea90094507b5e621",
+    "semantic_hash": "4068af45011b0785ea90094507b5e621"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/main.tsx": {
+    "mtime": 1779951631.4290302,
+    "ast_hash": "0160ba90326ebc3e15774fb2cb972200",
+    "semantic_hash": "0160ba90326ebc3e15774fb2cb972200"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/api.ts": {
+    "mtime": 1779967473.202781,
+    "ast_hash": "37f6c8db6184c9b29b581c4701c126ce",
+    "semantic_hash": "37f6c8db6184c9b29b581c4701c126ce"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/types.ts": {
+    "mtime": 1780220785.1485968,
+    "ast_hash": "2a4a640a085159e4028a05708fa28c6b",
+    "semantic_hash": "2a4a640a085159e4028a05708fa28c6b"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/ToolsPage.tsx": {
+    "mtime": 1779951619.9378145,
+    "ast_hash": "4c1bc066a1db63d5ee2184710350ed83",
+    "semantic_hash": "4c1bc066a1db63d5ee2184710350ed83"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/store.ts": {
+    "mtime": 1780220823.640481,
+    "ast_hash": "26bf7d79fbfd6d8c9c218930ca1dd338",
+    "semantic_hash": "26bf7d79fbfd6d8c9c218930ca1dd338"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/CellPalette.tsx": {
+    "mtime": 1779988917.2368279,
+    "ast_hash": "41b9fc977dfd05f28ae5823f3bb8ce21",
+    "semantic_hash": "41b9fc977dfd05f28ae5823f3bb8ce21"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/CalloutEditor.tsx": {
+    "mtime": 1779899070.7400439,
+    "ast_hash": "21be87cc0e1369f9dc79dd0dcf3b2683",
+    "semantic_hash": "21be87cc0e1369f9dc79dd0dcf3b2683"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/ConnectionsLayer.tsx": {
+    "mtime": 1779967938.508566,
+    "ast_hash": "0d52950ccafb1f79402fc4ead9c41fc2",
+    "semantic_hash": "0d52950ccafb1f79402fc4ead9c41fc2"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/PresenterProgress.tsx": {
+    "mtime": 1780149263.3926961,
+    "ast_hash": "6a2ff04de32a5f5fa32fb180b856c968",
+    "semantic_hash": "6a2ff04de32a5f5fa32fb180b856c968"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/ShortcutsHelp.tsx": {
+    "mtime": 1780220977.646287,
+    "ast_hash": "92a305356f3abf8013a5794518e95d18",
+    "semantic_hash": "92a305356f3abf8013a5794518e95d18"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/BrowserCell.tsx": {
+    "mtime": 1779975270.6506217,
+    "ast_hash": "6ff155df3344b5bb6b45a7dbed45c687",
+    "semantic_hash": "6ff155df3344b5bb6b45a7dbed45c687"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/DoodleBorder.tsx": {
+    "mtime": 1780001719.4053829,
+    "ast_hash": "8bbea0a41987ca4aaaee84312e220814",
+    "semantic_hash": "8bbea0a41987ca4aaaee84312e220814"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/CalloutBubble.tsx": {
+    "mtime": 1779961415.738323,
+    "ast_hash": "6fc8be7cc640ff4d5d82eef54176643d",
+    "semantic_hash": "6fc8be7cc640ff4d5d82eef54176643d"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/Toolbar.tsx": {
+    "mtime": 1779986588.468003,
+    "ast_hash": "ed78e5d3001aedf715a575f662a69ee3",
+    "semantic_hash": "ed78e5d3001aedf715a575f662a69ee3"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/MarkdownCell.tsx": {
+    "mtime": 1779980911.3179398,
+    "ast_hash": "e8e7c7c9ebb7b071758fd99a852d77a6",
+    "semantic_hash": "e8e7c7c9ebb7b071758fd99a852d77a6"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/PresenterBar.tsx": {
+    "mtime": 1779922085.027019,
+    "ast_hash": "75cd0c9c8c8babbd4c25b5367f26d3e7",
+    "semantic_hash": "75cd0c9c8c8babbd4c25b5367f26d3e7"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/Outputs.tsx": {
+    "mtime": 1780144376.2558594,
+    "ast_hash": "fecd4054b857c919d4daad21f38eb76d",
+    "semantic_hash": "fecd4054b857c919d4daad21f38eb76d"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/NoteEditor.tsx": {
+    "mtime": 1780220936.0323095,
+    "ast_hash": "f3e43e8019be862d3dd4b57e587a9d6a",
+    "semantic_hash": "f3e43e8019be862d3dd4b57e587a9d6a"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/FileMenu.tsx": {
+    "mtime": 1779952739.156787,
+    "ast_hash": "3bcab3b3c5eca427299a75af6f952414",
+    "semantic_hash": "3bcab3b3c5eca427299a75af6f952414"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/Outputs.test.ts": {
+    "mtime": 1780144392.803545,
+    "ast_hash": "ac223c8dae420f34d6417f11c7252731",
+    "semantic_hash": "ac223c8dae420f34d6417f11c7252731"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/WhiteboardCell.tsx": {
+    "mtime": 1779980431.8078399,
+    "ast_hash": "735a9a18fd76e824fdbb19dbfb8039fd",
+    "semantic_hash": "735a9a18fd76e824fdbb19dbfb8039fd"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/InstallModal.tsx": {
+    "mtime": 1779951161.8299026,
+    "ast_hash": "66d8b55f3c4537cd16b5e60f7595ef8e",
+    "semantic_hash": "66d8b55f3c4537cd16b5e60f7595ef8e"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/AmbientPicker.tsx": {
+    "mtime": 1779922577.2764835,
+    "ast_hash": "2a27ca59479860947eafe00f03bb5e45",
+    "semantic_hash": "2a27ca59479860947eafe00f03bb5e45"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/RevealEditor.tsx": {
+    "mtime": 1780082988.2667038,
+    "ast_hash": "dac0289e07022be260e161462b15c27c",
+    "semantic_hash": "dac0289e07022be260e161462b15c27c"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/PresenterOverlay.tsx": {
+    "mtime": 1779915509.082076,
+    "ast_hash": "4d45e8c5bf99be1947ba90343a24e8e5",
+    "semantic_hash": "4d45e8c5bf99be1947ba90343a24e8e5"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/ThemeToggle.tsx": {
+    "mtime": 1779806302.6046379,
+    "ast_hash": "b9add74f2619b47ea9b0b2ec79370dfd",
+    "semantic_hash": "b9add74f2619b47ea9b0b2ec79370dfd"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/PresenterNotes.tsx": {
+    "mtime": 1780220916.3195763,
+    "ast_hash": "5c80ddaf8a9c1b75b681e8101a9c382f",
+    "semantic_hash": "5c80ddaf8a9c1b75b681e8101a9c382f"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/EditableTitle.tsx": {
+    "mtime": 1779982476.479551,
+    "ast_hash": "eee499f07bda0355d1062ea4142f3ff5",
+    "semantic_hash": "eee499f07bda0355d1062ea4142f3ff5"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/Canvas.tsx": {
+    "mtime": 1780145971.9683142,
+    "ast_hash": "3b83f87e485b62b2178cd0c35325b595",
+    "semantic_hash": "3b83f87e485b62b2178cd0c35325b595"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/EmptyNotebookHint.tsx": {
+    "mtime": 1779922023.3432202,
+    "ast_hash": "f557795e1c9fc85a3ce6461313138931",
+    "semantic_hash": "f557795e1c9fc85a3ce6461313138931"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/CodeCell.tsx": {
+    "mtime": 1780083103.8883607,
+    "ast_hash": "5ca623662ace78c131e58b3f3d32e09b",
+    "semantic_hash": "5ca623662ace78c131e58b3f3d32e09b"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/DiagramCell.tsx": {
+    "mtime": 1779980158.9614768,
+    "ast_hash": "765ed5c174aa5ae97b36615fef9be098",
+    "semantic_hash": "765ed5c174aa5ae97b36615fef9be098"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/MediaCell.tsx": {
+    "mtime": 1779917378.2689846,
+    "ast_hash": "2ee3efb2979bfa8d9dba0d5946733951",
+    "semantic_hash": "2ee3efb2979bfa8d9dba0d5946733951"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/AmbientLayer.tsx": {
+    "mtime": 1779922554.8946018,
+    "ast_hash": "9588379622d95f3a70afb8d04d120203",
+    "semantic_hash": "9588379622d95f3a70afb8d04d120203"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/components/ResizeHandle.tsx": {
+    "mtime": 1779870874.6566133,
+    "ast_hash": "fc6c27f5f87351e42898864c5f42dfe8",
+    "semantic_hash": "fc6c27f5f87351e42898864c5f42dfe8"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/doodleDiagram.test.ts": {
+    "mtime": 1780220408.516484,
+    "ast_hash": "49dc5a91ef46061d49ce6021b6c62df1",
+    "semantic_hash": "49dc5a91ef46061d49ce6021b6c62df1"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/markdown.tsx": {
+    "mtime": 1779868335.8176887,
+    "ast_hash": "939d3deeb0abfd474d7145a7f49d1496",
+    "semantic_hash": "939d3deeb0abfd474d7145a7f49d1496"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/reveal.ts": {
+    "mtime": 1780082753.417434,
+    "ast_hash": "61204faa929089465ed675ec270c674c",
+    "semantic_hash": "61204faa929089465ed675ec270c674c"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/cellPreview.test.ts": {
+    "mtime": 1779991318.1621268,
+    "ast_hash": "9d968d30b5f8db36a903497d811b927d",
+    "semantic_hash": "9d968d30b5f8db36a903497d811b927d"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/markdown.test.tsx": {
+    "mtime": 1779992315.173513,
+    "ast_hash": "fd8512835b790b97a8d31921c463314c",
+    "semantic_hash": "fd8512835b790b97a8d31921c463314c"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/present.test.ts": {
+    "mtime": 1780149286.5150177,
+    "ast_hash": "08a1fb5de113f042acb6346dca5fa48d",
+    "semantic_hash": "08a1fb5de113f042acb6346dca5fa48d"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/cellPreview.ts": {
+    "mtime": 1779975218.0538015,
+    "ast_hash": "545ee5a5be1e26e795d069d946103a02",
+    "semantic_hash": "545ee5a5be1e26e795d069d946103a02"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/present.ts": {
+    "mtime": 1780149246.974463,
+    "ast_hash": "d735122fd94a3d98a9e7ce6a0f6cba47",
+    "semantic_hash": "d735122fd94a3d98a9e7ce6a0f6cba47"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/reveal.test.ts": {
+    "mtime": 1780082844.1494951,
+    "ast_hash": "4d7e8fe13c7b9b118f910fffd15bd714",
+    "semantic_hash": "4d7e8fe13c7b9b118f910fffd15bd714"
+  },
+  "/Users/kader/Library/CloudStorage/GoogleDrive-pentesterrepo202@gmail.com/My Drive/Projects/DoodleNotebook/v2/frontend/src/lib/doodleDiagram.ts": {
+    "mtime": 1780220385.7766132,
+    "ast_hash": "ad763d0f8ac3def0753e450aacfd6acb",
+    "semantic_hash": "ad763d0f8ac3def0753e450aacfd6acb"
+  }
+}

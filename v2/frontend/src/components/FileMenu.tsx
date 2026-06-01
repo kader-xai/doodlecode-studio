@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchDemo, saveNotebook } from "../api";
+import { exportMarkdown, fetchDemo, saveNotebook } from "../api";
 import { useStore } from "../store";
 
 /** Feature-detect the File System Access API. Available in Chrome,
@@ -133,6 +133,24 @@ export function FileMenu() {
     await onSave();
   };
 
+  /** "Export Markdown" — render the deck to a shareable .md handout. */
+  const onExportMd = async () => {
+    setOpen(false);
+    try {
+      const s = useStore.getState();
+      const { text } = await exportMarkdown({ name: s.notebookName, cells: s.cells });
+      const safe = (s.notebookName || "Untitled").replace(/[^A-Za-z0-9_-]+/g, "_");
+      const url = URL.createObjectURL(new Blob([text], { type: "text/markdown" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${safe}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      window.alert(`Export Markdown failed: ${err}`);
+    }
+  };
+
   const onRename = () => {
     const next = window.prompt("Notebook name", notebookName);
     if (next != null && next.trim()) setNotebookName(next.trim());
@@ -182,6 +200,7 @@ export function FileMenu() {
             hint={fileHandle ? fileHandle.name : undefined}
           />
           <MenuItem label="💾  Save As…" onClick={onSaveAs} />
+          <MenuItem label="📝  Export Markdown…" onClick={onExportMd} hint=".md handout" />
           <div className="border-t-2 border-ink/20 dark:border-white/20" />
           <MenuItem label="🎁  Load demo tour" onClick={onLoadDemo} />
           <div className="border-t-2 border-ink/20 dark:border-white/20" />

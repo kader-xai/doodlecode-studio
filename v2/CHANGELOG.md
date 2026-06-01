@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added (iter 219) — Export deck → Markdown handout
+- **File ▸ "Export Markdown…" downloads the deck as a shareable `.md`
+  document.** Titles become `##` headings, code → fenced ```python
+  blocks, diagram/chart sources → fenced ```text blocks, image media →
+  `![]()`, video/browser cells → links, and audience-facing callouts →
+  blockquotes. Speaker notes stay presenter-private and are omitted.
+- New backend `POST /api/export/markdown` + pure, dependency-free
+  `app/export_md.py:to_markdown(nb)` (8 pytest cases). New `api.ts`
+  wrapper + `FileMenu` item. Useful as a README, a handout, or a diff-
+  able plaintext snapshot of a deck. 60 backend tests.
+
 ### Added (iter 218) — `tel:` links in text cells
 - **Markdown links now accept the `tel:` scheme** (e.g.
   `[Call us](tel:+15551234)`) alongside http/https/mailto/relative —

@@ -40,6 +40,10 @@ export function openNotebook(text: string): Promise<OpenResponse> {
   return postJSON<OpenResponse>("/api/open", { text });
 }
 
+export function exportMarkdown(notebook: { name: string; cells: Cell[] }): Promise<{ text: string }> {
+  return postJSON<{ text: string }>("/api/export/markdown", { notebook });
+}
+
 export async function fetchDemo(): Promise<string> {
   const r = await fetch("/api/demo");
   if (!r.ok) throw new Error(`GET /api/demo → HTTP ${r.status}`);

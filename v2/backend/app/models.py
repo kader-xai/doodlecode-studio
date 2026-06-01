@@ -109,3 +109,8 @@ class OpenRequest(BaseModel):
 class OpenResponse(BaseModel):
     notebook: NotebookPayload
     format_version: int
+
+
+class ExportMarkdownResponse(BaseModel):
+    text: str
+    """The deck rendered as a Markdown handout. Frontend downloads it as .md."""

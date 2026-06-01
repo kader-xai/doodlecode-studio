@@ -271,6 +271,15 @@ Optional directives (additive — old files keep loading):
 Old `# @explain:` files load as `callouts[0]` automatically — files
 written by any prior version still open.
 
+## Export
+
+**File ▸ Export Markdown…** downloads the deck as a plain `.md` handout:
+titles become `##` headings, code → fenced ```python blocks, diagram and
+chart sources → fenced ```text blocks, image media → `![]()`, video and
+browser cells → links, and audience-facing callouts → blockquotes.
+Speaker notes stay presenter-private and are omitted. Backed by
+`POST /api/export/markdown` (pure, dependency-free `app/export_md.py`).
+
 ## Tests
 
 ```bash
