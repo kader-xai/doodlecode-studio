@@ -44,6 +44,7 @@ const KIND_ICON: Record<string, string> = {
   browser: "🌐",
   whiteboard: "✏️",
   diagram: "🧭",
+  animation: "🎞",
 };
 
 export function CellPalette() {

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Changed (iter 231) — Surface the Animation cell in palette + shortcuts
+- **The Cmd+K palette now shows a 🎞 icon for animation cells** (was a
+  generic bullet), and the **Shortcuts overlay** lists ＋ Animate and notes
+  that → / Space steps an animation cell's frames before advancing the
+  slide. Small discoverability/consistency pass after the v2.11.0 launch.
+
 ### Added (iter 230) — Markdown export renders animation frames
 - **The Markdown export now handles `kind=animation` cells** — frames
   (one per line) render as a bullet list, so a static handout captures
