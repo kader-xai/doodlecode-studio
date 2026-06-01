@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2.12.1] — 2026-06-01 — golden-stable
+
+Stability patch on top of v2.12.0, marked the **golden-stable** baseline
+(also tracked by the `stable` branch + `golden-stable` tag): mermaid
+diagrams render reliably (no flaky error box), and presentation
+auto-recenters the focused cell on resize / code-output growth.
+
 ### Fixed (iter 242) — Mermaid render reliability + presentation auto-recenter
 - **Mermaid diagrams no longer flash a render error.** The render effect
   depended on the whole `cell` object, so it re-fired on every store
