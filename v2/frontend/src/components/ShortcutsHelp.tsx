@@ -10,6 +10,7 @@ const ROWS: { keys: string; what: string; when?: string }[] = [
   { keys: "→ / Space / PageDown", what: "Next slide", when: "presenting" },
   { keys: "← / PageUp", what: "Previous slide", when: "presenting" },
   { keys: "Home / End", what: "First / last slide", when: "presenting" },
+  { keys: "1 – 9", what: "Jump to slide N", when: "presenting" },
   { keys: "P", what: "Pen ink (red, fades ~1.4s)", when: "presenting" },
   { keys: "H", what: "Highlighter ink (yellow, fades ~4s)", when: "presenting" },
   { keys: "X", what: "Fixed pen (red, stays until erased)", when: "presenting" },

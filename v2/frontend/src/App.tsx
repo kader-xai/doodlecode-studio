@@ -265,6 +265,12 @@ export function App() {
           state.focusCell(ord[ord.length - 1]?.id ?? null);
           return;
         }
+        // Digit 1-9 jumps straight to that slide (no modifiers).
+        if (/^[1-9]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+          e.preventDefault();
+          state.goToSlide(Number(e.key) - 1);
+          return;
+        }
         // Presenter ink tools. Toggle off if the same tool was active.
         if (e.key === "p" || e.key === "P") {
           e.preventDefault();

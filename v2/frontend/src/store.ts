@@ -106,6 +106,8 @@ export interface AppState {
   cellsInOrder: () => Cell[];
   nextCell: () => void;
   prevCell: () => void;
+  /** Jump to slide N (0-based) in reading order, clamped to the deck. */
+  goToSlide: (index: number) => void;
 
   /** Active presenter ink tool. */
   presenterTool: "none" | "pen" | "highlighter" | "fixedPen";
@@ -567,6 +569,14 @@ export const useStore = create<AppState>((set, get) => {
       const prev = idx <= 0 ? ordered[0] : ordered[idx - 1];
       // Iter 78: rule 21e.
       set({ focusedCellId: prev.id, selectedId: prev.id, selectedIds: [prev.id] });
+    },
+    goToSlide: (index) => {
+      const ordered = get().cellsInOrder();
+      if (!ordered.length) return;
+      const i = Math.max(0, Math.min(index, ordered.length - 1));
+      const cell = ordered[i];
+      // Iter 78: rule 21e — keep selectedId ⊂ selectedIds.
+      set({ focusedCellId: cell.id, selectedId: cell.id, selectedIds: [cell.id] });
     },
 
     presenterTool: "none",

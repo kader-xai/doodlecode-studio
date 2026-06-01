@@ -1001,3 +1001,39 @@ describe("store: speaker notes (iter 165)", () => {
     expect(useStore.getState().noteEditorCellId).toBeNull();
   });
 });
+
+describe("store: goToSlide (iter 210 — jump to slide N)", () => {
+  beforeEach(() => {
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "", x: 0, y: 0 },
+        { id: "b", kind: "code", source: "", x: 0, y: 200 },
+        { id: "c", kind: "code", source: "", x: 0, y: 400 },
+      ],
+      focusedCellId: "a",
+      selectedId: "a",
+      selectedIds: ["a"],
+    });
+  });
+
+  it("jumps focus + selection to the Nth slide in reading order", () => {
+    useStore.getState().goToSlide(2);
+    const s = useStore.getState();
+    expect(s.focusedCellId).toBe("c");
+    expect(s.selectedId).toBe("c");
+    expect(s.selectedIds).toEqual(["c"]); // rule 21e
+  });
+
+  it("clamps an out-of-range index to the deck bounds", () => {
+    useStore.getState().goToSlide(99);
+    expect(useStore.getState().focusedCellId).toBe("c"); // last
+    useStore.getState().goToSlide(-5);
+    expect(useStore.getState().focusedCellId).toBe("a"); // first
+  });
+
+  it("is a no-op on an empty deck", () => {
+    useStore.setState({ cells: [], focusedCellId: null });
+    useStore.getState().goToSlide(0);
+    expect(useStore.getState().focusedCellId).toBeNull();
+  });
+});

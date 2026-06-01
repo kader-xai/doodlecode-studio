@@ -166,6 +166,9 @@ The accessibility & polish batch (173–177) is complete.
   screen-reader semantics) + the owner-reported presentation fixes.
   Lockstep bump 2.8.0 → 2.8.1, tagged. CI-equivalent green (tsc, 235 FE
   tests, build, 44 BE tests).
+- **205 — Jump-to-slide by number** ✓ (iter 210): digits 1–9 jump to a
+  slide mid-talk via a clamped `goToSlide` store action; in the Shortcuts
+  overlay. For non-linear presenting. 238 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

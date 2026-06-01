@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added (iter 210) — jump to any slide by number while presenting
+- **Press `1`–`9` during a presentation to jump straight to that slide.**
+  Complements Prev/Next/Home/End for non-linear talks (skip ahead, answer
+  a question, jump back). Backed by a clamped `goToSlide(index)` store
+  action (rule 21e selection sync); documented in the Shortcuts overlay.
+  3 vitest cases (238 frontend tests).
+
 ## [2.8.1] — 2026-06-01
 
 Accessibility + presentation polish. Doodle charts, flowcharts, and
