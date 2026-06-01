@@ -634,11 +634,21 @@ export const useStore = create<AppState>((set, get) => {
       // Together always goes back to the user's hand-placed layout.
       const snapshot: Record<string, { x: number; y: number }> =
         s.originalPositions ?? Object.fromEntries(s.cells.map((c) => [c.id, { x: c.x, y: c.y }]));
-      // Map each cell to (60, i * slideGap) in reading order.
+      // Stack cells in reading order with a FULL empty page (one viewport
+      // height) between the bottom of one cell and the top of the next —
+      // so each slide is genuinely a page away, not just one viewport
+      // top-to-top (which left tall cells almost touching). (iter 238)
       const SLIDE_X = 60;
+      const HEIGHTS: Record<string, number> = {
+        code: 360, markdown: 220, diagram: 360, media: 360,
+        browser: 480, whiteboard: 420, animation: 240,
+      };
       const newPos = new Map<string, { x: number; y: number }>();
-      ordered.forEach((c, i) => {
-        newPos.set(c.id, { x: SLIDE_X, y: i * H });
+      let y = 0;
+      ordered.forEach((c) => {
+        newPos.set(c.id, { x: SLIDE_X, y });
+        const h = c.h ?? HEIGHTS[c.kind] ?? 360;
+        y += h + H; // cell's own height + a full page of empty space
       });
       set({
         originalPositions: snapshot,

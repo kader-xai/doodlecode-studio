@@ -275,6 +275,25 @@ describe("store: cell CRUD", () => {
     expect(useStore.getState().originalPositions).toBeNull();
   });
 
+  it("spaceForPresentation leaves a full page between cells (iter 238)", () => {
+    const H = 800;
+    useStore.setState({
+      cells: [
+        { id: "a", kind: "code", source: "", title: "A", x: 0, y: 0, h: 500 },
+        { id: "b", kind: "markdown", source: "", title: "B", x: 0, y: 9000, h: 200 },
+      ],
+      originalPositions: null,
+    });
+    useStore.getState().spaceForPresentation(H);
+    const cells = useStore.getState().cells;
+    const a = cells.find((c) => c.id === "a")!;
+    const b = cells.find((c) => c.id === "b")!;
+    expect(a.y).toBe(0);
+    // b starts a full page below a's bottom edge.
+    const gap = b.y - (a.y + (a.h ?? 0));
+    expect(gap).toBeGreaterThanOrEqual(H);
+  });
+
   it("rollbackLayout is a no-op when never spaced (iter 146)", () => {
     // No prior spaceForPresentation → originalPositions is null.
     // rollbackLayout must NOT clobber cell positions in this state.

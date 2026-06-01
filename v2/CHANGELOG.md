@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Changed (iter 238) — Space mode leaves a full page between cells
+- **📐 Space now puts a whole empty page between cells.** It used to map
+  each cell one viewport apart *top-to-top*, so a tall cell almost touched
+  the next. It now stacks `cellHeight + one viewport` per step, so every
+  slide is at least a full page of empty space away from its neighbour.
+  1 store vitest case (271 frontend tests).
+
 ### Changed (iter 237) — Add-cell buttons collapsed into an Add ▾ menu; clearer connectors
 - **The seven inline ＋ buttons are now one `➕ Add ▾` dropdown** (Code /
   Text / Media / Browser / Draw / Diagram / Animation, each with its
