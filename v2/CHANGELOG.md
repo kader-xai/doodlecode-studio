@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+## [2.10.0] — 2026-06-01
+
+Headline: **Export a deck to a shareable Markdown handout** (File ▸ Export
+Markdown…) — titles, code, charts, media, walkthrough reveals, and callout
+text/images all render to a portable `.md`. Plus the markdown showcase
+example, `tel:` links, the proxy SSRF regression suite, and doc lockstep.
+
 ### Added (iter 221) — Markdown export keeps callout images
 - **Callout images now survive the Markdown export.** A callout can be
   text, image, or both; the exporter emits `![alt](src)` for the image
