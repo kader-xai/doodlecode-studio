@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { executeCode, openNotebook, saveNotebook } from "./api";
 import type { Callout, Cell, CellRuntime } from "./types";
 import { effectiveSource } from "./lib/reveal";
+import { frameCount } from "./lib/animation";
 
 /**
  * Global app state. ONE source of truth — components subscribe with
@@ -459,7 +460,15 @@ export const useStore = create<AppState>((set, get) => {
     revealNext: (id) => {
       const s = get();
       const cell = s.cells.find((c) => c.id === id);
-      const total = cell?.kind === "code" ? cell.reveals?.length ?? 0 : 0;
+      // Code cells reveal `reveals.length` build-up fragments; animation
+      // cells step through their frames (frame 0 is the base, so the last
+      // advanceable step is frameCount - 1). Iter 226.
+      const total =
+        cell?.kind === "code"
+          ? cell.reveals?.length ?? 0
+          : cell?.kind === "animation"
+            ? Math.max(0, frameCount(cell.source) - 1)
+            : 0;
       const cur = s.revealStep[id] ?? 0;
       if (cur >= total) return cur; // nothing left to reveal
       const next = cur + 1;

@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added (iter 226) — Animation module: frame stepping in presentation
+- **Space / → now advances animation-cell frames in place** before moving
+  to the next slide — the in-slide build. The store's `revealNext` step
+  engine is generalized: code cells reveal `reveals` fragments, animation
+  cells step frame 0 → … → last (`frameCount − 1`), then a further Space
+  moves to the next slide. ← / PageUp still go to the previous slide; code
+  cells keep Shift+R. 2 store vitest cases (258 frontend tests); tsc +
+  build clean. Richer per-style transitions land in iter 227.
+
 ### Added (iter 225) — Animation module: node component + Add button
 - **The Animation cell now renders on the canvas.** New
   `AnimationCell.tsx` shows the numbered frame sequence in edit mode, the

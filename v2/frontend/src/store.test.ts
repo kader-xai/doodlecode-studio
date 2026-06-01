@@ -1037,3 +1037,28 @@ describe("store: goToSlide (iter 210 — jump to slide N)", () => {
     expect(useStore.getState().focusedCellId).toBeNull();
   });
 });
+
+describe("store: animation reveal stepping (iter 226)", () => {
+  beforeEach(() => freshNotebook());
+
+  it("revealNext steps through animation frames and stops at the last", () => {
+    useStore.setState({
+      cells: [{ id: "a", kind: "animation", source: "f1\nf2\nf3", title: "A", x: 0, y: 0 }],
+      revealStep: {},
+    });
+    expect(useStore.getState().revealStep["a"] ?? 0).toBe(0);
+    expect(useStore.getState().revealNext("a")).toBe(1);
+    expect(useStore.getState().revealNext("a")).toBe(2);
+    // 3 frames → last advanceable step is 2; further calls are no-ops.
+    expect(useStore.getState().revealNext("a")).toBe(2);
+    expect(useStore.getState().revealNext("a")).toBe(2);
+  });
+
+  it("a single-frame animation cell has nothing to advance", () => {
+    useStore.setState({
+      cells: [{ id: "a", kind: "animation", source: "only", title: "A", x: 0, y: 0 }],
+      revealStep: {},
+    });
+    expect(useStore.getState().revealNext("a")).toBe(0);
+  });
+});

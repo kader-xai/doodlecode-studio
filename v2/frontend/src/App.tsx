@@ -14,6 +14,7 @@ import { PresenterOverlay } from "./components/PresenterOverlay";
 import { ShortcutsHelp } from "./components/ShortcutsHelp";
 import { Toolbar } from "./components/Toolbar";
 import { useStore } from "./store";
+import { frameCount } from "./lib/animation";
 
 interface Ping {
   ok: boolean;
@@ -250,6 +251,19 @@ export function App() {
           e.key === " "
         ) {
           e.preventDefault();
+          // Iter 226: on an animation cell, Space/→ steps through the
+          // frames in place (with a transition) before advancing to the
+          // next slide — the in-slide build the user asked for.
+          const fid = state.focusedCellId;
+          const fcell = fid ? state.cells.find((c) => c.id === fid) : null;
+          if (fcell?.kind === "animation") {
+            const total = frameCount(fcell.source);
+            const cur = state.revealStep[fid!] ?? 0;
+            if (cur < total - 1) {
+              state.revealNext(fid!);
+              return;
+            }
+          }
           state.nextCell();
           return;
         }
