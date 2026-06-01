@@ -162,6 +162,16 @@ function CanvasInner() {
   // bounding box of the cell PLUS any callout bubbles to its right so a
   // cell+callout pair reads balanced; vertically on the cell midpoint.
   // (Per owner request: every slide sits in the middle of the screen.)
+  //
+  // Deps key on the focused cell's POSITION, not the whole `cells` array,
+  // so re-centering fires on navigation and moves but NOT on every
+  // resize tick — otherwise resizing a slide mid-talk spammed `setCenter`
+  // with competing 350ms animations (jank).
+  const focusedCell = presenting
+    ? cells.find((c) => c.id === focusedCellId)
+    : undefined;
+  const focusedX = focusedCell?.x;
+  const focusedY = focusedCell?.y;
   useEffect(() => {
     if (!presenting || !focusedCellId) return;
     const inst = instanceRef.current;
@@ -179,7 +189,8 @@ function CanvasInner() {
       hasCallouts ? CALLOUT_GAP + BUBBLE_W : 0,
     );
     inst.setCenter(cx, cy, { zoom: inst.getZoom(), duration: 350 });
-  }, [presenting, focusedCellId, cells]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presenting, focusedCellId, focusedX, focusedY]);
 
   // On first load, center the opening slide in the middle of the screen
   // at 100% zoom — never a zoomed-out "fit everything" view. Fires once

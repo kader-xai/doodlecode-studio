@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Fixed (iter 208) — resizing a slide mid-talk no longer janks the view
+- **The presentation re-center effect now keys on the focused cell's
+  position, not the whole `cells` array.** Resizing the focused slide
+  during a talk (now allowed) updates `w`/`h` on every pointer-move, which
+  used to retrigger `setCenter` with competing 350ms animations — the view
+  juddered while you dragged. Re-centering now fires only on slide change
+  / move, so resize is smooth and the slide stays put.
+
 ### Internal (iter 207) — extract + test the slide-center geometry
 - **The iter-206 dead-center math is now a pure, unit-tested helper.**
   `lib/present.ts:slideCenter(x, y, w, h, calloutExtra)` returns the

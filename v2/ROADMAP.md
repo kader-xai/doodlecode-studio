@@ -158,6 +158,10 @@ The accessibility & polish batch (173–177) is complete.
 - **202 — Flow aria + table header scope** ✓ (iter 205): flowcharts list
   their edges in the aria-label; markdown table `<th>` gain `scope="col"`
   for screen-reader header association. 232 frontend tests.
+- **203 — Presentation centering + locked canvas** ✓ (iter 206, owner
+  report): slides center dead-center, canvas frozen while presenting,
+  resize still works, opening slide centered at 100%. `slideCenter`
+  helper extracted + tested (iter 207); resize-jank fixed (iter 208).
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).
