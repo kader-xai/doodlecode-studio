@@ -10,7 +10,7 @@ import { JSX } from "react";
  *   `1. item` or `1) item`          (ordered list)
  *   `> blockquote`
  *   `---`                           (horizontal rule)
- *   `**bold**` and `*italic*`
+ *   `**bold**`, `*italic*`, `~~strikethrough~~`
  *   `` `inline code` ``
  *   ```` ```fenced code``` ````     (literal block, optional language)
  *   `[text](url)`                   (link — http/https/mailto/relative)
@@ -307,13 +307,14 @@ function safeHref(url: string): string | null {
   return null;
 }
 
-/** Inline pass: `[text](url)` links, **bold**, *italic*, `code`. */
+/** Inline pass: `[text](url)` links, **bold**, *italic*, `~~strike~~`,
+ *  `code`. */
 function renderInline(s: string): (string | JSX.Element)[] {
   const out: (string | JSX.Element)[] = [];
-  // One regex with four alternatives. Links come first so their text
+  // One regex with several alternatives. Links come first so their text
   // isn't parsed as emphasis; `bold` precedes `italic` so `**x**` isn't
-  // first parsed as `*` + `*x*` + `*`.
-  const re = /(\[[^\]]+\]\([^)\s]+\)|\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`]+`)/g;
+  // first parsed as `*` + `*x*` + `*`; `~~strike~~` is unambiguous.
+  const re = /(\[[^\]]+\]\([^)\s]+\)|\*\*[^*]+\*\*|~~[^~]+~~|\*[^*\n]+\*|`[^`]+`)/g;
   let last = 0;
   let m: RegExpExecArray | null;
   let key = 0;
@@ -340,6 +341,12 @@ function renderInline(s: string): (string | JSX.Element)[] {
       }
     } else if (tok.startsWith("**")) {
       out.push(<strong key={key++}>{tok.slice(2, -2)}</strong>);
+    } else if (tok.startsWith("~~")) {
+      out.push(
+        <del key={key++} className="opacity-70">
+          {tok.slice(2, -2)}
+        </del>,
+      );
     } else if (tok.startsWith("`")) {
       out.push(
         <code

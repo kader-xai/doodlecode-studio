@@ -169,6 +169,8 @@ The accessibility & polish batch (173–177) is complete.
 - **205 — Jump-to-slide by number** ✓ (iter 210): digits 1–9 jump to a
   slide mid-talk via a clamped `goToSlide` store action; in the Shortcuts
   overlay. For non-linear presenting. 238 frontend tests.
+- **206 — Markdown strikethrough** ✓ (iter 211): inline `~~strike~~` →
+  `<del>`, completing the inline set. 240 frontend tests.
 
 Other candidate areas: richer diagram presets, an in-app onboarding
 tour, animated-GIF slide export (needs a GIF-encoder dep — deferred).

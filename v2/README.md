@@ -70,7 +70,7 @@ technical and educational writing, nothing more:
 | `1. item` / `1) item`           | ordered list (keeps the start number)  |
 | `> quote`                       | blockquote                             |
 | `---`                           | horizontal rule                        |
-| `**bold**` `*italic*` `` `code` `` | inline emphasis + code              |
+| `**bold**` `*italic*` `~~strike~~` `` `code` `` | inline emphasis + code  |
 | ```` ```lang … ``` ````         | fenced code block (literal, optional language) |
 | `[text](url)`                   | link (http/https/mailto/relative only) |
 | `\| a \| b \|` + `\| --- \| :-: \|` | table with per-column alignment    |

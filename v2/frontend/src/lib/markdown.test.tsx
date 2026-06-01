@@ -61,6 +61,20 @@ describe("renderMarkdown", () => {
     expect(html).toContain("<code");
   });
 
+  it("renders ~~strikethrough~~ as <del> (iter 211)", () => {
+    const html = toHtml("this is ~~wrong~~ right");
+    expect(html).toContain("<del");
+    expect(html).toContain("wrong");
+    expect(html).toContain("</del>");
+  });
+
+  it("keeps strikethrough distinct from bold/italic (iter 211)", () => {
+    const html = toHtml("**b** *i* ~~s~~");
+    expect(html).toContain("<strong>b</strong>");
+    expect(html).toContain("<em");
+    expect(html).toContain("<del");
+  });
+
   it("renders blockquote", () => {
     const html = toHtml("> quoted");
     expect(html).toContain("<blockquote");

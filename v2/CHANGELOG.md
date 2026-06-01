@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added (iter 211) — `~~strikethrough~~` in text cells
+- **Inline `~~strikethrough~~` renders as `<del>`.** Rounds out the inline
+  markdown set (bold / italic / strike / code / links) — handy for "old →
+  new" edits in tutorials. Distinct from bold/italic in the tokenizer;
+  README updated. 2 vitest cases.
+
 ### Added (iter 210) — jump to any slide by number while presenting
 - **Press `1`–`9` during a presentation to jump straight to that slide.**
   Complements Prev/Next/Home/End for non-linear talks (skip ahead, answer
